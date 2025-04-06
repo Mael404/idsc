@@ -91,3 +91,45 @@ function getGreeting() {
 
 document.addEventListener("DOMContentLoaded", getGreeting);
 
+// Students Per Course Chart
+var ctx = document.getElementById("studentsPerCourseChart").getContext('2d');
+var studentsPerCourseChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ["Math", "English", "CS", "Science", "History"],
+        datasets: [{
+            label: "Students",
+            backgroundColor: "#4e73df",
+            hoverBackgroundColor: "#2e59d9",
+            data: [30, 25, 35, 15, 20]
+        }]
+    },
+    options: {
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+
+var ctx = document.getElementById('studyResourcesChart').getContext('2d');
+var studyResourcesChart = new Chart(ctx, {
+    type: 'pie',  // Pie chart type
+    data: {
+        labels: ['2018-2019', '2019-2020', '2020-2021', '2021-2022', '2022-2023', '2023-2024', '2024-2025'],  // Labels for the years
+        datasets: [{
+            data: [450, 500, 550, 600, 620, 650, 700],  // Student count for each year
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#f39c12', '#2e59d9'],  // Segment colors
+            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#f39c12', '#c0392b', '#f39c12', '#8e44ad'],  // Hover colors
+        }]
+    },
+    options: {
+        maintainAspectRatio: false,
+        responsive: true
+    }
+});

@@ -94,6 +94,8 @@
 
 <!-- Core plugin JavaScript-->
 <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+<!-- Add this in your HTML head or before your script tag -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- Custom scripts for all pages-->
 <script src="{{ asset('js/sb-admin-2.js') }}"></script>
