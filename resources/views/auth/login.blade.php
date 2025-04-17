@@ -4,7 +4,7 @@
 
 
 @section('content')
-<body class="bg-gradient-primary">
+
 
     <div class="container" style="max-width: 90%; padding: 2rem;">
         <!-- Outer Row -->
@@ -61,5 +61,5 @@
     
 
 
-</body>
+
 @endsection
