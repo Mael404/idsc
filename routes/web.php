@@ -4,8 +4,14 @@ use Illuminate\Support\Facades\Route;
 
 // Dashboard Routes for VP ADMIN
 Route::get('/', function () {
-    return view('vp_admin.vpadmin_db');
+    return view('auth.login');
 });
+
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('forgot-password');
+
+
 
 Route::get('/vpadmin_dashboard', function () {
     return view('vp_admin.vpadmin_db');

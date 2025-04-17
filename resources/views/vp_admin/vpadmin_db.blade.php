@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('tab_title', 'Dashboard')
 @section('vpadmin_sidebar')
