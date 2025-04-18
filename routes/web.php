@@ -1,52 +1,24 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VPAdminSideBarController;
 
-// Dashboard Routes for VP ADMIN
 Route::get('/', function () {
     return view('auth.login');
-})->name('login');
-
-Route::get('/forgot-password', function () {
-    return view('auth.forgot-password');
-})->name('forgot-password');
-
-
-
-Route::get('/vpadmin_dashboard', function () {
-    return view('vp_admin.vpadmin_db');
 });
 
-Route::get('/blank_page', function () {
-    return view('vp_admin.vpadmin_blank');
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Fees Routes
-Route::prefix('fees')->group(function () {
-    Route::get('/edit-tuition', function () {
-        return view('vp_admin.fees.edit_tuition');
-    });
-    Route::get('/misc-fees', function () {
-        return view('vp_admin.fees.misc_fees');
-    });
-});
-
-// Academic Routes
-Route::prefix('academic')->group(function () {
-    Route::get('/term-configuration', function () {
-        return view('vp_admin.academic.term_configuration');
-    });
-});
-
-// User Management Routes
-Route::prefix('user-management')->group(function () {
-    Route::get('/add-new', function () {
-        return view('vp_admin.user_management.add_new');
-    });
-    Route::get('/manage', function () {
-        return view('vp_admin.user_management.manage');
-    });
-    Route::get('/activate', function () {
-        return view('vp_admin.user_management.activate');
-    });
-});
+require __DIR__.'/auth.php';
+require __DIR__.'/vpadminsidebar.php';
+require __DIR__.'/vpacademicssidebar.php';
