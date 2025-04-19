@@ -43,11 +43,11 @@ class VPAcademicsSideBarController extends Controller
     // Course Management --------------------
     public function programs()
     {
-        return view('vp_academic.course_management.vpacademic_programs');
+        return view('vp_academic.course_management.programs');
     }
 
     public function courses()
     {
-        return view('vp_academic.course_management.vpacademic_courses');
+        return view('vp_academic.course_management.courses');
     }
 }

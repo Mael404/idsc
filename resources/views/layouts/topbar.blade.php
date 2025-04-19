@@ -7,8 +7,9 @@
        </button>
 
        <div class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0">
-           <span class="navbar-greeting" id="greetingMessage"></span>
+           <span class="navbar-greeting">Active School Year: SY 2024-2025</span>
        </div>
+
 
 
 

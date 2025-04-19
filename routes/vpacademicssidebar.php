@@ -6,7 +6,7 @@ use App\Http\Controllers\VPAcademicsSideBarController;
 Route::middleware('auth')->group(function () {
 
     // VP ACADEMICS --------------------
-    Route::get('/vpadmin_dashboard', [VPAcademicsSideBarController::class, 'vpAdminDashboard'])->name('vp_academic.vpacademic_db');
+    Route::get('/vpacademics_dashboard', [VPAcademicsSideBarController::class, 'vpAdminDashboard'])->name('vp_academic.vpacademic_db');
 
     // Scheduling Routes --------------------
     Route::get('/scheduling/room-assignment', [VPAcademicsSideBarController::class, 'roomAssignment'])->name('scheduling.room-assignment');

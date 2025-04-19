@@ -65,21 +65,32 @@
         </a>
     </li>
 
-  <!-- Nav Item - Academic Setup (with dropdown) -->
-<li class="nav-item {{ request()->is('programs*') || request()->is('courses*') ? 'active' : '' }}">
-    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#academicSetup"
-        aria-expanded="true" aria-controls="academicSetup">
-        <i class="fas fa-fw fa-university"></i>
-        <span>Academic Setup</span>
-    </a>
-    <div id="academicSetup" class="collapse {{ request()->is('programs*') || request()->is('courses*') ? 'show' : '' }}"
-        aria-labelledby="headingAcademic" data-parent="#accordionSidebar">
-        <div class="bg-white py-2 collapse-inner rounded">
-            <a class="collapse-item {{ request()->is('programs') || request()->is('programs/*') ? 'active' : '' }}" href="{{ url('programs') }}"> Manage Programs</a>
-            <a class="collapse-item {{ request()->is('courses') || request()->is('courses/*') ? 'active' : '' }}" href="{{ url('courses') }}"> Manage Courses</a>
+    <!-- Nav Item - Academic Setup (with dropdown) -->
+    <li
+        class="nav-item {{ request()->is('programs*') || request()->is('courses*') || request()->is('year*') || request()->is('semester*') || request()->is('program-mapping*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#academicSetup"
+            aria-expanded="true" aria-controls="academicSetup">
+            <i class="fas fa-fw fa-university"></i>
+            <span>Academic Setup</span>
+        </a>
+        <div id="academicSetup"
+            class="collapse {{ request()->is('programs*') || request()->is('courses*') || request()->is('year*') || request()->is('semester*') || request()->is('program-mapping*') ? 'show' : '' }}"
+            aria-labelledby="headingAcademic" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item {{ request()->is('programs') || request()->is('programs/*') ? 'active' : '' }}"
+                    href="{{ url('programs') }}"> Manage Programs</a>
+                <a class="collapse-item {{ request()->is('courses') || request()->is('courses/*') ? 'active' : '' }}"
+                    href="{{ url('courses') }}"> Manage Courses</a>
+                <a class="collapse-item {{ request()->is('year') || request()->is('year/*') ? 'active' : '' }}"
+                    href="{{ url('year') }}"> Manage Year</a>
+                <a class="collapse-item {{ request()->is('semester') || request()->is('semester/*') ? 'active' : '' }}"
+                    href="{{ url('semester') }}"> Manage Semester</a>
+                <a class="collapse-item {{ request()->is('program-mapping') || request()->is('program-mapping/*') ? 'active' : '' }}"
+                    href="{{ url('program-mapping') }}"> Program Mapping</a>
+            </div>
         </div>
-    </div>
-</li>
+    </li>
+
 
 
 

@@ -11316,7 +11316,7 @@ body.sidebar-toggled footer.sticky-footer {
   background: linear-gradient(135deg, #f0d857, #f39c12); /* Updated gradient with #f0d857 */
   border-radius: 15px; /* Rounded corners for a smoother look */
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Soft box shadow */
-  animation: fadeIn 1s ease-in-out;
+ 
 }
 
 
