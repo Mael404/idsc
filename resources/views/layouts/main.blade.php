@@ -44,9 +44,10 @@
             @case('admin')
                 @include('admin.admin_sidebar')
             @break
+
             @case('vp_academic')
-            @include('vp_academic.vpacademic_sidebar')
-        @break
+                @include('vp_academic.vpacademic_sidebar')
+            @break
 
             @case('student')
                 @include('student.student_sidebar')
@@ -111,6 +112,15 @@
         </div>
     </div>
 
+  
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <!-- DataTables JS + jQuery (required) -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
     <!-- Bootstrap core JavaScript-->
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -122,6 +132,10 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('js/sb-admin-2.js') }}"></script>
+
+    <!-- Page-specific scripts -->
+    @yield('scripts')
+
 
     <!-- Page level plugins -->
     <script src="{{ asset('vendor/chart.js/Chart.min.js') }}"></script>

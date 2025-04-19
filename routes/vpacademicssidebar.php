@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\CourseController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAcademicsSideBarController;
 
@@ -22,6 +24,12 @@ Route::middleware('auth')->group(function () {
     // Course Management --------------------
     Route::get('/programs', [VPAcademicsSideBarController::class, 'programs'])->name('vpacademic.programs');
     Route::get('/courses', [VPAcademicsSideBarController::class, 'courses'])->name('vpacademic.courses');
-    
 
+    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
+
+
+    Route::resource('courses', CourseController::class);
+    // In your routes/web.php
+    Route::post('/courses/{id}/toggle', [CourseController::class, 'toggleActive'])->name('courses.toggleActive');
+    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
 });

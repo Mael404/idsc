@@ -1,5 +1,5 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
-import forms from '@tailwindcss/forms';
+import defaultTheme from 'tailwindcss/defaultTheme'
+import forms from '@tailwindcss/forms'
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -14,8 +14,15 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                primary: {
+                    DEFAULT: '#00a652',  // Set to #00a652
+                    light: '#33b97f',    // A lighter shade
+                    dark: '#00793f',     // A darker shade
+                },
+            },
         },
     },
 
     plugins: [forms],
-};
+}
