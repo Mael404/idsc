@@ -35,7 +35,7 @@ class CourseController extends Controller
     {
         $course = Course::find($id);
         $course->update($request->all());
-        
+
         return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
     }
 
@@ -46,5 +46,11 @@ class CourseController extends Controller
         $course->save();
 
         return redirect()->route('courses.index')->with('success', 'Course status updated.');
+    }
+
+    public function destroy(Course $course)
+    {
+        $course->delete();
+        return redirect()->route('courses.index')->with('success', 'Course deleted successfully.');
     }
 }

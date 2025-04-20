@@ -126,9 +126,7 @@
                 <div class="row justify-content-center mt-4">
                     <div class="col-md-12">
                         <div class="card shadow mb-4">
-                            <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">List of Courses</h6>
-                            </div>
+
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table id="coursesTable" class="table table-bordered">
@@ -156,33 +154,53 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <div class="d-flex justify-content-center align-items-center"
-                                                            style="gap: 5px;">
-                                                            <a href="javascript:void(0);"
-                                                                class="btn btn-info btn-sm fixed-width-btn view-course-btn"
-                                                                data-id="{{ $course->id }}"
-                                                                data-code="{{ $course->code }}"
-                                                                data-name="{{ $course->name }}"
-                                                                data-description="{{ $course->description }}"
-                                                                data-units="{{ $course->units }}" data-bs-toggle="modal"
-                                                                data-bs-target="#courseModal">
-                                                                View
+                                                        <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
+                                                            <!-- View Button (Icon) -->
+                                                            <a href="javascript:void(0);" class="btn btn-info btn-sm fixed-width-btn view-course-btn" data-id="{{ $course->id }}" data-code="{{ $course->code }}" data-name="{{ $course->name }}" data-description="{{ $course->description }}" data-units="{{ $course->units }}" data-bs-toggle="modal" data-bs-target="#courseModal">
+                                                                <i class="fas fa-eye"></i> <!-- View Icon -->
                                                             </a>
-                                                            <form
-                                                                action="{{ route('courses.toggleActive', $course->id) }}"
-                                                                method="POST">
+                                                    
+                                                            <!-- Activate/Deactivate Button (Icon) -->
+                                                            <form action="{{ route('courses.toggleActive', $course->id) }}" method="POST">
                                                                 @csrf
-                                                                <button type="submit"
-                                                                    class="btn btn-warning btn-sm fixed-width-btn">
-                                                                    {{ $course->active ? 'Deactivate' : 'Activate' }}
+                                                                <button type="submit" class="btn btn-warning btn-sm fixed-width-btn">
+                                                                    <i class="fas {{ $course->active ? 'fa-times' : 'fa-check' }}"></i> <!-- Toggle Icon (Activate: Check, Deactivate: Times) -->
                                                                 </button>
                                                             </form>
+                                                    
+                                                            <!-- Delete Button (Icon) -->
+                                                            <button type="button" class="btn btn-danger btn-sm fixed-width-btn" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $course->id }}">
+                                                                <i class="fas fa-trash-alt"></i> <!-- Delete Icon -->
+                                                            </button>
+                                                        </div>
+                                                    
+                                                        <!-- DELETE MODAL -->
+                                                        <div class="modal fade" id="deleteModal{{ $course->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $course->id }}" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content border-danger">
+                                                                    <div class="modal-header bg-danger text-white">
+                                                                        <h5 class="modal-title" id="deleteModalLabel{{ $course->id }}">Delete Course</h5>
+                                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        Are you sure you want to delete <strong>{{ $course->name }}</strong> ({{ $course->code }})?
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <form method="POST" action="{{ route('courses.destroy', $course->id) }}">
+                                                                            @csrf
+                                                                            @method('DELETE')
+                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </td>
-
-
+                                                    
                                                 </tr>
                                             @endforeach
+
                                         </tbody>
                                     </table>
                                 </div>

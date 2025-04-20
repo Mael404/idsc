@@ -11333,7 +11333,7 @@ body.sidebar-toggled footer.sticky-footer {
 
 /*bbutton in the table in he courses vp academic*/
 .fixed-width-btn {
-  min-width: 85px;
+  min-width: 45px;
   text-align: center;
 }
 

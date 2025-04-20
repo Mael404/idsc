@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ProgramController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAcademicsSideBarController;
 
@@ -32,4 +33,14 @@ Route::middleware('auth')->group(function () {
     // In your routes/web.php
     Route::post('/courses/{id}/toggle', [CourseController::class, 'toggleActive'])->name('courses.toggleActive');
     Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
+    Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
+
+  
+
+    Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
+    Route::post('/programs', [ProgramController::class, 'store'])->name('programs.store');
+    Route::put('/programs/{id}', [ProgramController::class, 'update'])->name('programs.update');
+    Route::post('programs/{id}/toggleActive', [ProgramController::class, 'toggleActive'])->name('programs.toggleActive');
+    Route::delete('/programs/{program}', [ProgramController::class, 'destroy'])->name('programs.destroy');
+
 });

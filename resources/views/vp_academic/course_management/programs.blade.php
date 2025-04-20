@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('tab_title', 'Dashboard')
+@section('tab_title', 'Manage Courses')
 @section('vpacademic_sidebar')
     @include('vp_academic.vpacademic_sidebar')
 @endsection
@@ -14,149 +14,215 @@
 
             @include('layouts.topbar')
 
-            <!-- Begin Page Content -->
-            <!-- Begin Page Content -->
             <div class="container-fluid">
+                
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
 
-                <!-- Page Heading -->
+                <!-- Page Heading with Button on Same Row -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 class="h3 mb-0 text-gray-800">Manage Programs</h1>
-                    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                            class="fas fa-download fa-sm text-white-50"></i> Download Report</a>
+
+                    <!-- Button to Open Add Program Form -->
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#addProgramModal">
+                        Add New Program
+                    </button>
                 </div>
 
-                <!-- Content Row -->
-                <div class="row">
-
-                    <!-- Current Courses -->
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card border-left-primary shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                            Current Courses</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">5</div>
+                <!-- View/Edit Program Modal -->
+                <div class="modal fade" id="viewEditProgramModal" tabindex="-1" aria-labelledby="viewEditProgramModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <form method="POST" id="viewEditProgramForm">
+                            @csrf
+                            @method('PUT') <!-- This ensures the form sends a PUT request -->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="viewEditProgramModalLabel">View/Edit Program</h5>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="program-name">Program Name</label>
+                                        <input type="text" class="form-control" id="program-name" name="name"
+                                            required>
                                     </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-book-reader fa-2x text-gray-300"></i>
+                                    <div class="form-group">
+                                        <label for="program-code">Program Code</label>
+                                        <input type="text" class="form-control" id="program-code" name="code"
+                                            required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="program-effective-school-year">Effective School Year</label>
+                                        <input type="text" class="form-control" id="program-effective-school-year"
+                                            name="effective_school_year" required>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Blocks and Sections -->
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card border-left-success shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                            Blocks & Sections</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">8</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-layer-group fa-2x text-gray-300"></i>
-                                    </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-success">Save Changes</button>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
-
-                    <!-- New Users -->
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card border-left-info shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">New Users</div>
-                                        <div class="h6 mb-0 text-gray-800">
-                                            Leemae - Professor<br>
-                                            John - Student<br>
-                                            Mae - Instructor
-                                        </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-users fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Students Enrolled -->
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="card border-left-warning shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                            Students Enrolled</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">120</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
-                <!-- Content Row -->
-                <div class="row">
 
-                    <!-- Students per Course (Bar Chart) -->
-                    <div class="col-xl-8 col-lg-7">
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <h6 class="m-0 font-weight-bold text-primary">Students per Course</h6>
+                <!-- Modal for Add Program -->
+                <div class="modal fade" id="addProgramModal" tabindex="-1" aria-labelledby="addProgramModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <form method="POST" action="{{ route('programs.store') }}">
+                            @csrf
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add Program</h5>
+                                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label>Program Code</label>
+                                        <input type="text" class="form-control" name="code" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Program Name</label>
+                                        <input type="text" class="form-control" name="name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Effective School Year</label>
+                                        <input type="text" class="form-control" name="effective_school_year"
+                                            placeholder="e.g. 2024-2025" required>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button class="btn btn-primary" type="submit">Add Program</button>
+                                </div>
                             </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Display Programs in Table -->
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-12">
+                        <div class="card shadow mb-4">
                             <div class="card-body">
-                                <div class="chart-bar">
-                                    <canvas id="studentsPerCourseChart"></canvas>
+                                <div class="table-responsive">
+                                    <table id="coursesTable" class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>Name</th>
+                                                <th>Effective SY</th>
+                                                <th>Status</th> <!-- Added Status Column -->
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($programs as $program)
+                                            <tr>
+                                                <td>{{ $program->code }}</td>
+                                                <td>{{ $program->name }}</td>
+                                                <td>{{ $program->effective_school_year }}</td>
+                                                <td class="text-center">
+                                                    <span class="badge {{ $program->active ? 'badge-success' : 'badge-danger' }}">
+                                                        {{ $program->active ? 'Active' : 'Inactive' }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
+                                                        <!-- View Button (Icon) -->
+                                                        <a href="javascript:void(0);" class="btn btn-info btn-sm fixed-width-btn toggle-program-btn" data-id="{{ $program->id }}" data-name="{{ $program->name }}" data-code="{{ $program->code }}" data-effective_school_year="{{ $program->effective_school_year }}">
+                                                            <i class="fas fa-eye"></i> <!-- View Icon -->
+                                                        </a>
+                                                
+                                                        <!-- Activate/Deactivate Form (Icon) -->
+                                                        <form action="{{ route('programs.toggleActive', $program->id) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-warning btn-sm fixed-width-btn">
+                                                                <i class="fas {{ $program->active ? 'fa-times' : 'fa-check' }}"></i> <!-- Toggle Icon (Activate: Check, Deactivate: Times) -->
+                                                            </button>
+                                                        </form>
+                                                
+                                                        <!-- Delete Button (Icon) -->
+                                                        <button type="button" class="btn btn-danger btn-sm fixed-width-btn" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $program->id }}">
+                                                            <i class="fas fa-trash-alt"></i> <!-- Delete Icon -->
+                                                        </button>
+                                                    </div>
+                                                
+                                                    <!-- DELETE CONFIRMATION MODAL -->
+                                                    <div class="modal fade" id="deleteModal{{ $program->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $program->id }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content border-danger">
+                                                                <div class="modal-header bg-danger text-white">
+                                                                    <h5 class="modal-title" id="deleteModalLabel{{ $program->id }}">Delete Program</h5>
+                                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    Are you sure you want to delete <strong>{{ $program->name }}</strong> ({{ $program->code }})?
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <form method="POST" action="{{ route('programs.destroy', $program->id) }}">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                
+                                            </tr>
+                                        @endforeach
+                                        
+                                        </tbody>
+                                    </table>
+                                    {{-- Optionally add pagination --}}
+                                    {{-- {{ $programs->links() }} --}}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Study Resources -->
-                    <div class="col-xl-4 col-lg-5">
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <h6 class="m-0 font-weight-bold text-primary">Student Statistics (2018-2025)</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-pie pt-4 pb-2">
-                                    <canvas id="studyResourcesChart"></canvas>
-                                </div>
-                              
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
             </div>
-            <!-- End Page Content -->
-
-            <!-- End Page Content -->
 
 
         </div>
+        <!-- End Page Content -->
+
+
         <!-- End of Main Content -->
 
-        <!-- Footer -->
-        <footer class="sticky-footer bg-white">
-            <div class="container my-auto">
-                <div class="copyright text-center my-auto">
-                    <span>Copyright &copy; Your Website 2021</span>
-                </div>
-            </div>
-        </footer>
-        <!-- End of Footer -->
+        @include('layouts.footer')
 
     </div>
     <!-- End of Content Wrapper -->
+@endsection
+
+@section('scripts')
+    <script src="{{ asset('js/programs.js') }}"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#coursesTable').DataTable({
+                responsive: true,
+                pageLength: 10
+            });
+        });
+    </script>
 @endsection
