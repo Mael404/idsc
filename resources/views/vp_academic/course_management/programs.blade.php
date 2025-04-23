@@ -15,7 +15,7 @@
             @include('layouts.topbar')
 
             <div class="container-fluid">
-                
+
                 @if (session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         {{ session('success') }}
@@ -124,79 +124,100 @@
                                                 <th>Code</th>
                                                 <th>Name</th>
                                                 <th>Effective SY</th>
-                                                <th>Status</th> 
+                                                <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($programs as $program)
-                                            <tr>
-                                                <td>{{ $program->code }}</td>
-                                                <td>{{ $program->name }}</td>
-                                                <td>{{ $program->effective_school_year }}</td>
-                                                <td class="text-center">
-                                                    <span class="badge {{ $program->active ? 'badge-success' : 'badge-danger' }}">
-                                                        {{ $program->active ? 'Active' : 'Inactive' }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
-                                                        <!-- View Button (Icon) -->
-                                                        <a href="javascript:void(0);" 
-                                                        class="btn btn-info btn-sm fixed-width-btn toggle-program-btn" 
-                                                        data-id="{{ $program->id }}" 
-                                                        data-name="{{ $program->name }}" 
-                                                        data-code="{{ $program->code }}" 
-                                                        data-effective_school_year="{{ $program->effective_school_year }}">
-                                                        <i class="fas fa-edit"></i> <!-- Changed Icon -->
-                                                    </a>
-                                                    
-                                                
-                                                        <!-- Activate/Deactivate Form (Icon) -->
-                                                        <form action="{{ route('programs.toggleActive', $program->id) }}" method="POST">
-                                                            @csrf
-                                                            <button type="submit" class="btn btn-warning btn-sm fixed-width-btn">
-                                                                <i class="fas {{ $program->active ? 'fa-times' : 'fa-check' }}"></i> <!-- Toggle Icon (Activate: Check, Deactivate: Times) -->
+                                                <tr>
+                                                    <td>{{ $program->code }}</td>
+                                                    <td>{{ $program->name }}</td>
+                                                    <td>{{ $program->effective_school_year }}</td>
+                                                    <td class="text-center">
+                                                        <span
+                                                            class="badge {{ $program->active ? 'badge-success' : 'badge-danger' }}">
+                                                            {{ $program->active ? 'Active' : 'Inactive' }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex justify-content-center align-items-center"
+                                                            style="gap: 5px;">
+                                                            <!-- View Button (Icon) -->
+                                                            <a href="javascript:void(0);"
+                                                                class="btn btn-info btn-sm fixed-width-btn toggle-program-btn"
+                                                                data-id="{{ $program->id }}"
+                                                                data-name="{{ $program->name }}"
+                                                                data-code="{{ $program->code }}"
+                                                                data-effective_school_year="{{ $program->effective_school_year }}">
+                                                                <i class="fas fa-edit"></i> <!-- Changed Icon -->
+                                                            </a>
+
+
+                                                            <!-- Activate/Deactivate Form (Icon) -->
+                                                            <form
+                                                                action="{{ route('programs.toggleActive', $program->id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                <button type="submit"
+                                                                    class="btn btn-warning btn-sm fixed-width-btn">
+                                                                    <i
+                                                                        class="fas {{ $program->active ? 'fa-times' : 'fa-check' }}"></i>
+                                                                    <!-- Toggle Icon (Activate: Check, Deactivate: Times) -->
+                                                                </button>
+                                                            </form>
+
+                                                            <!-- Delete Button (Icon) -->
+                                                            <button type="button"
+                                                                class="btn btn-danger btn-sm fixed-width-btn"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#deleteModal{{ $program->id }}">
+                                                                <i class="fas fa-trash-alt"></i> <!-- Delete Icon -->
                                                             </button>
-                                                        </form>
-                                                
-                                                        <!-- Delete Button (Icon) -->
-                                                        <button type="button" class="btn btn-danger btn-sm fixed-width-btn" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $program->id }}">
-                                                            <i class="fas fa-trash-alt"></i> <!-- Delete Icon -->
-                                                        </button>
-                                                    </div>
-                                                
-                                                    <!-- DELETE CONFIRMATION MODAL -->
-                                                    <div class="modal fade" id="deleteModal{{ $program->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $program->id }}" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content border-danger">
-                                                                <div class="modal-header bg-danger text-white">
-                                                                    <h5 class="modal-title" id="deleteModalLabel{{ $program->id }}">Delete Program</h5>
-                                                                
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    Are you sure you want to delete <strong>{{ $program->name }}</strong> ({{ $program->code }})?
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <form method="POST" action="{{ route('programs.destroy', $program->id) }}">
-                                                                        @csrf
-                                                                        @method('DELETE')
-                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                                                                    </form>
+                                                        </div>
+
+                                                        <!-- DELETE CONFIRMATION MODAL -->
+                                                        <div class="modal fade" id="deleteModal{{ $program->id }}"
+                                                            tabindex="-1"
+                                                            aria-labelledby="deleteModalLabel{{ $program->id }}"
+                                                            aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content border-danger">
+                                                                    <div class="modal-header bg-danger text-white">
+                                                                        <h5 class="modal-title"
+                                                                            id="deleteModalLabel{{ $program->id }}">
+                                                                            Delete Program</h5>
+
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        Are you sure you want to delete
+                                                                        <strong>{{ $program->name }}</strong>
+                                                                        ({{ $program->code }})
+                                                                        ?
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <form method="POST"
+                                                                            action="{{ route('programs.destroy', $program->id) }}">
+                                                                            @csrf
+                                                                            @method('DELETE')
+                                                                            <button type="button"
+                                                                                class="btn btn-secondary"
+                                                                                data-bs-dismiss="modal">Cancel</button>
+                                                                            <button type="submit"
+                                                                                class="btn btn-danger">Yes, Delete</button>
+                                                                        </form>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                
-                                            </tr>
-                                        @endforeach
-                                        
+                                                    </td>
+
+                                                </tr>
+                                            @endforeach
+
                                         </tbody>
                                     </table>
-                                    {{-- Optionally add pagination --}}
-                                    {{-- {{ $programs->links() }} --}}
+
                                 </div>
                             </div>
                         </div>
@@ -209,7 +230,8 @@
         </div>
         <!-- End Page Content -->
 
-
+    
+        
         <!-- End of Main Content -->
 
         @include('layouts.footer')

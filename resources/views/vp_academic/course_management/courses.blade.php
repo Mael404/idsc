@@ -91,36 +91,41 @@
                                 </button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="{{ route('courses.store') }}">
+                                <form action="{{ route('courses.store') }}" method="POST">
                                     @csrf
-
+                                    <!-- Course Details Inputs -->
                                     <div class="form-group">
-                                        <label for="code">Course Code</label>
-                                        <input type="text" class="form-control" id="code" name="code" required>
+                                        <input type="text" name="code" class="form-control" placeholder="Course Code"
+                                            required>
                                     </div>
-
                                     <div class="form-group">
-                                        <label for="name">Course Name</label>
-                                        <input type="text" class="form-control" id="name" name="name" required>
+                                        <input type="text" name="name" class="form-control" placeholder="Course Name"
+                                            required>
                                     </div>
-
                                     <div class="form-group">
-                                        <label for="description">Course Description</label>
-                                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                                        <textarea name="description" class="form-control" placeholder="Description"></textarea>
                                     </div>
-
                                     <div class="form-group">
-                                        <label for="units">Units</label>
-                                        <input type="number" class="form-control" id="units" name="units"
-                                            min="0" required>
+                                        <input type="number" name="units" class="form-control" placeholder="Units"
+                                            required>
                                     </div>
-
-                                    <button type="submit" class="btn btn-primary">Add Course</button>
+                                    <!-- Dropdown for Prerequisite Course -->
+                                    <div class="form-group">
+                                        <label for="prerequisite_id">Prerequisite (optional):</label>
+                                        <select name="prerequisite_id" class="form-control">
+                                            <option value="">-- None --</option>
+                                            @foreach ($allCourses as $course)
+                                                <option value="{{ $course->id }}">{{ $course->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Course</button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Display Courses in Table -->
                 <div class="row justify-content-center mt-4">
@@ -239,6 +244,7 @@
                 </div>
             </div>
             <!-- End Page Content -->
+
         </div>
         <!-- End Page Content -->
 

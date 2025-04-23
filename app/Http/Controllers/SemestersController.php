@@ -31,7 +31,6 @@ class SemestersController extends Controller
         return redirect()->back()->with('success', 'Semester added successfully.');
     }
 
-    // Update an existing semester
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -46,8 +45,6 @@ class SemestersController extends Controller
         return redirect()->back()->with('success', 'Semester updated successfully.');
     }
 
-
-    // Delete a semester
     public function destroy($id)
     {
         $semester = Semester::findOrFail($id);

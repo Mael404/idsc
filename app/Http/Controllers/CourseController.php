@@ -4,32 +4,56 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 class CourseController extends Controller
 {
     // CourseController.php
 
     public function index()
     {
-        // Fetch all courses
+        // Fetch all courses and pass to the view
         $courses = Course::all();
-
-        return view('vp_academic.course_management.courses', compact('courses'));
+        $allCourses = Course::all(); // Get all courses for the prerequisite dropdown
+        return view('vp_academic.course_management.courses', compact('courses', 'allCourses'));
     }
+    
+    public function create()
+    {
+        $allCourses = Course::all();  // Get all courses for prerequisite dropdown
+        return view('vp_academic.course_management.courses', compact('allCourses'));
+    }
+    
 
     public function store(Request $request)
     {
-        $request->validate([
-            'code' => 'required|unique:courses,code',
-            'name' => 'required|string|max:255',
+        // Validate input
+        $validated = $request->validate([
+            'code' => 'required|string|unique:courses,code',
+            'name' => 'required|string',
             'description' => 'nullable|string',
-            'units' => 'required|integer|min:0',
+            'units' => 'required|numeric',
+            'prerequisite_id' => 'nullable|exists:courses,id', // Ensure prerequisite exists
         ]);
-
-        Course::create($request->only('code', 'name', 'description', 'units'));
-
-        return redirect()->back()->with('success', 'Course added successfully!');
+    
+        // Create the course
+        $course = Course::create([
+            'code' => $validated['code'],
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'units' => $validated['units'],
+        ]);
+    
+        // If a prerequisite is selected, save it in the course_prerequisite table
+        if ($validated['prerequisite_id']) {
+            DB::table('course_prerequisite')->insert([
+                'course_id' => $course->id,
+                'prerequisite_id' => $validated['prerequisite_id']
+            ]);
+        }
+    
+        return redirect()->route('courses.index')->with('success', 'Course added successfully!');
     }
+    
 
     public function update(Request $request, $id)
     {
