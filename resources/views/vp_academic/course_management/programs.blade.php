@@ -124,7 +124,7 @@
                                                 <th>Code</th>
                                                 <th>Name</th>
                                                 <th>Effective SY</th>
-                                                <th>Status</th> <!-- Added Status Column -->
+                                                <th>Status</th> 
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -142,9 +142,15 @@
                                                 <td>
                                                     <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
                                                         <!-- View Button (Icon) -->
-                                                        <a href="javascript:void(0);" class="btn btn-info btn-sm fixed-width-btn toggle-program-btn" data-id="{{ $program->id }}" data-name="{{ $program->name }}" data-code="{{ $program->code }}" data-effective_school_year="{{ $program->effective_school_year }}">
-                                                            <i class="fas fa-eye"></i> <!-- View Icon -->
-                                                        </a>
+                                                        <a href="javascript:void(0);" 
+                                                        class="btn btn-info btn-sm fixed-width-btn toggle-program-btn" 
+                                                        data-id="{{ $program->id }}" 
+                                                        data-name="{{ $program->name }}" 
+                                                        data-code="{{ $program->code }}" 
+                                                        data-effective_school_year="{{ $program->effective_school_year }}">
+                                                        <i class="fas fa-edit"></i> <!-- Changed Icon -->
+                                                    </a>
+                                                    
                                                 
                                                         <!-- Activate/Deactivate Form (Icon) -->
                                                         <form action="{{ route('programs.toggleActive', $program->id) }}" method="POST">
@@ -166,7 +172,7 @@
                                                             <div class="modal-content border-danger">
                                                                 <div class="modal-header bg-danger text-white">
                                                                     <h5 class="modal-title" id="deleteModalLabel{{ $program->id }}">Delete Program</h5>
-                                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     Are you sure you want to delete <strong>{{ $program->name }}</strong> ({{ $program->code }})?

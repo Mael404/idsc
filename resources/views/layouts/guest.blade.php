@@ -8,6 +8,9 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
+    <!-- Favicon -->
+    <link rel="icon" href="img/idslogo.png" type="image/png">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -16,24 +19,26 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
+
 <body class="font-sans text-gray-900 antialiased">
 
     <div class="min-h-screen flex flex-col md:flex-row">
 
         <!-- LEFT SIDE: Logo & Green (hidden on small screens) -->
-<!-- LEFT SIDE: Logo & Green (hidden on small screens) -->
-<div class="hidden md:flex md:w-1/2 items-center justify-center shadow-lg" style="background-color: rgb(0, 166, 82);">
-    <div class="text-center px-4 py-6">
-        <a href="/">
-            <!-- Custom Larger Logo -->
-            <x-application-logo class="w-[500px] h-auto mx-auto fill-current text-white" />
-            <h1 class="text-lg md:text-s font-bold uppercase mb-6 mt-4 text-white opacity-50">
-                A Global College in the Heart of Albay
-            </h1>
-            
-        </a>
-    </div>
-</div>
+        <!-- LEFT SIDE: Logo & Green (hidden on small screens) -->
+        <div class="hidden md:flex md:w-1/2 items-center justify-center shadow-lg"
+            style="background-color: rgb(0, 166, 82);">
+            <div class="text-center px-4 py-6">
+                <a href="/">
+                    <!-- Custom Larger Logo -->
+                    <x-application-logo class="w-[500px] h-auto mx-auto fill-current text-white" />
+                    <h1 class="text-lg md:text-s font-bold uppercase mb-6 mt-4 text-white opacity-50">
+                        A Global College in the Heart of Albay
+                    </h1>
+
+                </a>
+            </div>
+        </div>
 
 
 

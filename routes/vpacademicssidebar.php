@@ -2,8 +2,12 @@
 
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\SemestersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAcademicsSideBarController;
+
+use App\Http\Controllers\YearLevelController;
+
 
 // Applying 'auth' middleware to all routes within the group --------------------
 Route::middleware('auth')->group(function () {
@@ -35,7 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
     Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
 
-  
+
 
     Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
     Route::post('/programs', [ProgramController::class, 'store'])->name('programs.store');
@@ -43,4 +47,17 @@ Route::middleware('auth')->group(function () {
     Route::post('programs/{id}/toggleActive', [ProgramController::class, 'toggleActive'])->name('programs.toggleActive');
     Route::delete('/programs/{program}', [ProgramController::class, 'destroy'])->name('programs.destroy');
 
+
+    Route::get('/year', [YearLevelController::class, 'index'])->name('year_levels.index');
+    Route::post('/year', [YearLevelController::class, 'store'])->name('year_levels.store');
+    Route::put('/year/{id}', [YearLevelController::class, 'update'])->name('year_levels.update');
+    Route::delete('/year/{id}', [YearLevelController::class, 'destroy'])->name('year_levels.destroy')
+    ;
+    Route::get('/semester', [SemestersController::class, 'index'])->name('semesters.index');
+    Route::post('/semester', [SemestersController::class, 'store'])->name('semesters.store');
+    Route::put('/semesters/{id}', [SemestersController::class, 'update'])->name('semester.update');
+    Route::delete('/semester/{id}', [SemestersController::class, 'destroy'])->name('semesters.destroy');
+
+    
 });
+
