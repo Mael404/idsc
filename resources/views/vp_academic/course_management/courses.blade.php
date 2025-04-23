@@ -109,7 +109,7 @@
                                         <input type="number" name="units" class="form-control" placeholder="Units"
                                             required>
                                     </div>
-                                    <!-- Dropdown for Prerequisite Course -->
+                                    <!-- Dropdown for Prerequisite Cssourse -->
                                     <div class="form-group">
                                         <label for="prerequisite_id">Prerequisite (optional):</label>
                                         <select name="prerequisite_id" class="form-control">
