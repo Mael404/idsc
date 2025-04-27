@@ -14,11 +14,21 @@
 
             @include('layouts.topbar')
 
-            <!-- Begin Page Cosntent -->
+            <!-- Begin Page Content -->
             <div class="container-fluid">
-                @include('layouts.success-message')
 
-           
+                @if (session('success'))
+                    <div id="success-alert" class="popup-alert fadeDownIn shadow rounded-lg p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold fs-5 text-success-custom">
+                                {{ session('success') }}
+                                <i class="fas fa-check-circle ms-1"></i>
+                                <!-- Added ms-3 for spacing and positioned icon on the right -->
+                            </span>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Page Heading with Button on Same Row -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 class="h3 mb-0 text-gray-800">Manage Courses</h1>
@@ -32,172 +42,125 @@
 
                 <div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-lg"> <!-- Make modal larger -->
+                    <div class="modal-dialog">
                         <form method="POST" id="editCourseForm">
                             @csrf
                             @method('PUT')
+
                             <div class="modal-content">
                                 <div class="modal-header bg-primary text-white">
-                                    <h5 class="modal-title" id="editCourseModalLabel">View / Edit Course Details</h5>
-                                    <button type="button" class="close text-white" data-bs-dismiss="modal"
-                                        aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
+                                    <h5 class="modal-title" id="editCourseModalLabel">View/Edit Course</h5>
+                                   
                                 </div>
 
                                 <div class="modal-body">
-                                    <div class="container-fluid">
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Course Code</label>
-                                                <input type="text" class="form-control" id="modal-code" name="code"
-                                                    required>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label">Course Name</label>
-                                                <input type="text" class="form-control" id="modal-name" name="name"
-                                                    required>
-                                            </div>
-
-                                            <div class="col-12">
-                                                <label class="form-label">Description</label>
-                                                <textarea class="form-control" id="modal-description" name="description" rows="3"></textarea>
-                                            </div>
-
-                                            <div class="col-md-4">
-                                                <label class="form-label">Units</label>
-                                                <input type="number" class="form-control" id="modal-units" name="units"
-                                                    min="0" required>
-                                            </div>
-
-                                            <div class="col-md-4">
-                                                <label class="form-label">Lecture Hours</label>
-                                                <input type="number" step="0.1" class="form-control"
-                                                    id="modal-lecture-hours" name="lecture_hours" required>
-                                            </div>
-
-                                            <div class="col-md-4">
-                                                <label class="form-label">Lab Hours</label>
-                                                <input type="number" step="0.1" class="form-control"
-                                                    id="modal-lab-hours" name="lab_hours" required>
-                                            </div>
-
-                                            <div class="col-12 mt-2">
-                                                <fieldset class="border p-3 rounded">
-                                                    <legend class="float-none w-auto px-2" style="font-size: 1rem;">
-                                                        Prerequisite (optional)</legend>
-                                                    <div class="form-group">
-
-                                                        <select name="prerequisite_id" id="modal-prerequisite"
-                                                            class="form-control">
-                                                            <option value="">-- None --</option>
-                                                            @foreach ($allCourses as $course)
-                                                                <option value="{{ $course->id }}">{{ $course->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-
-
-                                                </fieldset>
-                                            </div>
-
-                                        </div>
+                                    <div class="form-group">
+                                        <label>Course Code</label>
+                                        <input type="text" class="form-control" id="modal-code" name="code" required>
                                     </div>
+                                    <div class="form-group">
+                                        <label>Course Name</label>
+                                        <input type="text" class="form-control" id="modal-name" name="name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea class="form-control" id="modal-description" name="description" rows="3"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Units</label>
+                                        <input type="number" class="form-control" id="modal-units" name="units"
+                                            min="0" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Lecture Hours</label>
+                                        <input type="number" step="0.1" class="form-control" id="modal-lecture-hours"
+                                            name="lecture_hours" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Lab Hours</label>
+                                        <input type="number" step="0.1" class="form-control" id="modal-lab-hours"
+                                            name="lab_hours" required>
+                                    </div>
+
+                                    <!-- Dropdown for Prerequisite Course -->
+                                    <div class="form-group">
+                                        <label for="prerequisite_id">Prerequisite (optional):</label>
+                                        <select name="prerequisite_id" id="modal-prerequisite" class="form-control">
+                                            <option value="">-- None --</option>
+                                            @foreach ($allCourses as $course)
+                                                <option value="{{ $course->id }}">{{ $course->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
                                 </div>
 
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-success">Save Changes</button>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
                                 </div>
                             </div>
                         </form>
                     </div>
                 </div>
+
+
 
                 <!-- Modal for Add Course Form -->
                 <div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-lg"> <!-- Make modal larger -->
-                        <form action="{{ route('courses.store') }}" method="POST">
-                            @csrf
-                            <div class="modal-content">
-                                <div class="modal-header bg-primary text-white">
-                                    <h5 class="modal-title" id="addCourseModalLabel">Add Course</h5>
-                                    <button type="button" class="close text-white" data-bs-dismiss="modal"
-                                        aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-
-                                <div class="modal-body">
-                                    <div class="container-fluid">
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Course Code</label>
-                                                <input type="text" name="code" class="form-control"
-                                                    placeholder="Course Code" required>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label">Course Name</label>
-                                                <input type="text" name="name" class="form-control"
-                                                    placeholder="Course Name" required>
-                                            </div>
-
-                                            <div class="col-12">
-                                                <label class="form-label">Description</label>
-                                                <textarea name="description" class="form-control" placeholder="Description"></textarea>
-                                            </div>
-
-                                            <div class="col-md-4">
-                                                <label class="form-label">Units</label>
-                                                <input type="number" name="units" step="0.1" class="form-control"
-                                                    placeholder="Units" required>
-                                            </div>
-
-                                            <div class="col-md-4">
-                                                <label class="form-label">Lecture Hours</label>
-                                                <input type="number" name="lecture_hours" step="0.1"
-                                                    class="form-control" placeholder="Lecture Hours" required>
-                                            </div>
-
-                                            <div class="col-md-4">
-                                                <label class="form-label">Lab Hours</label>
-                                                <input type="number" name="lab_hours" step="0.1"
-                                                    class="form-control" placeholder="Lab Hours" required>
-                                            </div>
-
-                                            <div class="col-12 mt-2">
-                                                <fieldset class="border p-3 rounded">
-                                                    <legend class="float-none w-auto px-2" style="font-size: 1rem;">
-                                                        Prerequisite (optional)</legend>
-                                                    <div class="form-group">
-                                                        <select name="prerequisite_id" class="form-control">
-                                                            <option value="">-- None --</option>
-                                                            @foreach ($allCourses as $course)
-                                                                <option value="{{ $course->id }}">{{ $course->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </fieldset>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-primary">Save Course</button>
-                                </div>
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addCourseModalLabel">Add Course</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </div>
-                        </form>
+                            <div class="modal-body">
+                                <form action="{{ route('courses.store') }}" method="POST">
+                                    @csrf
+                                    <!-- Course Details Inputs -->
+                                    <div class="form-group">
+                                        <input type="text" name="code" class="form-control" placeholder="Course Code"
+                                            required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="name" class="form-control"
+                                            placeholder="Course Name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <textarea name="description" class="form-control" placeholder="Description"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" name="units" step="0.1" class="form-control"
+                                            placeholder="Units" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" name="lecture_hours" step="0.1" class="form-control"
+                                            placeholder="Lecture Hours" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" name="lab_hours" step="0.1" class="form-control"
+                                            placeholder="Lab Hours" required>
+                                    </div>
+
+
+                                    <!-- Dropdown for Prerequisite Cssourse -->
+                                    <div class="form-group">
+                                        <label for="prerequisite_id">Prerequisite (optional):</label>
+                                        <select name="prerequisite_id" class="form-control">
+                                            <option value="">-- None --</option>
+                                            @foreach ($allCourses as $course)
+                                                <option value="{{ $course->id }}">{{ $course->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save Course</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
 
 
                 <!-- Display Courses in Table -->
@@ -341,13 +304,28 @@
     <script src="{{ asset('js/courses.js') }}"></script>
 
     <!-- DataTables JS -->
-  
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#coursesTable').DataTable({
                 responsive: true,
                 pageLength: 10
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const alert = document.getElementById('success-alert');
+            if (alert) {
+                setTimeout(() => {
+                    alert.classList.remove('fadeDownIn');
+                    alert.classList.add('fadeOut');
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 400);
+                }, 2500);
+            }
         });
     </script>
 

@@ -5,6 +5,7 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SemestersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAcademicsSideBarController;
+use App\Http\Controllers\ProgramCourseMappingController;
 
 use App\Http\Controllers\YearLevelController;
 
@@ -57,7 +58,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/semester', [SemestersController::class, 'store'])->name('semesters.store');
     Route::put('/semesters/{id}', [SemestersController::class, 'update'])->name('semester.update');
     Route::delete('/semester/{id}', [SemestersController::class, 'destroy'])->name('semesters.destroy');
+ 
 
+    Route::get('/program-mapping', [ProgramCourseMappingController::class, 'index'])->name('program.mapping.index');
+    Route::post('/program-mapping/store', [ProgramCourseMappingController::class, 'store'])->name('program.mapping.store');
+    
     
 });
 

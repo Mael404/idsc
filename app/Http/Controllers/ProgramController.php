@@ -57,6 +57,8 @@ class ProgramController extends Controller
         $program->name = $request->input('name');
         $program->code = $request->input('code');
         $program->effective_school_year = $request->input('effective_school_year');
+        
+        
         $program->save();
 
         return redirect()->route('programs.index')->with('success', 'Program updated successfully');

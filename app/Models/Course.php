@@ -9,7 +9,16 @@ class Course extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['code', 'name', 'description', 'units', 'active', 'prerequisite_id']; // Add 'prerequisite_id'
+    protected $fillable = [
+        'code',
+        'name',
+        'description',
+        'units',
+        'lecture_hours',  
+        'lab_hours',       
+        'active',
+        'prerequisite_id'
+    ];
 
     /**
      * Get the course's prerequisite.

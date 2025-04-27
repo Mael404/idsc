@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('tab_title', 'Manage Courses')
+@section('tab_title', 'Manage Programs')
 @section('vpacademic_sidebar')
     @include('vp_academic.vpacademic_sidebar')
 @endsection
@@ -15,15 +15,10 @@
             @include('layouts.topbar')
 
             <div class="container-fluid">
+                @include('layouts.success-message')
 
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                @endif
+         
+
 
                 <!-- Page Heading with Button on Same Row -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -43,28 +38,25 @@
                             @csrf
                             @method('PUT') <!-- This ensures the form sends a PUT request -->
                             <div class="modal-content">
-                                <div class="modal-header">
+                                <div class="modal-header bg-primary text-white">
                                     <h5 class="modal-title" id="viewEditProgramModalLabel">View/Edit Program</h5>
-                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
+                                 
                                 </div>
                                 <div class="modal-body">
                                     <div class="form-group">
                                         <label for="program-name">Program Name</label>
-                                        <input type="text" class="form-control" id="program-name" name="name"
-                                            required>
+                                        <input type="text" class="form-control" id="program-name" name="name" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="program-code">Program Code</label>
-                                        <input type="text" class="form-control" id="program-code" name="code"
-                                            required>
+                                        <input type="text" class="form-control" id="program-code" name="code" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="program-effective-school-year">Effective School Year</label>
-                                        <input type="text" class="form-control" id="program-effective-school-year"
-                                            name="effective_school_year" required>
+                                        <input type="text" class="form-control" id="program-effective-school-year" name="effective_school_year" required>
                                     </div>
+                                    
+                                    
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -230,8 +222,8 @@
         </div>
         <!-- End Page Content -->
 
-    
-        
+
+
         <!-- End of Main Content -->
 
         @include('layouts.footer')
@@ -244,7 +236,7 @@
     <script src="{{ asset('js/programs.js') }}"></script>
 
     <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
     <script>
         $(document).ready(function() {
             $('#coursesTable').DataTable({

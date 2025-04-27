@@ -11,6 +11,7 @@
 
     <!-- Add favicon logos -->
     <link rel="icon" type="image/png" href="{{ asset('img/idslogo.png') }}">
+    
 
     <meta name="csrf-token " content="{{ csrf_token() }}">
     <title>@yield('tab_title') | {{ config('app.name') }}</title>
@@ -120,8 +121,7 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
-    <!-- DataTables JS + jQuery (required) -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
     <!-- Bootstrap core JavaScript-->
@@ -146,7 +146,7 @@
     <!-- Page level custom scripts -->
     <script src="{{ asset('js/demo/chart-area-demo.js') }}"></script>
     <script src="{{ asset('js/demo/chart-pie-demo.js') }}"></script>
-
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </body>
 
 </html>

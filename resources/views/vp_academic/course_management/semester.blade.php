@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('tab_title', 'Manage Courses')
+@section('tab_title', 'Manage Semester')
 @section('vpacademic_sidebar')
     @include('vp_academic.vpacademic_sidebar')
 @endsection
@@ -33,28 +33,27 @@
                     </button>
                 </div>
 
-                <!-- Edit Semester Modal -->
-                <div class="modal fade" id="editSemesterModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <form id="editSemesterForm" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <div class="modal-content">
-                                <div class="modal-header bg-info text-white">
-                                    <h5 class="modal-title">Edit Semester</h5>
-                                </div>
-                                <div class="modal-body">
-                                    <input type="text" id="modal-semester-name" name="name" class="form-control"
-                                        required>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-primary">Update</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+<!-- Edit Semester Modal -->
+<div class="modal fade" id="editSemesterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="editSemesterForm" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Edit Semester</h5>
                 </div>
+                <div class="modal-body">
+                    <input type="text" id="modal-semester-name" name="name" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
                 <!-- Add Semester Modal -->
                 <div class="modal fade" id="addSemesterModal" tabindex="-1" aria-labelledby="addSemesterModalLabel"
@@ -158,8 +157,6 @@
                 </div>
 
             </div>
-
-
 
         </div>
         <!-- End Page Content -->
