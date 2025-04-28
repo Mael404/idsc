@@ -11,7 +11,10 @@
 
     <!-- Add favicon logos -->
     <link rel="icon" type="image/png" href="{{ asset('img/idslogo.png') }}">
-    
+
+    <!-- accordion-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 
     <meta name="csrf-token " content="{{ csrf_token() }}">
     <title>@yield('tab_title') | {{ config('app.name') }}</title>
@@ -114,8 +117,8 @@
     </div>
 
 
-<!-- Bootstrap 5 JS (with Popper) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap 5 JS (with Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 
     <!-- DataTables CSS -->

@@ -14,7 +14,8 @@ class ProgramCourseMapping extends Model
         'course_id',
         'year_level_id',
         'semester_id',
-        'price_per_unit'
+        'price_per_unit',
+        'effective_sy'
     ];
 
     public function program()
