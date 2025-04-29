@@ -172,18 +172,34 @@
                                             <div class="col-12 mt-2">
                                                 <fieldset class="border p-3 rounded">
                                                     <legend class="float-none w-auto px-2" style="font-size: 1rem;">
-                                                        Prerequisite (optional)</legend>
+                                                        Prerequisites (optional)
+                                                    </legend>
+                                            
+                                                    <div class="form-group mb-3">
+                                                        <input type="text" id="prerequisite-search" class="form-control" placeholder="Search courses...">
+                                                    </div>
+                                            
+                                                    <!-- Results container -->
+                                                    <div id="search-results" class="list-group mb-3">
+                                                        <!-- Search results will be dynamically inserted here -->
+                                                    </div>
+                                            
                                                     <div class="form-group">
-                                                        <select name="prerequisite_id" class="form-control">
-                                                            <option value="">-- None --</option>
-                                                            @foreach ($allCourses as $course)
-                                                                <option value="{{ $course->id }}">{{ $course->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                        <label>Selected Prerequisites:</label>
+                                                        <ul id="selected-prerequisites" class="list-group">
+                                                            <!-- Selected prerequisites will be shown here -->
+                                                        </ul>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            
+                                            <!-- Hidden inputs for form submission -->
+                                            <div id="prerequisite-hidden-inputs"></div>
+                                            
+                                            
+                                         
+                                            
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -351,5 +367,104 @@
         });
     </script>
 
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('prerequisite-search');
+        const searchResults = document.getElementById('search-results');
+        const selectedList = document.getElementById('selected-prerequisites');
+        const hiddenInputs = document.getElementById('prerequisite-hidden-inputs');
+    
+        // Load all courses
+        const allCourses = @json($allCourses);
+        let availableCourses = [...allCourses]; // copy, will update as user selects
+    
+        function renderSearchResults(searchTerm) {
+            searchResults.innerHTML = '';
+    
+            if (searchTerm.length === 0) {
+                return;
+            }
+    
+            const filtered = availableCourses.filter(course => 
+                course.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+    
+            filtered.forEach(course => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.classList.add('list-group-item', 'list-group-item-action');
+                button.setAttribute('data-id', course.id);
+                button.setAttribute('data-name', course.name);
+                button.innerText = course.name;
+                searchResults.appendChild(button);
+            });
+    
+            if (filtered.length === 0) {
+                searchResults.innerHTML = `<div class="list-group-item disabled">No courses found</div>`;
+            }
+        }
+    
+        searchInput.addEventListener('input', function () {
+            renderSearchResults(this.value);
+        });
+    
+        searchResults.addEventListener('click', function (e) {
+            if (e.target.tagName === 'BUTTON') {
+                const courseId = e.target.getAttribute('data-id');
+                const courseName = e.target.getAttribute('data-name');
+    
+                if (document.getElementById('selected-' + courseId)) {
+                    alert('This prerequisite is already added.');
+                    return;
+                }
+    
+                // Add to selected list
+                const listItem = document.createElement('li');
+                listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                listItem.id = 'selected-' + courseId;
+                listItem.innerHTML = `
+                    ${courseName}
+                    <button type="button" class="btn btn-sm btn-danger remove-prerequisite" data-id="${courseId}">
+                        Remove
+                    </button>
+                `;
+                selectedList.appendChild(listItem);
+    
+                // Add hidden input
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'prerequisite_id[]';
+                input.value = courseId;
+                input.id = 'input-' + courseId;
+                hiddenInputs.appendChild(input);
+    
+                // Remove selected course from available list
+                availableCourses = availableCourses.filter(course => course.id != courseId);
+    
+                // Clear search input and results
+                searchInput.value = '';
+                searchResults.innerHTML = '';
+            }
+        });
+    
+        // Handle removing prerequisites
+        selectedList.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-prerequisite')) {
+                const courseId = e.target.getAttribute('data-id');
+    
+                // Remove from selected list
+                document.getElementById('selected-' + courseId)?.remove();
+                document.getElementById('input-' + courseId)?.remove();
+    
+                // Add back to available courses
+                const course = allCourses.find(c => c.id == courseId);
+                if (course) {
+                    availableCourses.push(course);
+                }
+            }
+        });
+    });
+    </script>
+    
+    
 @endsection

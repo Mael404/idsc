@@ -31,9 +31,10 @@ class CourseController extends Controller
             'units' => 'required|numeric',
             'lecture_hours' => 'required|numeric',
             'lab_hours' => 'required|numeric',
-            'prerequisite_id' => 'nullable|exists:courses,id',
+            'prerequisite_id' => 'nullable|array', // Now an array!
+            'prerequisite_id.*' => 'exists:courses,id', // Each ID must exist
         ]);
-
+    
         // Create the course
         $course = Course::create([
             'code' => $validated['code'],
@@ -42,12 +43,24 @@ class CourseController extends Controller
             'units' => $validated['units'],
             'lecture_hours' => $validated['lecture_hours'],
             'lab_hours' => $validated['lab_hours'],
-            'prerequisite_id' => $validated['prerequisite_id'] ?? null,
         ]);
-
+    
+        // If prerequisites are selected
+        if (!empty($validated['prerequisite_id'])) {
+            foreach ($validated['prerequisite_id'] as $prerequisiteId) {
+                // Insert into course_prerequisite pivot table
+                DB::table('course_prerequisite')->insert([
+                    'course_id' => $course->id,
+                    'prerequisite_id' => $prerequisiteId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+    
         return redirect()->route('courses.index')->with('success', 'Course added successfully!');
     }
-
+    
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
