@@ -52,17 +52,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/year', [YearLevelController::class, 'index'])->name('year_levels.index');
     Route::post('/year', [YearLevelController::class, 'store'])->name('year_levels.store');
     Route::put('/year/{id}', [YearLevelController::class, 'update'])->name('year_levels.update');
-    Route::delete('/year/{id}', [YearLevelController::class, 'destroy'])->name('year_levels.destroy')
-    ;
+    Route::delete('/year/{id}', [YearLevelController::class, 'destroy'])->name('year_levels.destroy');
     Route::get('/semester', [SemestersController::class, 'index'])->name('semesters.index');
     Route::post('/semester', [SemestersController::class, 'store'])->name('semesters.store');
     Route::put('/semesters/{id}', [SemestersController::class, 'update'])->name('semester.update');
     Route::delete('/semester/{id}', [SemestersController::class, 'destroy'])->name('semesters.destroy');
- 
+
 
     Route::get('/program-mapping', [ProgramCourseMappingController::class, 'index'])->name('program.mapping.index');
     Route::post('/program-mapping/store', [ProgramCourseMappingController::class, 'store'])->name('program.mapping.store');
-    
-    
-});
+    Route::delete('/program-mapping/{id}', [ProgramCourseMappingController::class, 'destroy'])->name('program.mapping.destroy');
+    Route::post('/program-mapping', [ProgramCourseMappingController::class, 'store'])->name('program.mapping.store');
+    // Archive a Program Mapping
+    Route::post('/program-mapping/{id}/archive', [ProgramCourseMappingController::class, 'archive'])->name('program.mapping.archive');
 
+    // Restore a Program Mapping
+    Route::post('/program-mapping/{id}/restore', [ProgramCourseMappingController::class, 'restore'])->name('program.mapping.restore');
+    Route::post('/program-mapping/{id}/toggle-active', [ProgramCourseMappingController::class, 'toggleActive'])->name('program.mapping.toggleActive');
+    Route::delete('/program-mapping/{id}', [ProgramCourseMappingController::class, 'destroy'])->name('program.mapping.destroy');
+    Route::put('/program-mapping/{id}', [ProgramCourseMappingController::class, 'update'])->name('program.mapping.update');
+
+});

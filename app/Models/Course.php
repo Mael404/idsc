@@ -14,8 +14,8 @@ class Course extends Model
         'name',
         'description',
         'units',
-        'lecture_hours',  
-        'lab_hours',       
+        'lecture_hours',
+        'lab_hours',
         'active',
         'prerequisite_id'
     ];
@@ -23,11 +23,16 @@ class Course extends Model
     /**
      * Get the course's prerequisite.
      */
-    public function prerequisite()
+    public function prerequisites()
     {
-        return $this->belongsTo(Course::class, 'prerequisite_id');
+        return $this->belongsToMany(Course::class, 'course_prerequisite', 'course_id', 'prerequisite_id');
     }
 
+    public function isPrerequisiteFor()
+    {
+        return $this->belongsToMany(Course::class, 'course_prerequisite', 'prerequisite_id', 'course_id');
+    }
+    
     /**
      * Get all the courses that have this course as a prerequisite.
      */

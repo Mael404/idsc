@@ -51,10 +51,7 @@
                                         <label for="program-code">Program Code</label>
                                         <input type="text" class="form-control" id="program-code" name="code" required>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="program-effective-school-year">Effective School Year</label>
-                                        <input type="text" class="form-control" id="program-effective-school-year" name="effective_school_year" required>
-                                    </div>
+                                
                                     
                                     
                                 </div>
@@ -89,11 +86,7 @@
                                         <label>Program Name</label>
                                         <input type="text" class="form-control" name="name" required>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Effective School Year</label>
-                                        <input type="text" class="form-control" name="effective_school_year"
-                                            placeholder="e.g. 2024-2025" required>
-                                    </div>
+                                   
                                 </div>
 
                                 <div class="modal-footer">
@@ -115,7 +108,7 @@
                                             <tr>
                                                 <th>Code</th>
                                                 <th>Name</th>
-                                                <th>Effective SY</th>
+                                            
                                                 <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -125,7 +118,7 @@
                                                 <tr>
                                                     <td>{{ $program->code }}</td>
                                                     <td>{{ $program->name }}</td>
-                                                    <td>{{ $program->effective_school_year }}</td>
+                                              
                                                     <td class="text-center">
                                                         <span
                                                             class="badge {{ $program->active ? 'badge-success' : 'badge-danger' }}">

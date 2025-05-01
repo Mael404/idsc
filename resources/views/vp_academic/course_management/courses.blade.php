@@ -18,7 +18,7 @@
             <div class="container-fluid">
                 @include('layouts.success-message')
 
-           
+
                 <!-- Page Heading with Button on Same Row -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 class="h3 mb-0 text-gray-800">Manage Courses</h1>
@@ -67,10 +67,11 @@
 
                                             <div class="col-md-4">
                                                 <label class="form-label">Units</label>
-                                                <input type="number" class="form-control" id="modal-units" name="units"
+                                                <input type="number" class="form-control" id="modal-units" step="0.1" name="units"
                                                     min="0" required>
                                             </div>
 
+                                            
                                             <div class="col-md-4">
                                                 <label class="form-label">Lecture Hours</label>
                                                 <input type="number" step="0.1" class="form-control"
@@ -86,22 +87,27 @@
                                             <div class="col-12 mt-2">
                                                 <fieldset class="border p-3 rounded">
                                                     <legend class="float-none w-auto px-2" style="font-size: 1rem;">
-                                                        Prerequisite (optional)</legend>
+                                                        Prerequisites (optional)</legend>
+
                                                     <div class="form-group">
+                                                        <!-- Search input -->
+                                                        <input type="text" class="form-control mb-2"
+                                                            id="edit-prerequisite-search"
+                                                            placeholder="Search for a course to add as prerequisite...">
 
-                                                        <select name="prerequisite_id" id="modal-prerequisite"
-                                                            class="form-control">
-                                                            <option value="">-- None --</option>
-                                                            @foreach ($allCourses as $course)
-                                                                <option value="{{ $course->id }}">{{ $course->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                        <!-- Search ressult list -->
+                                                        <div id="edit-search-results" class="list-group"></div>
+
+                                                        <!-- Selected prerequisites -->
+                                                        <ul id="edit-selected-prerequisites" class="list-group mt-2"></ul>
+
+                                                        <!-- Hidden inputs container -->
+                                                        <div id="edit-prerequisite-hidden-inputs"></div>
                                                     </div>
-
 
                                                 </fieldset>
                                             </div>
+
 
                                         </div>
                                     </div>
@@ -160,13 +166,13 @@
                                             <div class="col-md-4">
                                                 <label class="form-label">Lecture Hours</label>
                                                 <input type="number" name="lecture_hours" step="0.1"
-                                                    class="form-control" placeholder="Lecture Hours" required>
+                                                    class="form-control" placeholder="Lecture Hours">
                                             </div>
 
                                             <div class="col-md-4">
                                                 <label class="form-label">Lab Hours</label>
                                                 <input type="number" name="lab_hours" step="0.1"
-                                                    class="form-control" placeholder="Lab Hours" required>
+                                                    class="form-control" placeholder="Lab Hours">
                                             </div>
 
                                             <div class="col-12 mt-2">
@@ -174,16 +180,17 @@
                                                     <legend class="float-none w-auto px-2" style="font-size: 1rem;">
                                                         Prerequisites (optional)
                                                     </legend>
-                                            
+
                                                     <div class="form-group mb-3">
-                                                        <input type="text" id="prerequisite-search" class="form-control" placeholder="Search courses...">
+                                                        <input type="text" id="prerequisite-search"
+                                                            class="form-control" placeholder="Search courses...">
                                                     </div>
-                                            
+
                                                     <!-- Results container -->
                                                     <div id="search-results" class="list-group mb-3">
                                                         <!-- Search results will be dynamically inserted here -->
                                                     </div>
-                                            
+
                                                     <div class="form-group">
                                                         <label>Selected Prerequisites:</label>
                                                         <ul id="selected-prerequisites" class="list-group">
@@ -192,14 +199,14 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            
+
                                             <!-- Hidden inputs for form submission -->
                                             <div id="prerequisite-hidden-inputs"></div>
-                                            
-                                            
-                                         
-                                            
-                                            
+
+
+
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -229,8 +236,7 @@
                                                 <th>Course Name</th>
                                                 <th>Description</th>
                                                 <th>Units</th>
-                                                <th>Lecture Hrs</th>
-                                                <th>Lab Hrs</th>
+                                              
                                                 <th>Prerequisite</th> <!-- Added column for Prerequisite -->
                                                 <th>Status</th>
                                                 <th>Actions</th>
@@ -239,16 +245,21 @@
                                         <tbody>
                                             @foreach ($courses as $course)
                                                 <tr>
-                                                    <td>{{ $course->code }}</td>
+                                                    <td class="text-center">{{ $course->code }}</td>
                                                     <td>{{ $course->name }}</td>
                                                     <td>{{ $course->description }}</td>
                                                     <td>{{ $course->units }}</td>
-                                                    <td>{{ $course->lecture_hours }}</td>
-                                                    <td>{{ $course->lab_hours }}</td>
+                                                   
 
                                                     <!-- Show the prerequisite name if it exists -->
-                                                    <td>{{ $course->prerequisite ? $course->prerequisite->name : 'None' }}
+                                                    <td>
+                                                        @if ($course->prerequisites->isNotEmpty())
+                                                            {{ $course->prerequisites->pluck('code')->implode(', ') }}
+                                                        @else
+                                                            None
+                                                        @endif
                                                     </td>
+
 
                                                     <td class="text-center">
                                                         <span
@@ -261,18 +272,22 @@
                                                             style="gap: 5px;">
                                                             <!-- Edit Button -->
                                                             <a href="javascript:void(0);"
-                                                                class="btn btn-info btn-sm fixed-width-btn view-course-btn"
-                                                                data-bs-toggle="modal" data-bs-target="#editCourseModal"
-                                                                data-id="{{ $course->id }}"
-                                                                data-code="{{ $course->code }}"
-                                                                data-name="{{ $course->name }}"
-                                                                data-description="{{ $course->description }}"
-                                                                data-units="{{ $course->units }}"
-                                                                data-lecture-hours="{{ $course->lecture_hours }}"
-                                                                data-lab-hours="{{ $course->lab_hours }}"
-                                                                data-prerequisite-id="{{ $course->prerequisite_id }}">
-                                                                <i class="fas fa-edit"></i> <!-- Edit Icon -->
-                                                            </a>
+                                                            class="btn btn-info btn-sm fixed-width-btn view-course-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#editCourseModal"
+                                                            data-id="{{ $course->id }}"
+                                                            data-code="{{ $course->code }}"
+                                                            data-name="{{ $course->name }}"
+                                                            data-description="{{ $course->description }}"
+                                                            data-units="{{ $course->units }}"
+                                                            data-lecture-hours="{{ $course->lecture_hours }}"
+                                                            data-lab-hours="{{ $course->lab_hours }}"
+                                                            data-prerequisites='@json($course->prerequisites->map(function($prereq) {
+                                                                return ['id' => $prereq->id, 'name' => $prereq->name];
+                                                            }))'>
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        
+                                                        
                                                             <!-- Activate/Deactivate Button -->
                                                             <form
                                                                 action="{{ route('courses.toggleActive', $course->id) }}"
@@ -357,7 +372,7 @@
     <script src="{{ asset('js/courses.js') }}"></script>
 
     <!-- DataTables JS -->
-  
+
     <script>
         $(document).ready(function() {
             $('#coursesTable').DataTable({
@@ -367,104 +382,109 @@
         });
     </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput = document.getElementById('prerequisite-search');
-        const searchResults = document.getElementById('search-results');
-        const selectedList = document.getElementById('selected-prerequisites');
-        const hiddenInputs = document.getElementById('prerequisite-hidden-inputs');
-    
-        // Load all courses
-        const allCourses = @json($allCourses);
-        let availableCourses = [...allCourses]; // copy, will update as user selects
-    
-        function renderSearchResults(searchTerm) {
-            searchResults.innerHTML = '';
-    
-            if (searchTerm.length === 0) {
-                return;
-            }
-    
-            const filtered = availableCourses.filter(course => 
-                course.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-    
-            filtered.forEach(course => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.classList.add('list-group-item', 'list-group-item-action');
-                button.setAttribute('data-id', course.id);
-                button.setAttribute('data-name', course.name);
-                button.innerText = course.name;
-                searchResults.appendChild(button);
-            });
-    
-            if (filtered.length === 0) {
-                searchResults.innerHTML = `<div class="list-group-item disabled">No courses found</div>`;
-            }
-        }
-    
-        searchInput.addEventListener('input', function () {
-            renderSearchResults(this.value);
-        });
-    
-        searchResults.addEventListener('click', function (e) {
-            if (e.target.tagName === 'BUTTON') {
-                const courseId = e.target.getAttribute('data-id');
-                const courseName = e.target.getAttribute('data-name');
-    
-                if (document.getElementById('selected-' + courseId)) {
-                    alert('This prerequisite is already added.');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('prerequisite-search');
+            const searchResults = document.getElementById('search-results');
+            const selectedList = document.getElementById('selected-prerequisites');
+            const hiddenInputs = document.getElementById('prerequisite-hidden-inputs');
+
+            // Load all courses
+            const allCourses = @json($allCourses);
+            let availableCourses = [...allCourses]; // copy, will update as user selects
+
+            function renderSearchResults(searchTerm) {
+                searchResults.innerHTML = '';
+
+                if (searchTerm.length === 0) {
                     return;
                 }
-    
-                // Add to selected list
-                const listItem = document.createElement('li');
-                listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-                listItem.id = 'selected-' + courseId;
-                listItem.innerHTML = `
+
+                const filtered = availableCourses.filter(course =>
+                    course.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                filtered.forEach(course => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.classList.add('list-group-item', 'list-group-item-action');
+                    button.setAttribute('data-id', course.id);
+                    button.setAttribute('data-name', course.name);
+                    button.innerText = course.name;
+                    searchResults.appendChild(button);
+                });
+
+                if (filtered.length === 0) {
+                    searchResults.innerHTML = `<div class="list-group-item disabled">No courses found</div>`;
+                }
+            }
+
+            searchInput.addEventListener('input', function() {
+                renderSearchResults(this.value);
+            });
+
+            searchResults.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') {
+                    const courseId = e.target.getAttribute('data-id');
+                    const courseName = e.target.getAttribute('data-name');
+
+                    if (document.getElementById('selected-' + courseId)) {
+                        alert('This prerequisite is already added.');
+                        return;
+                    }
+
+                    // Add to selected list
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between',
+                        'align-items-center');
+                    listItem.id = 'selected-' + courseId;
+                    listItem.innerHTML = `
                     ${courseName}
                     <button type="button" class="btn btn-sm btn-danger remove-prerequisite" data-id="${courseId}">
                         Remove
                     </button>
                 `;
-                selectedList.appendChild(listItem);
-    
-                // Add hidden input
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'prerequisite_id[]';
-                input.value = courseId;
-                input.id = 'input-' + courseId;
-                hiddenInputs.appendChild(input);
-    
-                // Remove selected course from available list
-                availableCourses = availableCourses.filter(course => course.id != courseId);
-    
-                // Clear search input and results
-                searchInput.value = '';
-                searchResults.innerHTML = '';
-            }
-        });
-    
-        // Handle removing prerequisites
-        selectedList.addEventListener('click', function (e) {
-            if (e.target.classList.contains('remove-prerequisite')) {
-                const courseId = e.target.getAttribute('data-id');
-    
-                // Remove from selected list
-                document.getElementById('selected-' + courseId)?.remove();
-                document.getElementById('input-' + courseId)?.remove();
-    
-                // Add back to available courses
-                const course = allCourses.find(c => c.id == courseId);
-                if (course) {
-                    availableCourses.push(course);
+                    selectedList.appendChild(listItem);
+
+                    // Add hidden input
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'prerequisite_id[]';
+                    input.value = courseId;
+                    input.id = 'input-' + courseId;
+                    hiddenInputs.appendChild(input);
+
+
+                    availableCourses = availableCourses.filter(course => course.id != courseId);
+
+
+                    searchInput.value = '';
+                    searchResults.innerHTML = '';
                 }
-            }
+            });
+
+
+            selectedList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-prerequisite')) {
+                    const courseId = e.target.getAttribute('data-id');
+
+                    document.getElementById('selected-' + courseId)?.remove();
+                    document.getElementById('input-' + courseId)?.remove();
+
+
+                    const course = allCourses.find(c => c.id == courseId);
+                    if (course) {
+                        availableCourses.push(course);
+                    }
+                }
+            });
         });
-    });
     </script>
+
+<script>
+           const allCourses = @json($allCourses);
+</script>
+
     
-    
+
 @endsection

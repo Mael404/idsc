@@ -8,11 +8,13 @@ class AddPricePerUnitToProgramCourseMappings extends Migration
 {
     public function up()
     {
-        Schema::table('program_course_mappings', function (Blueprint $table) {
-            // Modify the price_per_unit column to set a default value of 0
-            $table->decimal('price_per_unit', 8, 2)->default(0)->after('semester_id'); // Adjust 'after' column position if needed
-        });
+        if (!Schema::hasColumn('program_course_mappings', 'price_per_unit')) {
+            Schema::table('program_course_mappings', function (Blueprint $table) {
+                $table->decimal('price_per_unit', 8, 2)->default(0)->after('semester_id');
+            });
+        }
     }
+    
 
     public function down()
     {

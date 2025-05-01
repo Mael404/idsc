@@ -10,11 +10,11 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::all();
+        $courses = Course::with('prerequisites')->get();
         $allCourses = Course::orderBy('name', 'asc')->get(); // Alphabetical order
         return view('vp_academic.course_management.courses', compact('courses', 'allCourses'));
     }
-
+    
     public function create()
     {
         $allCourses = Course::orderBy('name', 'asc')->get(); // Alphabetical order
@@ -70,14 +70,40 @@ class CourseController extends Controller
             'units' => 'required|numeric',
             'lecture_hours' => 'required|numeric',
             'lab_hours' => 'required|numeric',
-            'prerequisite_id' => 'nullable|exists:courses,id',
+            'prerequisite_id' => 'nullable|array',
+            'prerequisite_id.*' => 'exists:courses,id',
         ]);
-
+    
         $course = Course::findOrFail($id);
-        $course->update($validated);
-
+        $course->update([
+            'code' => $validated['code'],
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'units' => $validated['units'],
+            'lecture_hours' => $validated['lecture_hours'],
+            'lab_hours' => $validated['lab_hours'],
+        ]);
+    
+        // Sync prerequisites (replaces all with new ones)
+        if (!empty($validated['prerequisite_id'])) {
+            DB::table('course_prerequisite')->where('course_id', $course->id)->delete();
+            foreach ($validated['prerequisite_id'] as $prerequisiteId) {
+                DB::table('course_prerequisite')->insert([
+                    'course_id' => $course->id,
+                    'prerequisite_id' => $prerequisiteId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        } else {
+            // No prerequisites selected, clear existing
+            DB::table('course_prerequisite')->where('course_id', $course->id)->delete();
+        }
+    
         return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
     }
+    
+    
 
     public function toggleActive($id)
     {

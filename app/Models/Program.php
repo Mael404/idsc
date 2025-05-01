@@ -9,7 +9,7 @@ class Program extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'effective_school_year'];
+    protected $fillable = ['name', 'code'];
 
     public function mappings()
     {

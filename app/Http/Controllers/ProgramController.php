@@ -18,7 +18,7 @@ class ProgramController extends Controller
         $request->validate([
             'name' => 'required',
             'code' => 'required|unique:programs',
-            'effective_school_year' => 'required',
+            
         ]);
 
         Program::create($request->all());
@@ -50,13 +50,13 @@ class ProgramController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50',
-            'effective_school_year' => 'required|string|max:9', // Assuming format like "2024-2025"
+            
         ]);
 
         // Update the program
         $program->name = $request->input('name');
         $program->code = $request->input('code');
-        $program->effective_school_year = $request->input('effective_school_year');
+    
         
         
         $program->save();

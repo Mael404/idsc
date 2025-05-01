@@ -32,40 +32,193 @@
                     </button>
                 </div>
 
-                <!-- Display Existing Program Mappings -->
-                <div class="accordion" id="programAccordion">
-                    @foreach ($programMappings as $groupKey => $mappings)
-                        @php
-                            $firstMapping = $mappings->first();
-                            $program = $firstMapping->program;
-                            $yearLevel = $firstMapping->yearLevel;
-                            $semester = $firstMapping->semester;
-                            $effectiveSy = $firstMapping->effective_sy; // Get the effective_sy for this group
-                        @endphp
 
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="heading-{{ $groupKey }}">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapse-{{ $groupKey }}" aria-expanded="false"
-                                    aria-controls="collapse-{{ $groupKey }}">
-                                    Program: {{ $program->name }} - Year Level: {{ $yearLevel->name }} - Semester:
-                                    {{ $semester->name }} - Effective SY: {{ $effectiveSy }} <!-- Display effective_sy -->
-                                </button>
-                            </h2>
-                            <div id="collapse-{{ $groupKey }}" class="accordion-collapse collapse"
-                                aria-labelledby="heading-{{ $groupKey }}" data-bs-parent="#programAccordion">
-                                <div class="accordion-body">
-                                    <h5>Courses</h5>
-                                    <ul class="list-group">
+
+
+                <table id="mapping" class="table table-bordered mt-4">
+                    <thead>
+                        <tr>
+                            <th>Program</th>
+                            <th>Year Level</th>
+                            <th>Semester</th>
+                            <th>Effective SY</th>
+                            <th>Courses (with Prerequisites)</th>
+                            <th>action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($programMappings as $key => $mappings)
+                            @php
+                                $first = $mappings->first();
+                            @endphp
+                            <tr>
+                                <td>{{ $first->program->name ?? 'N/A' }}</td>
+                                <td>{{ $first->yearLevel->name ?? 'N/A' }}</td>
+                                <td>{{ $first->semester->name ?? 'N/A' }}</td>
+                                <td>{{ $first->effective_sy }}</td>
+                                <td>
+                                    <ul>
                                         @foreach ($mappings as $mapping)
-                                            <li class="list-group-item">{{ $mapping->course->name }}</li>
+                                            <li>
+                                                <strong>{{ $mapping->course->name }}</strong>
+                                                @if ($mapping->course->prerequisites->count())
+                                                    <br><small>Prerequisites:
+                                                        {{ $mapping->course->prerequisites->pluck('name')->implode(', ') }}
+                                                    </small>
+                                                @endif
+                                            </li>
                                         @endforeach
                                     </ul>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center align-items-center" style="gap: 5px;">
+                                        @php
+                                            $first = $mappings->first(); // You already used this earlier
+                                        @endphp
+
+                                        <!-- VIEW BUTTON -->
+                                        <a href="javascript:void(0);"
+                                            class="btn btn-info btn-sm fixed-width-btn view-mapping-btn"
+                                            data-bs-toggle="modal" data-bs-target="#viewMappingModal{{ $first->id }}"
+                                            data-id="{{ $first->id }}">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        <!-- TOGGLE ACTIVE/INACTIVE BUTTON -->
+                                        <form action="{{ route('program.mapping.toggleActive', $first->id) }}"
+                                            method="POST">
+                                            @csrf
+                                            <button type="submit" class="btn btn-warning btn-sm fixed-width-btn">
+                                                <i class="fas {{ $first->active ? 'fa-times' : 'fa-check' }}"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- DELETE BUTTON -->
+                                        <button type="button" class="btn btn-danger btn-sm fixed-width-btn"
+                                            data-bs-toggle="modal" data-bs-target="#deleteMappingModal{{ $first->id }}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+
+
+                                    <!-- DELETE CONFIRMATION MODAL -->
+                                    <div class="modal fade" id="deleteMappingModal{{ $first->id }}" tabindex="-1"
+                                        aria-labelledby="deleteModalLabel{{ $first->id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content border-danger">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title" id="deleteModalLabel{{ $first->id }}">Delete
+                                                        Mapping</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the mapping for
+                                                    <strong>{{ $first->program->name ?? 'N/A' }}</strong>,
+                                                    {{ $first->yearLevel->name ?? '' }} -
+                                                    {{ $first->semester->name ?? '' }} SY {{ $first->effective_sy }}?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form method="POST"
+                                                        action="{{ route('program.mapping.destroy', $first->id) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <form method="POST" action="{{ route('program.mapping.update', $first->id) }}"
+                                        id="editProgramMappingForm{{ $first->id }}">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal fade" id="viewMappingModal{{ $first->id }}" tabindex="-1"
+                                            aria-labelledby="viewMappingModalLabel{{ $first->id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-primary text-white">
+                                                        <h5 class="modal-title"
+                                                            id="viewMappingModalLabel{{ $first->id }}">Edit Program
+                                                            Mapping</h5>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Program Info -->
+                                                        <p><strong>Program:</strong> {{ $first->program->name }}</p>
+                                                        <p><strong>Year Level:</strong> {{ $first->yearLevel->name }}</p>
+                                                        <p><strong>Semester:</strong> {{ $first->semester->name }}</p>
+                                                        <p><strong>Effective SY:</strong> {{ $first->effective_sy }}</p>
+
+                                                        <hr>
+
+                                                        <!-- Existing Courses -->
+                                                        <h6>Current Courses:</h6>
+                                                        <ul class="list-group mb-3"
+                                                            id="existingCoursesList{{ $first->id }}">
+                                                            @foreach ($mappings as $mapping)
+                                                                <li
+                                                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                                                    <span>
+                                                                        {{ $mapping->course->name }}
+                                                                        @if ($mapping->course->prerequisites->count())
+                                                                            <small class="text-muted">
+                                                                                (Prerequisites:
+                                                                                {{ $mapping->course->prerequisites->pluck('name')->implode(', ') }})
+                                                                            </small>
+                                                                        @endif
+                                                                    </span>
+                                                                    <div class="d-flex align-items-center"
+                                                                        style="gap: 10px;">
+                                                                        <input type="hidden" name="existing_courses[]"
+                                                                            value="{{ $mapping->course->id }}">
+                                                                        <button type="button"
+                                                                            class="btn btn-danger btn-sm remove-existing-course">Remove</button>
+                                                                    </div>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+
+                                                        <!-- Add New Course -->
+                                                        <!-- Search and Add Course -->
+                                                        <div class="form-group position-relative">
+                                                            <label for="courseSearch{{ $first->id }}">Search and Add
+                                                                Course</label>
+                                                            <input type="text" class="form-control" autocomplete="off"
+                                                                id="courseSearch{{ $first->id }}"
+                                                                placeholder="Type course name...">
+                                                            <div id="courseSuggestions{{ $first->id }}"
+                                                                class="list-group position-absolute w-100 z-index-3"
+                                                                style="max-height: 200px; overflow-y: auto;"></div>
+                                                        </div>
+
+                                                        <!-- New Courses List -->
+                                                        <ul class="list-group mt-3" id="newCoursesList{{ $first->id }}">
+                                                        </ul>
+
+                                                    </div>
+
+                                                    <!-- Modal Footer -->
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Close</button>
+                                                        <button type="submit" class="btn btn-success">Update
+                                                            Mapping</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+
+
+                                </td>
+
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
 
 
                 <!-- Modal for Create Program Mapping -->
@@ -94,23 +247,17 @@
                                         </select>
                                     </div>
 
-                                    <!-- Course Dropdown -->
+                                    <!-- Add New Course -->
                                     <div class="form-group">
-                                        <label for="course_id">Course</label>
-                                        <select class="form-control" id="course_id" name="course_id" required>
-                                            <option value="">Select Course</option>
-                                            @foreach ($courses as $course)
-                                                <option value="{{ $course->id }}">{{ $course->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <button type="button" class="btn btn-primary mt-2" id="addCourseBtn">Add
-                                            Course</button>
+                                        <label for="courseSearch{{ $first->id }}">Search and Add Course</label>
+                                        <input type="text" class="form-control" id="courseSearch{{ $first->id }}"
+                                            placeholder="Type to search...">
+                                        <div id="courseSuggestions{{ $first->id }}" class="list-group mt-1"></div>
                                     </div>
 
-                                    <!-- List of Selected Courses -->
-                                    <div id="selectedCourses" class="mb-3">
-                                        <ul class="list-group" id="selectedCoursesList"></ul>
-                                    </div>
+                                    <!-- New Courses List -->
+                                    <ul class="list-group mt-3" id="newCoursesList{{ $first->id }}"></ul>
+
 
                                     <!-- Hidden inputs for each selected course -->
                                     <div id="hiddenCoursesInputs"></div>
@@ -142,6 +289,8 @@
                                         <input type="text" class="form-control" id="effective_sy" name="effective_sy"
                                             placeholder="Enter School Year (e.g., 2025-2026)" required>
                                     </div>
+                                    <input type="hidden" name="action_type" value="create_mapping">
+
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -172,7 +321,7 @@
     <!-- DataTables JS -->
     <script>
         $(document).ready(function() {
-            $('#coursesTable').DataTable({
+            $('#mapping').DataTable({
                 responsive: true,
                 pageLength: 10
             });
@@ -190,7 +339,7 @@
                     // Create a list item
                     var listItem = $(
                         '<li class="list-group-item d-flex justify-content-between align-items-center"></li>'
-                        );
+                    );
                     listItem.text(courseName);
 
                     // Add a hidden input to store the course ID
@@ -226,6 +375,104 @@
             });
         });
     </script>
+    <script>
+       $(document).ready(function () {
+    const courses = @json($courses);
+
+    $(document).on('input', '[id^="courseSearch"]', function () {
+        const modalId = $(this).attr('id').replace('courseSearch', '');
+        const query = $(this).val().toLowerCase();
+        const suggestionsBox = $(`#courseSuggestions${modalId}`);
+        suggestionsBox.empty().show();
+
+        if (query.length < 1) return;
+
+        const filtered = courses.filter(course =>
+            course.name.toLowerCase().includes(query)
+        );
+
+        if (filtered.length === 0) {
+            suggestionsBox.append(`<div class="list-group-item disabled">No courses found</div>`);
+        } else {
+            filtered.forEach(course => {
+                suggestionsBox.append(
+                    `<button type="button" class="list-group-item list-group-item-action" data-id="${course.id}" data-name="${course.name}">
+                        ${course.name}
+                    </button>`
+                );
+            });
+        }
+    });
+
+    // Add course on suggestion click
+    $(document).on('click', '[id^="courseSuggestions"] .list-group-item-action', function () {
+        const courseId = $(this).data('id');
+        const courseName = $(this).data('name');
+        const modalId = $(this).parent().attr('id').replace('courseSuggestions', '');
+
+        const alreadyExists = $(`#newCoursesList${modalId} input[value="${courseId}"]`).length > 0 ||
+                              $(`#existingCoursesList${modalId} input[value="${courseId}"]`).length > 0;
+
+        if (alreadyExists) {
+            showDuplicateCourseAlert('This course is already added.');
+            return;
+        }
+
+        const listItem = $(`
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${courseName}</span>
+                <div>
+                    <input type="hidden" name="new_courses[]" value="${courseId}">
+                    <button type="button" class="btn btn-danger btn-sm remove-new-course">Remove</button>
+                </div>
+            </li>
+        `);
+
+        $(`#newCoursesList${modalId}`).append(listItem);
+        $(`#courseSearch${modalId}`).val('');
+        $(`#courseSuggestions${modalId}`).empty().hide();
+    });
+
+    // Remove course
+    $(document).on('click', '.remove-new-course', function () {
+        $(this).closest('li').remove();
+    });
+
+    // Hide suggestions when clicking outside
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.form-group').length) {
+            $('[id^="courseSuggestions"]').hide();
+        }
+    });
+
+    function showDuplicateCourseAlert(message) {
+        $('#dynamic-alert').remove();
+
+        const alertHtml = `
+            <div id="dynamic-alert" class="popup-alert fadeDownIn shadow rounded-lg p-4 position-fixed top-0 end-0 m-3 bg-white z-5">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold fs-6 text-danger">
+                        ${message}
+                        <i class="fas fa-exclamation-circle ms-1"></i>
+                    </span>
+                </div>
+            </div>
+        `;
+
+        $('body').append(alertHtml);
+
+        setTimeout(() => {
+            $('#dynamic-alert').removeClass('fadeDownIn').addClass('fadeOut');
+            setTimeout(() => {
+                $('#dynamic-alert').remove();
+            }, 400);
+        }, 2500);
+    }
+});
+
+    </script>
+
+
 
 
 @endsection
