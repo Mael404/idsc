@@ -174,4 +174,16 @@ class ProgramCourseMappingController extends Controller
         // Redirect back with a success message
         return redirect()->route('program.mapping.index')->with('success', 'Program mapping and associated courses deleted successfully.');
     }
+
+    // In ProgramController.php// In ProgramController.php
+    public function removeCourse($program_id, $course_id)
+    {
+        $program = Program::find($program_id);
+        $course = Course::find($course_id);
+
+        // Remove the course from the program
+        $program->courses()->detach($course);
+
+        return redirect()->route('program.show', $program_id)->with('success', 'Course removed successfully!');
+    }
 }

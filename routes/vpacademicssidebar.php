@@ -71,5 +71,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/program-mapping/{id}/toggle-active', [ProgramCourseMappingController::class, 'toggleActive'])->name('program.mapping.toggleActive');
     Route::delete('/program-mapping/{id}', [ProgramCourseMappingController::class, 'destroy'])->name('program.mapping.destroy');
     Route::put('/program-mapping/{id}', [ProgramCourseMappingController::class, 'update'])->name('program.mapping.update');
+// In routes/web.php
+Route::delete('/program/{program_id}/course/{course_id}/remove', [ProgramController::class, 'removeCourse'])->name('program.mapping.remove');
 
 });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 
 class VPAcademicsSideBarController extends Controller
@@ -9,7 +10,10 @@ class VPAcademicsSideBarController extends Controller
     // VP ACADEMICS --------------------
     public function vpAdminDashboard()
     {
-        return view('vp_academic.vpacademic_db');
+        
+        $activeSchoolYear = SchoolYear::where('is_active', true)->first(); // 👈 get the active one
+    
+        return view('vp_academic.vpacademic_db', compact( 'activeSchoolYear'));
     }
 
     // Scheduling Routes --------------------

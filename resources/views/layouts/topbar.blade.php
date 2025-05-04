@@ -7,9 +7,19 @@
        </button>
 
        <div class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0">
-           <span class="navbar-greeting">Active School Year: SY 2024-2025</span>
-       </div>
-
+        <span class="navbar-greeting font-weight-bold" style="font-size: 1.1rem;">
+            Active S.Y.:
+            @if ($activeSchoolYear)
+                <span class="text-black" style="font-size: 1.1rem;">
+                    {{ $activeSchoolYear->name }}
+                    <span class="badge badge-pill badge-primary ml-1">{{ ucfirst($activeSchoolYear->semester) }}</span>
+                </span>
+            @else
+                <span class="text-danger ml-2">None set</span>
+            @endif
+        </span>
+    </div>
+        
 
 
 

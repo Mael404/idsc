@@ -32,9 +32,6 @@
                     </button>
                 </div>
 
-
-
-
                 <table id="mapping" class="table table-bordered mt-4">
                     <thead>
                         <tr>
@@ -42,8 +39,8 @@
                             <th>Year Level</th>
                             <th>Semester</th>
                             <th>Effective SY</th>
-                            <th>Courses (with Prerequisites)</th>
-                            <th>action</th>
+                            <th>Courses</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,9 +59,6 @@
                                             <li>
                                                 <strong>{{ $mapping->course->name }}</strong>
                                                 @if ($mapping->course->prerequisites->count())
-                                                    <br><small>Prerequisites:
-                                                        {{ $mapping->course->prerequisites->pluck('name')->implode(', ') }}
-                                                    </small>
                                                 @endif
                                             </li>
                                         @endforeach
@@ -130,14 +124,13 @@
                                         </div>
                                     </div>
 
-
                                     <form method="POST" action="{{ route('program.mapping.update', $first->id) }}"
                                         id="editProgramMappingForm{{ $first->id }}">
                                         @csrf
                                         @method('PUT')
                                         <div class="modal fade" id="viewMappingModal{{ $first->id }}" tabindex="-1"
                                             aria-labelledby="viewMappingModalLabel{{ $first->id }}" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg">
+                                            <div class="modal-dialog modal-xl"> <!-- Changed to XL -->
                                                 <div class="modal-content">
                                                     <div class="modal-header bg-primary text-white">
                                                         <h5 class="modal-title"
@@ -145,57 +138,112 @@
                                                             Mapping</h5>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <!-- Program Info -->
-                                                        <p><strong>Program:</strong> {{ $first->program->name }}</p>
-                                                        <p><strong>Year Level:</strong> {{ $first->yearLevel->name }}</p>
-                                                        <p><strong>Semester:</strong> {{ $first->semester->name }}</p>
-                                                        <p><strong>Effective SY:</strong> {{ $first->effective_sy }}</p>
+                                                        <!-- Bottom Section - Add Course -->
+                                                        <div class="form-group">
+                                                            <fieldset class="border p-4 rounded"
+                                                                style="border-color: black;">
 
-                                                        <hr>
 
-                                                        <!-- Existing Courses -->
-                                                        <h6>Current Courses:</h6>
-                                                        <ul class="list-group mb-3"
-                                                            id="existingCoursesList{{ $first->id }}">
-                                                            @foreach ($mappings as $mapping)
-                                                                <li
-                                                                    class="list-group-item d-flex justify-content-between align-items-center">
-                                                                    <span>
-                                                                        {{ $mapping->course->name }}
-                                                                        @if ($mapping->course->prerequisites->count())
-                                                                            <small class="text-muted">
-                                                                                (Prerequisites:
-                                                                                {{ $mapping->course->prerequisites->pluck('name')->implode(', ') }})
-                                                                            </small>
-                                                                        @endif
-                                                                    </span>
-                                                                    <div class="d-flex align-items-center"
-                                                                        style="gap: 10px;">
-                                                                        <input type="hidden" name="existing_courses[]"
-                                                                            value="{{ $mapping->course->id }}">
-                                                                        <button type="button"
-                                                                            class="btn btn-danger btn-sm remove-existing-course">Remove</button>
-                                                                    </div>
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
+                                                                <label for="courseSearch{{ $first->id }}">Add
+                                                                    Course</label>
+                                                                <div class="position-relative d-flex flex-column"
+                                                                    style="gap: 10px;">
+                                                                    <input type="text" class="form-control"
+                                                                        id="courseSearch{{ $first->id }}"
+                                                                        placeholder="Search for a course..."
+                                                                        onkeyup="filterCourses({{ $first->id }})">
 
-                                                        <!-- Add New Course -->
-                                                        <!-- Search and Add Course -->
-                                                        <div class="form-group position-relative">
-                                                            <label for="courseSearch{{ $first->id }}">Search and Add
-                                                                Course</label>
-                                                            <input type="text" class="form-control" autocomplete="off"
-                                                                id="courseSearch{{ $first->id }}"
-                                                                placeholder="Type course name...">
-                                                            <div id="courseSuggestions{{ $first->id }}"
-                                                                class="list-group position-absolute w-100 z-index-3"
-                                                                style="max-height: 200px; overflow-y: auto;"></div>
+                                                                    <ul id="searchResults{{ $first->id }}"
+                                                                        class="list-group position-absolute mt-1"
+                                                                        style="display: none; max-height: 200px; overflow-y: auto; width: 100%; z-index: 999; padding: 0; background: white; border: 1px solid #ddd; border-radius: 4px;">
+                                                                    </ul>
+                                                                </div>
+                                                            </fieldset>
                                                         </div>
 
                                                         <!-- New Courses List -->
-                                                        <ul class="list-group mt-3" id="newCoursesList{{ $first->id }}">
+                                                        <ul class="list-group mt-3 mb-1"
+                                                            id="newCoursesList{{ $first->id }}">
                                                         </ul>
+
+                                                        <!-- Grid layout -->
+                                                        <div class="row">
+                                                            <!-- Left Column - Program Details (smaller) -->
+                                                            <!-- Left Column - Program Details (smaller, centered, styled with fieldset) -->
+                                                            <!-- Left Column - Program Details with fieldset and centered items -->
+                                                            <div class="col-md-4">
+                                                                <fieldset class="border p-4 rounded">
+                                                                    <legend class="w-auto px-2">Program Details</legend>
+                                                                    <div class="">
+                                                                        <p><strong>Program:</strong>
+                                                                            {{ $first->program->name }}</p>
+                                                                        <p><strong>Year Level:</strong>
+                                                                            {{ $first->yearLevel->name }}</p>
+                                                                        <p><strong>Semester:</strong>
+                                                                            {{ $first->semester->name }}</p>
+                                                                        <p><strong>Effective SY:</strong>
+                                                                            {{ $first->effective_sy }}</p>
+                                                                    </div>
+                                                                </fieldset>
+                                                            </div>
+
+                                                            <!-- Right Column - Current Courses (larger) -->
+                                                            <div class="col-md-8">
+                                                                <fieldset class="border p-4 rounded">
+                                                                    <h6>Current Courses</h6>
+                                                                    @php $totalUnits = 0; @endphp
+                                                                    <table class="table table-bordered mb-3"
+                                                                        id="existingCoursesTable{{ $first->id }}">
+                                                                        <thead class="table-light">
+                                                                            <tr>
+                                                                                <th>Course Name</th>
+                                                                                <th>Units</th>
+                                                                                <th>Prerequisites</th>
+                                                                                <th>Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach ($mappings as $mapping)
+                                                                                @php $totalUnits += $mapping->course->units; @endphp
+                                                                                <tr>
+                                                                                    <td>{{ $mapping->course->name }}</td>
+                                                                                    <td>{{ $mapping->course->units }}</td>
+                                                                                    <td>
+                                                                                        @if ($mapping->course->prerequisites->count())
+                                                                                            {{ $mapping->course->prerequisites->pluck('name')->implode(', ') }}
+                                                                                        @else
+                                                                                            —
+                                                                                        @endif
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="hidden"
+                                                                                            name="existing_courses[]"
+                                                                                            value="{{ $mapping->course->id }}">
+                                                                                        <!-- Remove Button -->
+                                                                                        <button type="button"
+                                                                                            class="btn btn-danger btn-sm remove-existing-course-with-confirm"
+                                                                                            data-course-id="{{ $mapping->course->id }}">
+                                                                                            Remove
+                                                                                        </button>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                                        <tfoot>
+                                                                            <tr>
+                                                                                <th>Total Units</th>
+                                                                                <th>{{ $totalUnits }}</th>
+                                                                                <th colspan="2"></th>
+                                                                            </tr>
+                                                                        </tfoot>
+                                                                    </table>
+                                                                </fieldset>
+                                                            </div>
+                                                        </div>
+
+
+                                                        <hr>
+
 
                                                     </div>
 
@@ -210,6 +258,7 @@
                                             </div>
                                         </div>
                                     </form>
+
 
 
                                 </td>
@@ -247,17 +296,24 @@
                                         </select>
                                     </div>
 
-                                    <!-- Add New Course -->
+                                    <!-- Course Dropdown -->
                                     <div class="form-group">
-                                        <label for="courseSearch{{ $first->id }}">Search and Add Course</label>
-                                        <input type="text" class="form-control" id="courseSearch{{ $first->id }}"
-                                            placeholder="Type to search...">
-                                        <div id="courseSuggestions{{ $first->id }}" class="list-group mt-1"></div>
+                                        <label for="course_id">Course</label>
+                                        <select class="form-control" id="main_course_id" required>
+                                            <option value="">Select Course</option>
+                                            @foreach ($courses as $course)
+                                                <option value="{{ $course->id }}">{{ $course->name }}</option>
+                                            @endforeach
+                                        </select>
+
+                                        <button type="button" class="btn btn-primary mt-2" id="addMainCourseBtn">Add
+                                            Course</button>
                                     </div>
 
-                                    <!-- New Courses List -->
-                                    <ul class="list-group mt-3" id="newCoursesList{{ $first->id }}"></ul>
-
+                                    <!-- List of Selected Courses -->
+                                    <div id="selectedCourses" class="mb-3">
+                                        <ul class="list-group" id="selectedCoursesList"></ul>
+                                    </div>
 
                                     <!-- Hidden inputs for each selected course -->
                                     <div id="hiddenCoursesInputs"></div>
@@ -331,11 +387,14 @@
     <script>
         $(document).ready(function() {
             // Handle adding selected courses to the list
-            $('#addCourseBtn').on('click', function() {
-                var courseId = $('#course_id').val();
-                var courseName = $('#course_id option:selected').text();
+            $('#addMainCourseBtn').on('click', function() {
+                var courseId = $('#main_course_id').val();
+                var courseName = $('#main_course_id option:selected').text();
 
-                if (courseId && courseName) {
+                // Check if course is already added by looking in hidden inputs
+                var courseExists = $('#hiddenCoursesInputs input[value="' + courseId + '"]').length > 0;
+
+                if (courseId && courseName && !courseExists) {
                     // Create a list item
                     var listItem = $(
                         '<li class="list-group-item d-flex justify-content-between align-items-center"></li>'
@@ -349,25 +408,57 @@
                     // Add a remove button to the list item
                     var removeButton = $('<button class="btn btn-danger btn-sm">Remove</button>');
                     removeButton.on('click', function() {
-                        // Remove the hidden input as well
                         hiddenInput.remove();
                         listItem.remove();
                     });
                     listItem.append(removeButton);
 
-                    // Append the list item to the selected courses list
+                    // Append to the list
                     $('#selectedCoursesList').append(listItem);
 
-                    // Clear the course dropdown
-                    $('#course_id').val('');
+                    // Append the hidden input to the #hiddenCoursesInputs
+                    $('#hiddenCoursesInputs').append(hiddenInput);
+
+                    // Clear the dropdown
+                    $('#main_course_id').val('');
+                } else if (courseExists) {
+                    showPopupAlert('This course has already been added.');
                 } else {
                     alert('Please select a course.');
                 }
             });
 
-            // Optionally, handle the form submission with selected courses
+            // Show custom popup alert
+            function showPopupAlert(message) {
+                // Remove any existing alert first
+                $('#dynamic-popup-alert').remove();
+
+                // Create the alert pop-up HTML
+                const alertHtml = `
+                <div id="dynamic-popup-alert" class="popup-alert fadeDownIn shadow rounded-lg p-4 position-fixed top-0 end-0 m-3 bg-white z-5">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold fs-6 text-danger-custom">
+                            ${message}
+                            <i class="fas fa-exclamation-circle ms-1"></i>
+                        </span>
+                    </div>
+                </div>
+            `;
+
+                // Append the pop-up to the body
+                $('body').append(alertHtml);
+
+                // Automatically remove the pop-up after a few seconds
+                setTimeout(() => {
+                    $('#dynamic-popup-alert').removeClass('fadeDownIn').addClass('fadeOut');
+                    setTimeout(() => {
+                        $('#dynamic-popup-alert').remove();
+                    }, 400);
+                }, 2500);
+            }
+
+            // Ensure at least one course is selected before submitting
             $('#programMappingForm').on('submit', function(event) {
-                // Ensure that at least one course has been selected before submitting
                 if ($('#selectedCoursesList li').length === 0) {
                     event.preventDefault();
                     alert('Please select at least one course.');
@@ -375,103 +466,113 @@
             });
         });
     </script>
+
+
     <script>
-       $(document).ready(function () {
-    const courses = @json($courses);
+        function filterCourses(modalId) {
+            const searchInput = document.getElementById(`courseSearch${modalId}`).value.toLowerCase();
+            const searchResults = document.getElementById(`searchResults${modalId}`);
+            const courses = @json($courses); // All possible courses
+            const existingCourseInputs = document.querySelectorAll(
+                `#existingCoursesTable${modalId} input[name="existing_courses[]"]`);
 
-    $(document).on('input', '[id^="courseSearch"]', function () {
-        const modalId = $(this).attr('id').replace('courseSearch', '');
-        const query = $(this).val().toLowerCase();
-        const suggestionsBox = $(`#courseSuggestions${modalId}`);
-        suggestionsBox.empty().show();
+            // Get list of existing course IDs
+            const existingCourseIds = Array.from(existingCourseInputs).map(input => parseInt(input.value));
+            const newCourseInputs = document.querySelectorAll(`#newCoursesList${modalId} input[name="new_courses[]"]`);
+            const newCourseIds = Array.from(newCourseInputs).map(input => parseInt(input.value));
 
-        if (query.length < 1) return;
+            // Combine all excluded course IDs
+            const excludedCourseIds = [...existingCourseIds, ...newCourseIds];
 
-        const filtered = courses.filter(course =>
-            course.name.toLowerCase().includes(query)
-        );
 
-        if (filtered.length === 0) {
-            suggestionsBox.append(`<div class="list-group-item disabled">No courses found</div>`);
-        } else {
-            filtered.forEach(course => {
-                suggestionsBox.append(
-                    `<button type="button" class="list-group-item list-group-item-action" data-id="${course.id}" data-name="${course.name}">
-                        ${course.name}
-                    </button>`
-                );
-            });
-        }
-    });
+            // Filter courses based on search input and exclude existing courses
+            const filteredCourses = courses.filter(course =>
+                course.name.toLowerCase().includes(searchInput) &&
+                !excludedCourseIds.includes(course.id)
+            );
 
-    // Add course on suggestion click
-    $(document).on('click', '[id^="courseSuggestions"] .list-group-item-action', function () {
-        const courseId = $(this).data('id');
-        const courseName = $(this).data('name');
-        const modalId = $(this).parent().attr('id').replace('courseSuggestions', '');
+            // Clear previous results
+            searchResults.innerHTML = '';
 
-        const alreadyExists = $(`#newCoursesList${modalId} input[value="${courseId}"]`).length > 0 ||
-                              $(`#existingCoursesList${modalId} input[value="${courseId}"]`).length > 0;
-
-        if (alreadyExists) {
-            showDuplicateCourseAlert('This course is already added.');
-            return;
+            // Display filtered results
+            if (searchInput && filteredCourses.length) {
+                searchResults.style.display = 'block';
+                filteredCourses.forEach(course => {
+                    const resultItem = document.createElement('li');
+                    resultItem.classList.add('list-group-item', 'cursor-pointer', 'py-1', 'px-2', 'small');
+                    resultItem.textContent = course.name;
+                    resultItem.onclick = () => addCourseToList(modalId, course);
+                    searchResults.appendChild(resultItem);
+                });
+            } else {
+                searchResults.style.display = 'none';
+            }
         }
 
-        const listItem = $(`
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>${courseName}</span>
-                <div>
-                    <input type="hidden" name="new_courses[]" value="${courseId}">
-                    <button type="button" class="btn btn-danger btn-sm remove-new-course">Remove</button>
-                </div>
-            </li>
-        `);
 
-        $(`#newCoursesList${modalId}`).append(listItem);
-        $(`#courseSearch${modalId}`).val('');
-        $(`#courseSuggestions${modalId}`).empty().hide();
-    });
+        function addCourseToList(modalId, course) {
+            const courseId = course.id;
+            const courseName = course.name;
 
-    // Remove course
-    $(document).on('click', '.remove-new-course', function () {
-        $(this).closest('li').remove();
-    });
+            // Check if the course is already added
+            const alreadyExists = document.querySelectorAll(`#newCoursesList${modalId} input[value="${courseId}"]`).length >
+                0;
 
-    // Hide suggestions when clicking outside
-    $(document).on('click', function (e) {
-        if (!$(e.target).closest('.form-group').length) {
-            $('[id^="courseSuggestions"]').hide();
+            if (alreadyExists) {
+                alert('This course is already added.');
+                return;
+            }
+
+            // Create list item with hidden input
+            const listItem = document.createElement('li');
+            listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+
+            const courseText = document.createElement('span');
+            courseText.textContent = courseName;
+
+            const removeButton = document.createElement('button');
+            removeButton.classList.add('btn', 'btn-danger', 'btn-sm', 'remove-new-course');
+            removeButton.textContent = 'Remove';
+            removeButton.onclick = function() {
+                listItem.remove();
+            };
+
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'new_courses[]';
+            hiddenInput.value = courseId;
+
+            // Append elements to the list item
+            listItem.appendChild(courseText);
+            const buttonContainer = document.createElement('div');
+            buttonContainer.appendChild(hiddenInput);
+            buttonContainer.appendChild(removeButton);
+            listItem.appendChild(buttonContainer);
+
+            // Append the list item to the new courses list
+            document.getElementById(`newCoursesList${modalId}`).appendChild(listItem);
+
+            // Clear the search input and hide results
+            document.getElementById(`courseSearch${modalId}`).value = '';
+            document.getElementById(`searchResults${modalId}`).style.display = 'none';
         }
-    });
-
-    function showDuplicateCourseAlert(message) {
-        $('#dynamic-alert').remove();
-
-        const alertHtml = `
-            <div id="dynamic-alert" class="popup-alert fadeDownIn shadow rounded-lg p-4 position-fixed top-0 end-0 m-3 bg-white z-5">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-semibold fs-6 text-danger">
-                        ${message}
-                        <i class="fas fa-exclamation-circle ms-1"></i>
-                    </span>
-                </div>
-            </div>
-        `;
-
-        $('body').append(alertHtml);
-
-        setTimeout(() => {
-            $('#dynamic-alert').removeClass('fadeDownIn').addClass('fadeOut');
-            setTimeout(() => {
-                $('#dynamic-alert').remove();
-            }, 400);
-        }, 2500);
-    }
-});
-
     </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.remove-existing-course-with-confirm').forEach(button => {
+                button.addEventListener('click', function() {
+                    const confirmed = confirm('Are you sure you want to remove this course?');
+                    if (!confirmed) return;
 
+                    const row = this.closest('tr');
+                    if (row) {
+                        row.remove();
+                    }
+                });
+            });
+        });
+    </script>
 
 
 

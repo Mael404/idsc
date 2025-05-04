@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 
 class VPAdminSideBarController extends Controller
 {
     // Main dashboard
     public function dashboard()
+    
     {
-        return view('vp_admin.vpadmin_db');
+        $schoolYears = SchoolYear::all();
+        $trashedSchoolYears = SchoolYear::onlyTrashed()->get();
+        $activeSchoolYear = SchoolYear::where('is_active', true)->first(); // 👈 get the active one
+    
+        return view('vp_admin.vpadmin_db', compact('schoolYears', 'trashedSchoolYears', 'activeSchoolYear'));
+       
     }
 
     // Blank page
@@ -32,7 +39,11 @@ class VPAdminSideBarController extends Controller
     // Academic
     public function termConfiguration()
     {
-        return view('vp_admin.academic.term_configuration');
+        $schoolYears = SchoolYear::all();
+        $trashedSchoolYears = SchoolYear::onlyTrashed()->get();
+        $activeSchoolYear = SchoolYear::where('is_active', true)->first(); // 👈 get the active one
+    
+        return view('vp_admin.term_config.term-config', compact('schoolYears', 'trashedSchoolYears', 'activeSchoolYear'));
     }
 
     // User Management
