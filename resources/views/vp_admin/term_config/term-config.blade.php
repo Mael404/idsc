@@ -192,9 +192,10 @@
                                                 <tr class="{{ $sy->deleted_at ? 'table-danger' : '' }}">
                                                     <td>{{ $sy->name }}</td>
                                                     <td>{{ $sy->default_unit_price ?? 'N/A' }}</td>
-                                                    <td>{{ $sy->semester ?? 'N/A' }}</td> <!-- Display Semester -->
+                                                    <td class="text-center">{{ $sy->semester ?? 'N/A' }}</td>
+                                                    <!-- Display Semester -->
 
-                                                    <td>
+                                                    <td class="text-center">
                                                         @if ($sy->is_active)
                                                             <span class="badge badge-success">Active</span>
                                                         @else
@@ -226,7 +227,7 @@
                                                                 <div class="modal-dialog">
                                                                     <form method="POST" id="editSchoolYearForm">
                                                                         @csrf
-                                                                        @method('PATCH') <!-- Use PATCH method -->
+                                                                        @method('PATCH')
                                                                         <div class="modal-content">
                                                                             <div class="modal-header">
                                                                                 <h5 class="modal-title">Edit School Year
@@ -236,31 +237,48 @@
                                                                             </div>
 
                                                                             <div class="modal-body">
+
+                                                                              
                                                                                 <div class="form-group">
                                                                                     <label>School Year</label>
                                                                                     <input type="text"
-                                                                                        class="form-control"
+                                                                                        class="form-control @error('name') is-invalid @enderror"
                                                                                         name="name"
-                                                                                        id="editSchoolYearName" required>
+                                                                                        id="editSchoolYearName"
+                                                                                        value="{{ old('name') }}"
+                                                                                        required>
+                                                                                    @error('name')
+                                                                                        <span
+                                                                                            class="text-danger small">{{ $message }}</span>
+                                                                                    @enderror
                                                                                 </div>
 
                                                                                 <div class="form-group">
                                                                                     <label>Default Unit Price
-                                                                                        (optional)
-                                                                                    </label>
+                                                                                        (optional)</label>
                                                                                     <input type="number" step="0.01"
-                                                                                        class="form-control"
+                                                                                        class="form-control @error('default_unit_price') is-invalid @enderror"
                                                                                         name="default_unit_price"
-                                                                                        id="editSchoolYearDefaultUnitPrice">
+                                                                                        id="editSchoolYearDefaultUnitPrice"
+                                                                                        value="{{ old('default_unit_price') }}">
+                                                                                    @error('default_unit_price')
+                                                                                        <span
+                                                                                            class="text-danger small">{{ $message }}</span>
+                                                                                    @enderror
                                                                                 </div>
 
                                                                                 <div class="form-group">
                                                                                     <label>Semester</label>
                                                                                     <input type="text"
-                                                                                        class="form-control"
+                                                                                        class="form-control @error('semester') is-invalid @enderror"
                                                                                         name="semester"
                                                                                         id="editSchoolYearSemester"
+                                                                                        value="{{ old('semester') }}"
                                                                                         required>
+                                                                                    @error('semester')
+                                                                                        <span
+                                                                                            class="text-danger small">{{ $message }}</span>
+                                                                                    @enderror
                                                                                 </div>
                                                                             </div>
 
@@ -273,7 +291,8 @@
                                                                 </div>
                                                             </div>
 
-                                                            <!-- Toggle Active/Inactive Button -->
+
+
                                                             <!-- Toggle Active/Inactive Button -->
                                                             <form action="{{ route('school-years.set-active', $sy->id) }}"
                                                                 method="POST" class="d-inline">
@@ -322,7 +341,7 @@
 
                                                                             <div class="modal-body">
                                                                                 Are you sure you want to move this school
-                                                                                year to the trash? 🗑️<br>
+                                                                                year to the trash?<br>
                                                                                 You can restore it later from the Trash
                                                                                 modal.
                                                                             </div>

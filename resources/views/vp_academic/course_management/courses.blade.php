@@ -75,13 +75,13 @@
                                             <div class="col-md-4">
                                                 <label class="form-label">Lecture Hours</label>
                                                 <input type="number" step="0.1" class="form-control"
-                                                    id="modal-lecture-hours" name="lecture_hours" required>
+                                                    id="modal-lecture-hours" name="lecture_hours" >
                                             </div>
 
                                             <div class="col-md-4">
                                                 <label class="form-label">Lab Hours</label>
                                                 <input type="number" step="0.1" class="form-control"
-                                                    id="modal-lab-hours" name="lab_hours" required>
+                                                    id="modal-lab-hours" name="lab_hours" >
                                             </div>
 
                                             <div class="col-12 mt-2">

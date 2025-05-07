@@ -31,7 +31,7 @@ class ProgramCourseMappingController extends Controller
         return view('vp_academic.course_management.program-mapping', compact(
             'courses',
             'programs',
-            'yearLevels',
+            'yearLevels', 
             'semesters',
             'programMappings'
         ));

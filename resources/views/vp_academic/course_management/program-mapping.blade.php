@@ -299,7 +299,7 @@
                                     <!-- Course Dropdown -->
                                     <div class="form-group">
                                         <label for="course_id">Course</label>
-                                        <select class="form-control" id="main_course_id" required>
+                                        <select class="form-control" id="main_course_id">
                                             <option value="">Select Course</option>
                                             @foreach ($courses as $course)
                                                 <option value="{{ $course->id }}">{{ $course->name }}</option>

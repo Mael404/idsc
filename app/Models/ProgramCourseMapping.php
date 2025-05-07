@@ -40,6 +40,6 @@ class ProgramCourseMapping extends Model
 
     public function miscFees()
     {
-        return $this->belongsToMany(MiscFee::class, 'program_course_misc_fees');
+        return $this->hasMany(MiscFee::class);
     }
 }

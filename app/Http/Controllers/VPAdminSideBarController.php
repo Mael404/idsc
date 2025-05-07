@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProgramCourseMapping;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 
@@ -32,16 +33,34 @@ class VPAdminSideBarController extends Controller
     }
 
     public function miscFees()
-    {
-        return view('vp_admin.fees.misc_fees');
+    {$schoolYears = SchoolYear::withTrashed()->get(); // or however you're fetching them
+        $groupedMappings = ProgramCourseMapping::with(['program', 'course', 'yearLevel', 'semester'])
+        ->get()
+        ->groupBy(function ($item) {
+            return $item->program_id . '-' . $item->year_level_id . '-' . $item->semester_id;
+        })
+        ->map(function ($group) {
+            return [
+                'program_name' => $group->first()->program->name,
+                'year_level' => $group->first()->yearLevel->name,
+                'semester' => $group->first()->semester->name ?? 'N/A',
+                'courses' => $group->pluck('course.name')->implode(', '),
+                'mapping_ids' => $group->pluck('id')->toArray(),
+            ];
+        });
+
+    return view('vp_admin.fees.misc-fees', compact('groupedMappings'));
+    
+      
+    
     }
 
-    // Academic
+    
     public function termConfiguration()
     {
         $schoolYears = SchoolYear::all();
         $trashedSchoolYears = SchoolYear::onlyTrashed()->get();
-        $activeSchoolYear = SchoolYear::where('is_active', true)->first(); // 👈 get the active one
+        $activeSchoolYear = SchoolYear::where('is_active', true)->first(); 
     
         return view('vp_admin.term_config.term-config', compact('schoolYears', 'trashedSchoolYears', 'activeSchoolYear'));
     }

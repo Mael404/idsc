@@ -9,10 +9,10 @@ class MiscFee extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'amount'];
+    protected $fillable = ['name', 'amount', 'program_course_mapping_id'];
 
-    public function mappings()
+    public function programCourseMapping()
     {
-        return $this->belongsToMany(ProgramCourseMapping::class, 'program_course_misc_fees');
+        return $this->belongsTo(ProgramCourseMapping::class);
     }
 }

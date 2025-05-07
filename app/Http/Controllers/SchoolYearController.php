@@ -15,10 +15,10 @@ class SchoolYearController extends Controller
         $schoolYears = SchoolYear::all();
         $trashedSchoolYears = SchoolYear::onlyTrashed()->get();
         $activeSchoolYear = SchoolYear::where('is_active', true)->first(); // 👈 get the active one
-    
+
         return view('vp_admin.term_config.term-config', compact('schoolYears', 'trashedSchoolYears', 'activeSchoolYear'));
     }
-    
+
     /**
      * Store a new school year.
      */
@@ -59,13 +59,29 @@ class SchoolYearController extends Controller
             'default_unit_price' => 'nullable|numeric',
             'is_active' => 'nullable|boolean',
         ]);
-    
+
+        // Check for duplicate name + semester combo, excluding current record
+        $existing = SchoolYear::where('name', $request->name)
+            ->where('semester', $request->semester)
+            ->where('id', '!=', $id) //
+            ->exists();
+
+        if ($existing) {
+            return back()->withErrors(['semester' => 'That School Year and Semester combo already exists.'])
+                ->withInput();
+        }
+
+        // If marked active, deactivate others
+        if ($request->input('is_active')) {
+            SchoolYear::where('is_active', true)->where('id', '!=', $id)->update(['is_active' => false]);
+        }
+
         $schoolYear = SchoolYear::findOrFail($id);
         $schoolYear->update($request->all());
-    
+
         return redirect()->route('school-years.index')->with('success', 'School Year updated successfully!');
     }
-    
+
 
     /**
      * Soft-delete a school year.
@@ -117,12 +133,12 @@ class SchoolYearController extends Controller
     public function setActive($id)
     {
         $schoolYear = SchoolYear::findOrFail($id);
-    
+
         // If the selected school year is NOT active, activate it and deactivate all others
         if (!$schoolYear->is_active) {
             // Deactivate all school years first
             SchoolYear::where('is_active', true)->update(['is_active' => false]);
-    
+
             // Activate the selected one
             $schoolYear->is_active = true;
             $schoolYear->save();
@@ -131,9 +147,7 @@ class SchoolYearController extends Controller
             $schoolYear->is_active = false;
             $schoolYear->save();
         }
-    
+
         return redirect()->route('school-years.index')->with('success', 'School Year status updated successfully!');
     }
-    
-    
 }

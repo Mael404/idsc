@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\MiscFeeController;
 use App\Http\Controllers\SchoolYearController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAdminSideBarController;
-//s
+//ss
 
 Route::get('/vp-admin-db', [VPAdminSideBarController::class, 'dashboard'])
     ->middleware('auth')
@@ -27,7 +28,7 @@ Route::prefix('user-management')->group(function () {
     Route::get('/activate', [VPAdminSideBarController::class, 'activateUsers']);
 });
 
-// School Year Routes (Cleaned)
+
 Route::get('school-years', [SchoolYearController::class, 'index'])->name('school-years.index');
 Route::post('school-years', [SchoolYearController::class, 'store'])->name('school-years.store');
 Route::delete('school-years/{id}', [SchoolYearController::class, 'destroy'])->name('school-years.destroy');
@@ -36,3 +37,7 @@ Route::patch('school-years/{id}/archive', [SchoolYearController::class, 'archive
 Route::patch('school-years/{id}/set-active', [SchoolYearController::class, 'setActive'])->name('school-years.set-active');
 Route::patch('school-years/{id}/restore', [SchoolYearController::class, 'restore'])->name('school-years.restore');
 Route::delete('school-years/{id}/force-delete', [SchoolYearController::class, 'forceDelete'])->name('school-years.forceDelete');
+
+
+Route::get('/misc-fees/list/{mappingId}', [MiscFeeController::class, 'getList']);
+Route::post('/misc-fees/store-bulk', [MiscFeeController::class, 'storeBulk'])->name('misc-fees.store-bulk');

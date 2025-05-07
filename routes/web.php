@@ -21,4 +21,5 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/vpadminsidebar.php';
+require __DIR__ . '/registrarsidebar.php';
 require __DIR__ . '/vpacademicssidebar.php';
