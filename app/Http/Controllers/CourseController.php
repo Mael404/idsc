@@ -14,7 +14,7 @@ class CourseController extends Controller
         $allCourses = Course::orderBy('name', 'asc')->get(); // Alphabetical order
         return view('vp_academic.course_management.courses', compact('courses', 'allCourses'));
     }
-    
+
     public function create()
     {
         $allCourses = Course::orderBy('name', 'asc')->get(); // Alphabetical order
@@ -29,12 +29,12 @@ class CourseController extends Controller
             'name' => 'required|string',
             'description' => 'nullable|string',
             'units' => 'required|numeric',
-            'lecture_hours' => 'required|numeric',
-            'lab_hours' => 'required|numeric',
-            'prerequisite_id' => 'nullable|array', // Now an array!
-            'prerequisite_id.*' => 'exists:courses,id', // Each ID must exist
+            'lecture_hours' => 'nullable|numeric',
+            'lab_hours' => 'nullable|numeric',
+            'prerequisite_id' => 'nullable|array', 
+            'prerequisite_id.*' => 'exists:courses,id',
         ]);
-    
+
         // Create the course
         $course = Course::create([
             'code' => $validated['code'],
@@ -44,7 +44,7 @@ class CourseController extends Controller
             'lecture_hours' => $validated['lecture_hours'],
             'lab_hours' => $validated['lab_hours'],
         ]);
-    
+
         // If prerequisites are selected
         if (!empty($validated['prerequisite_id'])) {
             foreach ($validated['prerequisite_id'] as $prerequisiteId) {
@@ -57,10 +57,10 @@ class CourseController extends Controller
                 ]);
             }
         }
-    
+
         return redirect()->route('courses.index')->with('success', 'Course added successfully!');
     }
-    
+
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -68,12 +68,12 @@ class CourseController extends Controller
             'name' => 'required|string',
             'description' => 'nullable|string',
             'units' => 'required|numeric',
-            'lecture_hours' => 'required|numeric',
-            'lab_hours' => 'required|numeric',
+            'lecture_hours' => 'nullable|numeric',
+            'lab_hours' => 'nullable|numeric',
             'prerequisite_id' => 'nullable|array',
             'prerequisite_id.*' => 'exists:courses,id',
         ]);
-    
+
         $course = Course::findOrFail($id);
         $course->update([
             'code' => $validated['code'],
@@ -83,7 +83,7 @@ class CourseController extends Controller
             'lecture_hours' => $validated['lecture_hours'],
             'lab_hours' => $validated['lab_hours'],
         ]);
-    
+
         // Sync prerequisites (replaces all with new ones)
         if (!empty($validated['prerequisite_id'])) {
             DB::table('course_prerequisite')->where('course_id', $course->id)->delete();
@@ -99,11 +99,11 @@ class CourseController extends Controller
             // No prerequisites selected, clear existing
             DB::table('course_prerequisite')->where('course_id', $course->id)->delete();
         }
-    
+
         return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
     }
-    
-    
+
+
 
     public function toggleActive($id)
     {

@@ -121,7 +121,7 @@
                                     <div class="form-group">
                                         <label>School Year</label>
                                         <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                            name="name" placeholder="2024-2025" required value="{{ old('name') }}">
+                                            name="name" placeholder="eg. 2024-2025" required value="{{ old('name') }}">
 
                                         @error('name')
                                             <div class="invalid-feedback">
@@ -159,6 +159,48 @@
                                             </div>
                                         @enderror
                                     </div>
+                                    <!-- Start Date -->
+                                    <div class="form-group">
+                                        <label>Start Date</label>
+                                        <input type="date" class="form-control" name="start_date"
+                                            value="{{ old('start_date') }}">
+                                    </div>
+
+                                    <!-- End Date -->
+                                    <div class="form-group">
+                                        <label>End Date</label>
+                                        <input type="date" class="form-control" name="end_date"
+                                            value="{{ old('end_date') }}">
+                                    </div>
+
+                                    <!-- Prelims Exam Date -->
+                                    <div class="form-group">
+                                        <label>Prelims Examination Date</label>
+                                        <input type="date" class="form-control" name="prelims_date"
+                                            value="{{ old('prelims_date') }}">
+                                    </div>
+
+                                    <!-- Midterms Exam Date -->
+                                    <div class="form-group">
+                                        <label>Midterms Examination Date</label>
+                                        <input type="date" class="form-control" name="midterms_date"
+                                            value="{{ old('midterms_date') }}">
+                                    </div>
+
+                                    <!-- Pre-Finals Exam Date -->
+                                    <div class="form-group">
+                                        <label>Pre-Finals Examination Date</label>
+                                        <input type="date" class="form-control" name="pre_finals_date"
+                                            value="{{ old('pre_finals_date') }}">
+                                    </div>
+
+                                    <!-- Finals Exam Date -->
+                                    <div class="form-group">
+                                        <label>Finals Examination Date</label>
+                                        <input type="date" class="form-control" name="finals_date"
+                                            value="{{ old('finals_date') }}">
+                                    </div>
+
                                 </div>
 
                                 <div class="modal-footer">
@@ -214,10 +256,17 @@
                                                                 data-name="{{ $sy->name }}"
                                                                 data-semester="{{ $sy->semester }}"
                                                                 data-default_unit_price="{{ $sy->default_unit_price }}"
-                                                                data-is_active="{{ $sy->is_active }}" title="Edit"
+                                                                data-is_active="{{ $sy->is_active }}"
+                                                                data-start_date="{{ $sy->start_date }}"
+                                                                data-end_date="{{ $sy->end_date }}"
+                                                                data-prelims_date="{{ $sy->prelims_date }}"
+                                                                data-midterms_date="{{ $sy->midterms_date }}"
+                                                                data-pre_finals_date="{{ $sy->pre_finals_date }}"
+                                                                data-finals_date="{{ $sy->finals_date }}" title="Edit"
                                                                 style="width: 30px; height: 30px; padding: 0;">
                                                                 <i class="fas fa-edit" style="font-size: 14px;"></i>
                                                             </button>
+
 
 
                                                             <!-- Edit School Year Modal -->
@@ -238,7 +287,7 @@
 
                                                                             <div class="modal-body">
 
-                                                                              
+
                                                                                 <div class="form-group">
                                                                                     <label>School Year</label>
                                                                                     <input type="text"
@@ -255,7 +304,8 @@
 
                                                                                 <div class="form-group">
                                                                                     <label>Default Unit Price
-                                                                                        (optional)</label>
+                                                                                        (optional)
+                                                                                    </label>
                                                                                     <input type="number" step="0.01"
                                                                                         class="form-control @error('default_unit_price') is-invalid @enderror"
                                                                                         name="default_unit_price"
@@ -280,6 +330,68 @@
                                                                                             class="text-danger small">{{ $message }}</span>
                                                                                     @enderror
                                                                                 </div>
+
+                                                                                <!-- Start Date -->
+                                                                                <div class="form-group">
+                                                                                    <label>Start Date</label>
+                                                                                    <input type="date"
+                                                                                        class="form-control"
+                                                                                        name="start_date"
+                                                                                        id="editSchoolYearStartDate"
+                                                                                        value="{{ old('start_date') }}">
+                                                                                </div>
+
+                                                                                <!-- End Date -->
+                                                                                <div class="form-group">
+                                                                                    <label>End Date</label>
+                                                                                    <input type="date"
+                                                                                        class="form-control"
+                                                                                        name="end_date"
+                                                                                        id="editSchoolYearEndDate"
+                                                                                        value="{{ old('end_date') }}">
+                                                                                </div>
+
+                                                                                <!-- Prelims Examination Date -->
+                                                                                <div class="form-group">
+                                                                                    <label>Prelims Examination Date</label>
+                                                                                    <input type="date"
+                                                                                        class="form-control"
+                                                                                        name="prelims_date"
+                                                                                        id="editSchoolYearPrelimsDate"
+                                                                                        value="{{ old('prelims_date') }}">
+                                                                                </div>
+
+                                                                                <!-- Midterms Examination Date -->
+                                                                                <div class="form-group">
+                                                                                    <label>Midterms Examination Date</label>
+                                                                                    <input type="date"
+                                                                                        class="form-control"
+                                                                                        name="midterms_date"
+                                                                                        id="editSchoolYearMidtermsDate"
+                                                                                        value="{{ old('midterms_date') }}">
+                                                                                </div>
+
+                                                                                <!-- Pre-Finals Examination Date -->
+                                                                                <div class="form-group">
+                                                                                    <label>Pre-Finals Examination
+                                                                                        Date</label>
+                                                                                    <input type="date"
+                                                                                        class="form-control"
+                                                                                        name="pre_finals_date"
+                                                                                        id="editSchoolYearPreFinalsDate"
+                                                                                        value="{{ old('pre_finals_date') }}">
+                                                                                </div>
+
+                                                                                <!-- Finals Examination Date -->
+                                                                                <div class="form-group">
+                                                                                    <label>Finals Examination Date</label>
+                                                                                    <input type="date"
+                                                                                        class="form-control"
+                                                                                        name="finals_date"
+                                                                                        id="editSchoolYearFinalsDate"
+                                                                                        value="{{ old('finals_date') }}">
+                                                                                </div>
+
                                                                             </div>
 
                                                                             <div class="modal-footer">
@@ -290,8 +402,6 @@
                                                                     </form>
                                                                 </div>
                                                             </div>
-
-
 
                                                             <!-- Toggle Active/Inactive Button -->
                                                             <form action="{{ route('school-years.set-active', $sy->id) }}"
@@ -307,15 +417,7 @@
                                                                 </button>
                                                             </form>
 
-                                                            <!-- Soft Delete Button -->
-                                                            <button
-                                                                class="btn btn-sm btn-danger d-flex justify-content-center align-items-center"
-                                                                data-toggle="modal" data-target="#confirmDeleteModal"
-                                                                data-url="{{ route('school-years.destroy', $sy->id) }}"
-                                                                title="Move to Trash"
-                                                                style="width: 30px; height: 30px; padding: 0;">
-                                                                <i class="fas fa-trash-alt" style="font-size: 14px;"></i>
-                                                            </button>
+
                                                             <!-- Confirm Delete Modal -->
                                                             <div class="modal fade" id="confirmDeleteModal"
                                                                 tabindex="-1" role="dialog"
@@ -411,21 +513,38 @@
     <script>
         $('#editSchoolYearModal').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget); // Button that triggered the modal
-            var id = button.data('id'); // Extract the ID from the data-id attribute
+
+            // Extract values from data attributes
+            var id = button.data('id');
             var name = button.data('name');
             var semester = button.data('semester');
             var default_unit_price = button.data('default_unit_price');
+            var start_date = button.data('start_date');
+            var end_date = button.data('end_date');
+            var prelims_date = button.data('prelims_date');
+            var midterms_date = button.data('midterms_date');
+            var pre_finals_date = button.data('pre_finals_date');
+            var finals_date = button.data('finals_date');
 
-            // Set the form action dynamically to include the ID in the URL
+            // Set the form action dynamically
             var formAction = '{{ route('school-years.update', ':id') }}';
-            formAction = formAction.replace(':id', id); // Replace :id with actual ID
+            formAction = formAction.replace(':id', id);
             $('#editSchoolYearForm').attr('action', formAction);
 
-            // Fill the modal input fields with current data
+            // Populate fields
             $('#editSchoolYearName').val(name);
             $('#editSchoolYearSemester').val(semester);
             $('#editSchoolYearDefaultUnitPrice').val(default_unit_price);
+
+            // New date fields
+            $('#editSchoolYearStartDate').val(start_date);
+            $('#editSchoolYearEndDate').val(end_date);
+            $('#editSchoolYearPrelimsDate').val(prelims_date);
+            $('#editSchoolYearMidtermsDate').val(midterms_date);
+            $('#editSchoolYearPreFinalsDate').val(pre_finals_date);
+            $('#editSchoolYearFinalsDate').val(finals_date);
         });
     </script>
+
 
 @endsection

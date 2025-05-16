@@ -41,7 +41,7 @@
             aria-labelledby="headingFees" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item {{ request()->is('fees/edit-tuition') ? 'active' : '' }}"
-                    href="{{ url('fees/edit-tuition') }}">Edit Tuition Rates</a>
+                    href="{{ url('fees/edit-tuition') }}">Manage Scholarship Fees</a>
                 <a class="collapse-item {{ request()->is('fees/misc-fees') ? 'active' : '' }}"
                     href="{{ url('fees/misc-fees') }}">Misc. Fees Manager</a>
             </div>

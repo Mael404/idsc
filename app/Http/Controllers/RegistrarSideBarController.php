@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admission;
+use App\Models\ProgramCourseMapping;
 use Illuminate\Http\Request;
 
 class RegistrarSideBarController extends Controller
@@ -15,8 +17,23 @@ class RegistrarSideBarController extends Controller
     // Records
     public function quickSearch()
     {
-        return view('registrar.enrollment.enrollment');
-    }
+        $admissions = Admission::latest()->get();
+
+        // Group by the unique combination for display
+        $courseMappings = ProgramCourseMapping::with(['program', 'yearLevel', 'semester'])
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->program_id . '-' . $item->year_level_id . '-' . $item->semester_id . '-' . $item->effective_sy;
+            })
+            ->map(function ($group) {
+                return $group->first(); // pick one representative from the group
+            })
+            ->sortBy(fn($mapping) => $mapping->program->name ?? '');
+
+        $allCourses = \App\Models\Course::orderBy('code')->get();
+
+        return view('registrar.enrollment.enrollment', compact('admissions', 'courseMappings', 'allCourses')); // ✅ Add here
+    }   
 
     public function bulkUpload()
     {

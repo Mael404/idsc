@@ -23,10 +23,7 @@
                     <h1 class="h3 mb-0 text-gray-800">Manage School Years</h1>
 
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#trashedModal"
-                            title="View Trash">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                        
 
                         <button class="btn btn-primary" data-toggle="modal" data-target="#addSchoolYearModal">
                             Add New School Year
@@ -57,18 +54,18 @@
                                                     <td>{{ $group['year_level'] }}</td>
                                                     <td>{{ $group['semester'] }}</td>
                                                     @php
-                                                    $courseList = explode(',', $group['courses']);
-                                                @endphp
-                                                
-                                                <td>
-                                                    <ul class="mb-0 ps-3">
-                                                        @foreach ($courseList as $course)
-                                                            <li>{{ trim($course) }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </td>
-                                                
-                                                <td class="text-center">
+                                                        $courseList = explode(',', $group['courses']);
+                                                    @endphp
+
+                                                    <td>
+                                                        <ul class="mb-0 ps-3">
+                                                            @foreach ($courseList as $course)
+                                                                <li>{{ trim($course) }}</li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </td>
+
+                                                    <td class="text-center">
                                                         <!-- Modal Trigger Button -->
                                                         <button type="button" class="btn btn-primary btn-sm"
                                                             data-bs-toggle="modal"
@@ -76,7 +73,7 @@
                                                             Manage Misc Fees
                                                         </button>
 
-                                                        <!-- Modal -->
+                                                        <!-- Miscellaneous Fees Modal -->
                                                         <div class="modal fade"
                                                             id="miscFeesModal-{{ $group['mapping_ids'][0] }}" tabindex="-1"
                                                             aria-labelledby="miscFeesModalLabel" aria-hidden="true">
@@ -84,7 +81,9 @@
                                                                 <div class="modal-content rounded-3 shadow">
                                                                     <div class="modal-header bg-primary text-white">
                                                                         <h5 class="modal-title" id="miscFeesModalLabel">
-                                                                            Miscellaneous Fees</h5>
+                                                                            <i class="fas fa-receipt me-2"></i>Miscellaneous
+                                                                            Fees Management
+                                                                        </h5>
                                                                         <button type="button"
                                                                             class="btn-close btn-close-white"
                                                                             data-bs-dismiss="modal"
@@ -92,92 +91,173 @@
                                                                     </div>
 
                                                                     <div class="modal-body">
-                                                                        <form id="miscFeeForm-{{ $group['mapping_ids'][0] }}" method="POST" action="{{ route('misc-fees.store-bulk') }}">
+                                                                        <form
+                                                                            id="miscFeeForm-{{ $group['mapping_ids'][0] }}"
+                                                                            method="POST"
+                                                                            action="{{ route('misc-fees.store-bulk') }}">
                                                                             @csrf
-                                                                            <input type="hidden" name="program_course_mapping_id" value="{{ $group['mapping_ids'][0] }}">
-                                                                    
-                                                                            <!-- Input Section -->
-                                                                            <div class="row g-3 align-items-end">
-                                                                                <div class="col-md-5">
-                                                                                    <input type="text" id="feeName-{{ $group['mapping_ids'][0] }}" class="form-control" placeholder="Fee name" >
+                                                                            <input type="hidden"
+                                                                                name="program_course_mapping_id"
+                                                                                value="{{ $group['mapping_ids'][0] }}">
+
+                                                                            <!-- Add New Fee Section -->
+                                                                            <div class="card mb-4">
+                                                                                <div class="card-header bg-light">
+                                                                                    <i
+                                                                                        class="fas fa-plus-circle me-2"></i>Add
+                                                                                    New Fee
                                                                                 </div>
-                                                                                <div class="col-md-5">
-                                                                                    <input type="number" id="feeAmount-{{ $group['mapping_ids'][0] }}" class="form-control" placeholder="Amount" step="0.01">
-                                                                                </div>
-                                                                                <div class="col-md-2">
-                                                                                    <button type="button" class="btn btn-success w-100"
-                                                                                        onclick="addFee('{{ $group['mapping_ids'][0] }}')">Add</button>
+                                                                                <div class="card-body">
+                                                                                    <div class="row g-3 align-items-end">
+                                                                                        <div class="col-md-5">
+                                                                                            <label
+                                                                                                for="feeName-{{ $group['mapping_ids'][0] }}"
+                                                                                                class="form-label small text-muted">Fee
+                                                                                                Name</label>
+                                                                                            <input type="text"
+                                                                                                id="feeName-{{ $group['mapping_ids'][0] }}"
+                                                                                                class="form-control"
+                                                                                                placeholder="e.g. Lab Materials, Activity Fee">
+                                                                                        </div>
+                                                                                        <div class="col-md-5">
+                                                                                            <label
+                                                                                                for="feeAmount-{{ $group['mapping_ids'][0] }}"
+                                                                                                class="form-label small text-muted">Amount</label>
+                                                                                            <div class="input-group">
+                                                                                                <span
+                                                                                                    class="input-group-text">₱</span>
+                                                                                                <input type="number"
+                                                                                                    id="feeAmount-{{ $group['mapping_ids'][0] }}"
+                                                                                                    class="form-control"
+                                                                                                    placeholder="0.00"
+                                                                                                    step="0.01"
+                                                                                                    min="0">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-md-2">
+                                                                                            <button type="button"
+                                                                                                class="btn btn-success w-100"
+                                                                                                onclick="addFee('{{ $group['mapping_ids'][0] }}')">
+                                                                                                <i
+                                                                                                    class="fas fa-plus me-1"></i>
+                                                                                                Add
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
-                                                                    
-                                                                            <!-- Dynamic Fee List -->
-                                                                            <hr>
-                                                                            <h6>New Fees (Pending Submission)</h6>
-                                                                            <table class="table table-bordered mt-3" id="feeList-{{ $group['mapping_ids'][0] }}">
-                                                                                <thead>
-                                                                                    <tr>
-                                                                                        <th>Fee Name</th>
-                                                                                        <th>Amount</th>
-                                                                                        <th>Action</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    <!-- Populated by JavaScript -->
-                                                                                </tbody>
-                                                                            </table>
-                                                                    
-                                                                            <!-- Hidden JSON field -->
-                                                                            <input type="hidden" name="fees_json" id="feesJson-{{ $group['mapping_ids'][0] }}">
-                                                                    
-                                                                            <div class="text-end">
-                                                                                <button type="submit" class="btn btn-primary">Submit All</button>
+
+                                                                            <!-- Pending Fees Section -->
+                                                                            <div class="card mb-4">
+                                                                                <div class="card-header bg-light">
+                                                                                    <i class="fas fa-clock me-2"></i>Pending
+                                                                                    Submission
+                                                                                </div>
+                                                                                <div class="card-body">
+                                                                                    <div class="table-responsive">
+                                                                                        <table class="table table-bordered"
+                                                                                            id="feeList-{{ $group['mapping_ids'][0] }}">
+                                                                                            <thead class="table-light">
+                                                                                                <tr>
+                                                                                                    <th>Fee Name</th>
+                                                                                                    <th>Amount</th>
+                                                                                                    <th width="100px">
+                                                                                                        Action</th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                <!-- Will be populated by JavaScript -->
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                    <input type="hidden" name="fees_json"
+                                                                                        id="feesJson-{{ $group['mapping_ids'][0] }}">
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div class="d-grid">
+                                                                                <button type="submit"
+                                                                                    class="btn btn-primary">
+                                                                                    <i class="fas fa-save me-1"></i> Save
+                                                                                    All Fees
+                                                                                </button>
                                                                             </div>
                                                                         </form>
-                                                                    
-                                                                        <!-- Existing Fees Section -->
-                                                                        <hr>
-                                                                        <h6 class="mt-4">Existing Misc Fees</h6>
-                                                                        @php
-                                                                            $fees = App\Models\MiscFee::whereIn('program_course_mapping_id', $group['mapping_ids'])->get();
-                                                                            $total = $fees->sum('amount');
-                                                                        @endphp
-                                                                    
-                                                                        @if ($fees->count())
-                                                                            <table class="table table-striped align-middle mt-2">
-                                                                                <thead class="table-light">
-                                                                                    <tr>
-                                                                                        <th>Fee Name</th>
-                                                                                        <th>Amount (₱)</th>
-                                                                                        <th>Action</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    @foreach ($fees as $fee)
-                                                                                        <tr>
-                                                                                            <td>{{ $fee->name }}</td>
-                                                                                            <td>₱{{ number_format($fee->amount, 2) }}</td>
-                                                                                            <td>
-                                                                                                <form action="{{ route('misc-fees.destroy', $fee->id) }}" method="POST" class="d-inline">
-                                                                                                    @csrf
-                                                                                                    @method('DELETE')
-                                                                                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                                                                                </form>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    @endforeach
-                                                                                    <tr class="fw-bold table-info">
-                                                                                        <td>Total</td>
-                                                                                        <td>₱{{ number_format($total, 2) }}</td>
-                                                                                        <td></td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        @else
-                                                                            <p class="text-muted">No miscellaneous fees added yet.</p>
-                                                                        @endif
-                                                                    </div>
-                                                                    
 
+                                                                        <!-- Existing Fees Section -->
+                                                                        <div class="card mt-4">
+                                                                            <div class="card-header bg-light">
+                                                                                <i
+                                                                                    class="fas fa-list-check me-2"></i>Current
+                                                                                Fees
+                                                                            </div>
+                                                                            <div class="card-body">
+                                                                                @php
+                                                                                    $fees = App\Models\MiscFee::whereIn(
+                                                                                        'program_course_mapping_id',
+                                                                                        $group['mapping_ids'],
+                                                                                    )->get();
+                                                                                    $total = $fees->sum('amount');
+                                                                                @endphp
+
+                                                                                @if ($fees->count())
+                                                                                    <div class="table-responsive">
+                                                                                        <table
+                                                                                            class="table table-striped align-middle">
+                                                                                            <thead class="table-light">
+                                                                                                <tr>
+                                                                                                    <th>Fee Name</th>
+                                                                                                    <th>Amount</th>
+                                                                                                    <th width="100px">
+                                                                                                        Action</th>
+                                                                                                </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                                @foreach ($fees as $fee)
+                                                                                                    <tr>
+                                                                                                        <td>{{ $fee->name }}
+                                                                                                        </td>
+                                                                                                        <td>₱{{ number_format($fee->amount, 2) }}
+                                                                                                        </td>
+                                                                                                        <td>
+                                                                                                            <form
+                                                                                                                action="{{ route('misc-fees.destroy', $fee->id) }}"
+                                                                                                                method="POST"
+                                                                                                                class="d-inline">
+                                                                                                                @csrf
+                                                                                                                @method('DELETE')
+                                                                                                                <button
+                                                                                                                    type="submit"
+                                                                                                                    class="btn btn-sm btn-outline-danger"
+                                                                                                                    title="Delete">
+                                                                                                                    <i
+                                                                                                                        class="fas fa-trash-alt"></i>
+                                                                                                                </button>
+                                                                                                            </form>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                @endforeach
+                                                                                                <tr
+                                                                                                    class="fw-bold table-active">
+                                                                                                    <td>Total</td>
+                                                                                                    <td>₱{{ number_format($total, 2) }}
+                                                                                                    </td>
+                                                                                                    <td></td>
+                                                                                                </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                @else
+                                                                                    <div class="alert alert-info mb-0">
+                                                                                        <i
+                                                                                            class="fas fa-info-circle me-2"></i>
+                                                                                        No miscellaneous fees have been
+                                                                                        added yet.
+                                                                                    </div>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>

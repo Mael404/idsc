@@ -9,7 +9,7 @@
        <div class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0">
            <span class="navbar-greeting font-weight-bold" style="font-size: 1.1rem;">
                Active S.Y.:
-               @if ($activeSchoolYear)
+               @if ($activeSchoolYear && is_object($activeSchoolYear) && isset($activeSchoolYear->name))
                    <span class="text-black" style="font-size: 1.1rem;">
                        {{ $activeSchoolYear->name }}
                        <span
@@ -18,6 +18,7 @@
                @else
                    <span class="text-danger ml-2">None set</span>
                @endif
+
            </span>
        </div>
 

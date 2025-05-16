@@ -16,11 +16,7 @@
 
             <div class="container-fluid">
                 @include('layouts.success-message')
-                @if (session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
+          
 
                 <!-- Page Heading with Button on Same Row -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -155,8 +151,20 @@
 
                                                                     <ul id="searchResults{{ $first->id }}"
                                                                         class="list-group position-absolute mt-1"
-                                                                        style="display: none; max-height: 200px; overflow-y: auto; width: 100%; z-index: 999; padding: 0; background: white; border: 1px solid #ddd; border-radius: 4px;">
+                                                                        style="
+                                                                        display: none;
+                                                                        max-height: 200px;
+                                                                        overflow-y: auto;
+                                                                        width: 100%;
+                                                                        z-index: 999;
+                                                                        top: 100%;
+                                                                        left: 0;
+                                                                        background: white;
+                                                                        border: 1px solid #ddd;
+                                                                        border-radius: 4px;
+                                                                    ">
                                                                     </ul>
+
                                                                 </div>
                                                             </fieldset>
                                                         </div>
@@ -168,8 +176,7 @@
 
                                                         <!-- Grid layout -->
                                                         <div class="row">
-                                                            <!-- Left Column - Program Details (smaller) -->
-                                                            <!-- Left Column - Program Details (smaller, centered, styled with fieldset) -->
+
                                                             <!-- Left Column - Program Details with fieldset and centered items -->
                                                             <div class="col-md-4">
                                                                 <fieldset class="border p-4 rounded">
@@ -207,32 +214,36 @@
                                                                                 @php $totalUnits += $mapping->course->units; @endphp
                                                                                 <tr>
                                                                                     <td>{{ $mapping->course->name }}</td>
-                                                                                    <td>{{ $mapping->course->units }}</td>
+                                                                                    <td>{{ number_format($mapping->course->units, 1) }}
+                                                                                    </td>
+
                                                                                     <td>
                                                                                         @if ($mapping->course->prerequisites->count())
-                                                                                            {{ $mapping->course->prerequisites->pluck('name')->implode(', ') }}
+                                                                                            {{ $mapping->course->prerequisites->pluck('code')->implode(', ') }}
                                                                                         @else
                                                                                             —
                                                                                         @endif
                                                                                     </td>
-                                                                                    <td>
+                                                                                    <td class="text-center">
                                                                                         <input type="hidden"
                                                                                             name="existing_courses[]"
                                                                                             value="{{ $mapping->course->id }}">
-                                                                                        <!-- Remove Button -->
                                                                                         <button type="button"
                                                                                             class="btn btn-danger btn-sm remove-existing-course-with-confirm"
                                                                                             data-course-id="{{ $mapping->course->id }}">
                                                                                             Remove
                                                                                         </button>
                                                                                     </td>
+
                                                                                 </tr>
                                                                             @endforeach
                                                                         </tbody>
                                                                         <tfoot>
                                                                             <tr>
                                                                                 <th>Total Units</th>
-                                                                                <th>{{ $totalUnits }}</th>
+                                                                                <th style="text-align: center;">
+                                                                                    {{ $totalUnits }}</th>
+
                                                                                 <th colspan="2"></th>
                                                                             </tr>
                                                                         </tfoot>
@@ -269,93 +280,99 @@
                 </table>
 
 
+<!-- Modal for Create Program Mapping -->
+<div class="modal fade" id="createProgramMappingModal" tabindex="-1"
+    aria-labelledby="createProgramMappingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form method="POST" action="{{ route('program.mapping.store') }}" id="programMappingForm">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="createProgramMappingModalLabel">Create Program Mapping</h5>
+                    <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-                <!-- Modal for Create Program Mapping -->
-                <div class="modal fade" id="createProgramMappingModal" tabindex="-1"
-                    aria-labelledby="createProgramMappingModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <form method="POST" action="{{ route('program.mapping.store') }}" id="programMappingForm">
-                            @csrf
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="createProgramMappingModalLabel">Create New Program Mapping
-                                    </h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Program Dropdown -->
-                                    <div class="form-group">
-                                        <label for="program_id">Program</label>
-                                        <select class="form-control" id="program_id" name="program_id" required>
-                                            <option value="">Select Program</option>
-                                            @foreach ($programs as $program)
-                                                <option value="{{ $program->id }}">{{ $program->name }}</option>
-                                            @endforeach
-                                        </select>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label">Program <span class="text-danger">*</span></label>
+                                <select class="form-control" name="program_id" required>
+                                    <option value="">Select Program</option>
+                                    @foreach ($programs as $program)
+                                        <option value="{{ $program->id }}">{{ $program->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Effective School Year <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="effective_sy"
+                                    placeholder="e.g., 2025-2026" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Year Level <span class="text-danger">*</span></label>
+                                <select class="form-control" name="year_level_id" required>
+                                    <option value="">Select Year Level</option>
+                                    @foreach ($yearLevels as $yearLevel)
+                                        <option value="{{ $yearLevel->id }}">{{ $yearLevel->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Semester <span class="text-danger">*</span></label>
+                                <select class="form-control" name="semester_id" required>
+                                    <option value="">Select Semester</option>
+                                    @foreach ($semesters as $semester)
+                                        <option value="{{ $semester->id }}">{{ $semester->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-12 mt-2">
+                                <fieldset class="border p-3 rounded">
+                                    <legend class="float-none w-auto px-2" style="font-size: 1rem;">
+                                        Add Courses
+                                    </legend>
+
+                                    <div class="form-group mb-3">
+                                        <input type="text" id="courseSearchInput" class="form-control"
+                                            placeholder="Search course by name...">
                                     </div>
 
-                                    <!-- Course Dropdown -->
+                                    <ul id="courseSuggestions" class="list-group mb-3"
+                                        style="display: none; max-height: 200px; overflow-y: auto;">
+                                        <!-- Dynamic suggestions go here -->
+                                    </ul>
+
                                     <div class="form-group">
-                                        <label for="course_id">Course</label>
-                                        <select class="form-control" id="main_course_id">
-                                            <option value="">Select Course</option>
-                                            @foreach ($courses as $course)
-                                                <option value="{{ $course->id }}">{{ $course->name }}</option>
-                                            @endforeach
-                                        </select>
-
-                                        <button type="button" class="btn btn-primary mt-2" id="addMainCourseBtn">Add
-                                            Course</button>
-                                    </div>
-
-                                    <!-- List of Selected Courses -->
-                                    <div id="selectedCourses" class="mb-3">
+                                        <label>Selected Courses</label>
                                         <ul class="list-group" id="selectedCoursesList"></ul>
                                     </div>
-
-                                    <!-- Hidden inputs for each selected course -->
-                                    <div id="hiddenCoursesInputs"></div>
-
-                                    <!-- Year Level and Semester -->
-                                    <div class="form-group">
-                                        <label for="year_level_id">Year Level</label>
-                                        <select class="form-control" id="year_level_id" name="year_level_id" required>
-                                            <option value="">Select Year Level</option>
-                                            @foreach ($yearLevels as $yearLevel)
-                                                <option value="{{ $yearLevel->id }}">{{ $yearLevel->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="semester_id">Semester</label>
-                                        <select class="form-control" id="semester_id" name="semester_id" required>
-                                            <option value="">Select Semester</option>
-                                            @foreach ($semesters as $semester)
-                                                <option value="{{ $semester->id }}">{{ $semester->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <!-- Effective SY (School Year) Input -->
-                                    <div class="form-group">
-                                        <label for="effective_sy">Effective School Year</label>
-                                        <input type="text" class="form-control" id="effective_sy" name="effective_sy"
-                                            placeholder="Enter School Year (e.g., 2025-2026)" required>
-                                    </div>
-                                    <input type="hidden" name="action_type" value="create_mapping">
-
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Save Mapping</button>
-                                </div>
+                                </fieldset>
                             </div>
-                        </form>
+
+                            <!-- Hidden course inputs -->
+                            <div id="hiddenCoursesInputs"></div>
+                            <input type="hidden" name="action_type" value="create_mapping">
+
+                        </div>
                     </div>
                 </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Mapping</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 
             </div>
@@ -372,7 +389,7 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/programs.js') }}"></script>
+
 
     <!-- DataTables JS -->
     <script>
@@ -386,49 +403,68 @@
 
     <script>
         $(document).ready(function() {
-            // Handle adding selected courses to the list
-            $('#addMainCourseBtn').on('click', function() {
-                var courseId = $('#main_course_id').val();
-                var courseName = $('#main_course_id option:selected').text();
+            const courses = @json($courses);
 
-                // Check if course is already added by looking in hidden inputs
-                var courseExists = $('#hiddenCoursesInputs input[value="' + courseId + '"]').length > 0;
+            // Handle course search and display suggestions
+            $('#courseSearchInput').on('input', function() {
+                const query = $(this).val().toLowerCase();
+                const filtered = courses.filter(course =>
+                    course.name.toLowerCase().includes(query)
+                );
 
-                if (courseId && courseName && !courseExists) {
-                    // Create a list item
-                    var listItem = $(
-                        '<li class="list-group-item d-flex justify-content-between align-items-center"></li>'
-                    );
-                    listItem.text(courseName);
+                const suggestionList = $('#courseSuggestions');
+                suggestionList.empty();
 
-                    // Add a hidden input to store the course ID
-                    var hiddenInput = $('<input type="hidden" name="course_id[]" />').val(courseId);
-                    listItem.append(hiddenInput);
+                if (query && filtered.length > 0) {
+                    suggestionList.show();
 
-                    // Add a remove button to the list item
-                    var removeButton = $('<button class="btn btn-danger btn-sm">Remove</button>');
-                    removeButton.on('click', function() {
-                        hiddenInput.remove();
-                        listItem.remove();
+                    filtered.forEach(course => {
+                        const item = $(
+                                '<li class="list-group-item list-group-item-action cursor-pointer"></li>'
+                                )
+                            .text(course.name)
+                            .on('click', function() {
+                                addCourseToSelected(course.id, course.name);
+                                $('#courseSearchInput').val('');
+                                suggestionList.hide();
+                            });
+
+                        suggestionList.append(item);
                     });
-                    listItem.append(removeButton);
-
-                    // Append to the list
-                    $('#selectedCoursesList').append(listItem);
-
-                    // Append the hidden input to the #hiddenCoursesInputs
-                    $('#hiddenCoursesInputs').append(hiddenInput);
-
-                    // Clear the dropdown
-                    $('#main_course_id').val('');
-                } else if (courseExists) {
-                    showPopupAlert('This course has already been added.');
                 } else {
-                    alert('Please select a course.');
+                    suggestionList.hide();
                 }
             });
 
-            // Show custom popup alert
+            // Function to add selected course to the list
+            function addCourseToSelected(courseId, courseName) {
+                const alreadyExists = $('#hiddenCoursesInputs input[value="' + courseId + '"]').length > 0;
+
+                if (alreadyExists) {
+                    showPopupAlert('This course has already been added.');
+                    return;
+                }
+
+                const listItem = $(`
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${courseName}
+                </li>
+            `);
+
+                const hiddenInput = $('<input type="hidden" name="course_id[]" />').val(courseId);
+                const removeButton = $('<button class="btn btn-danger btn-sm">Remove</button>').on('click',
+                    function() {
+                        hiddenInput.remove();
+                        listItem.remove();
+                    });
+
+                listItem.append(hiddenInput).append(removeButton);
+
+                $('#selectedCoursesList').append(listItem);
+                $('#hiddenCoursesInputs').append(hiddenInput);
+            }
+
+            // Show popup alert for error messages
             function showPopupAlert(message) {
                 // Remove any existing alert first
                 $('#dynamic-popup-alert').remove();
@@ -468,6 +504,7 @@
     </script>
 
 
+
     <script>
         function filterCourses(modalId) {
             const searchInput = document.getElementById(`courseSearch${modalId}`).value.toLowerCase();
@@ -499,7 +536,7 @@
                 searchResults.style.display = 'block';
                 filteredCourses.forEach(course => {
                     const resultItem = document.createElement('li');
-                    resultItem.classList.add('list-group-item', 'cursor-pointer', 'py-1', 'px-2', 'small');
+                    resultItem.classList.add('list-group-item', 'cursor-pointer', 'py-1', 'px-2', 'large');
                     resultItem.textContent = course.name;
                     resultItem.onclick = () => addCourseToList(modalId, course);
                     searchResults.appendChild(resultItem);
@@ -557,7 +594,7 @@
             document.getElementById(`searchResults${modalId}`).style.display = 'none';
         }
     </script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.remove-existing-course-with-confirm').forEach(button => {

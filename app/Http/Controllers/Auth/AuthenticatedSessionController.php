@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -28,22 +29,25 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Handle role-based redirection
         if (Auth::user()->role === 'vp_admin') {
-         
             return redirect()->route('vpadmin.vpadmin_db');
         }
 
         if (Auth::user()->role === 'vp_academic') {
-      
             return redirect()->route('vp_academic.vpacademic_db');
         }
 
         if (Auth::user()->role === 'registrar') {
-      
             return redirect()->route('registrar.dashboard');
         }
-        return redirect()->intended(route('dashboard', absolute: false));
+
+        // Ensure default dashboard redirection works if role isn't matched
+        return redirect()->route('dashboard');
     }
+
+
+
 
 
     public function destroy(Request $request): RedirectResponse

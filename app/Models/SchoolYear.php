@@ -15,5 +15,11 @@ class SchoolYear extends Model
         'default_unit_price',
         'semester',
         'is_active',
+        'start_date',
+        'end_date',
+        'prelims_date',
+        'midterms_date',
+        'pre_finals_date',
+        'finals_date',
     ];
 }

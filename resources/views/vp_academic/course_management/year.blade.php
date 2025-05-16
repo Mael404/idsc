@@ -16,12 +16,10 @@
 
             <div class="container-fluid">
 
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                @include('layouts.success-message')
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
                     </div>
                 @endif
 
@@ -41,7 +39,7 @@
                         <div class="modal-content">
                             <div class="modal-header bg-primary text-white">
                                 <h5 class="modal-title" id="editYearLevelModalLabel">Edit Year Level</h5>
-                             
+
                             </div>
                             <div class="modal-body">
                                 <form id="editYearLevelForm" method="POST" action="">
@@ -103,62 +101,61 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                       
-                                                <!-- Your Table with Year Level Information -->
-                                                @foreach ($year_levels as $year_level)
-                                                    <tr>
-                                                        <td class="text-center">{{ $year_level->name }}</td>
-                                                        <td>
-                                                            <div class="d-flex justify-content-center align-items-center"
-                                                                style="gap: 5px;">
-                                                                <!-- View/Edit Button -->
-                                                                <a href="javascript:void(0);"
-                                                                    class="btn btn-info btn-sm toggle-year-level-btn"
-                                                                    data-id="{{ $year_level->id }}"
-                                                                    data-name="{{ $year_level->name }}">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </a>
-                                                                <!-- Delete Button -->
-                                                                <button type="button" class="btn btn-danger btn-sm"
-                                                                    data-bs-toggle="modal"
-                                                                    data-bs-target="#deleteModal{{ $year_level->id }}">
-                                                                    <i class="fas fa-trash-alt"></i>
-                                                                </button>
-                                                            </div>
-                                                            <!-- Delete Confirmation Modal -->
-                                                            <div class="modal fade" id="deleteModal{{ $year_level->id }}"
-                                                                tabindex="-1"
-                                                                aria-labelledby="deleteModalLabel{{ $year_level->id }}"
-                                                                aria-hidden="true">
-                                                                <div class="modal-dialog">
-                                                                    <div class="modal-content border-danger">
-                                                                        <div class="modal-header bg-danger text-white">
-                                                                            <h5 class="modal-title">Delete Year Level</h5>
-                                                                        </div>
-                                                                        <div class="modal-body">
-                                                                            Are you sure you want to delete
-                                                                            <strong>{{ $year_level->name }}</strong>?
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <form method="POST"
-                                                                                action="{{ route('year_levels.destroy', $year_level->id) }}">
-                                                                                @csrf
-                                                                                @method('DELETE')
-                                                                                <button type="button"
-                                                                                    class="btn btn-secondary"
-                                                                                    data-bs-dismiss="modal">Cancel</button>
-                                                                                <button type="submit"
-                                                                                    class="btn btn-danger">Yes,
-                                                                                    Delete</button>
-                                                                            </form>
-                                                                        </div>
+
+                                            <!-- Your Table with Year Level Information -->
+                                            @foreach ($year_levels as $year_level)
+                                                <tr>
+                                                    <td class="text-center">{{ $year_level->name }}</td>
+                                                    <td>
+                                                        <div class="d-flex justify-content-center align-items-center"
+                                                            style="gap: 5px;">
+                                                            <!-- View/Edit Button -->
+                                                            <a href="javascript:void(0);"
+                                                                class="btn btn-info btn-sm toggle-year-level-btn"
+                                                                data-id="{{ $year_level->id }}"
+                                                                data-name="{{ $year_level->name }}">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <!-- Delete Button -->
+                                                            <button type="button" class="btn btn-danger btn-sm"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#deleteModal{{ $year_level->id }}">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </div>
+                                                        <!-- Delete Confirmation Modal -->
+                                                        <div class="modal fade" id="deleteModal{{ $year_level->id }}"
+                                                            tabindex="-1"
+                                                            aria-labelledby="deleteModalLabel{{ $year_level->id }}"
+                                                            aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content border-danger">
+                                                                    <div class="modal-header bg-danger text-white">
+                                                                        <h5 class="modal-title">Delete Year Level</h5>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        Are you sure you want to delete
+                                                                        <strong>{{ $year_level->name }}</strong>?
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <form method="POST"
+                                                                            action="{{ route('year_levels.destroy', $year_level->id) }}">
+                                                                            @csrf
+                                                                            @method('DELETE')
+                                                                            <button type="button" class="btn btn-secondary"
+                                                                                data-bs-dismiss="modal">Cancel</button>
+                                                                            <button type="submit"
+                                                                                class="btn btn-danger">Yes,
+                                                                                Delete</button>
+                                                                        </form>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                        
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+
 
                                         </tbody>
                                     </table>

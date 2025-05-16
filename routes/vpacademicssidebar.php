@@ -7,9 +7,7 @@ use App\Http\Controllers\SemestersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAcademicsSideBarController;
 use App\Http\Controllers\ProgramCourseMappingController;
-
 use App\Http\Controllers\YearLevelController;
-
 
 // Applying 'auth' middleware to all routes within the group --------------------
 Route::middleware('auth')->group(function () {
@@ -32,50 +30,44 @@ Route::middleware('auth')->group(function () {
     Route::get('/programs', [VPAcademicsSideBarController::class, 'programs'])->name('vpacademic.programs');
     Route::get('/courses', [VPAcademicsSideBarController::class, 'courses'])->name('vpacademic.courses');
 
-    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
+    // Resource route — defines index, store, show, update, destroy, etc.
+    Route::resource('courses', CourseController::class)->except(['create', 'edit']);  // Avoid duplicates
 
-
-    Route::resource('courses', CourseController::class);
-    // In your routes/web.php
+    // Custom action not included in resource
     Route::post('/courses/{id}/toggle', [CourseController::class, 'toggleActive'])->name('courses.toggleActive');
-    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
-    Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
 
-
-
+    // Program Routes --------------------
     Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
     Route::post('/programs', [ProgramController::class, 'store'])->name('programs.store');
     Route::put('/programs/{id}', [ProgramController::class, 'update'])->name('programs.update');
     Route::post('programs/{id}/toggleActive', [ProgramController::class, 'toggleActive'])->name('programs.toggleActive');
     Route::delete('/programs/{program}', [ProgramController::class, 'destroy'])->name('programs.destroy');
 
-
+    // Year Level Routes --------------------
     Route::get('/year', [YearLevelController::class, 'index'])->name('year_levels.index');
     Route::post('/year', [YearLevelController::class, 'store'])->name('year_levels.store');
     Route::put('/year/{id}', [YearLevelController::class, 'update'])->name('year_levels.update');
     Route::delete('/year/{id}', [YearLevelController::class, 'destroy'])->name('year_levels.destroy');
+
+    // Semester Routes --------------------
     Route::get('/semester', [SemestersController::class, 'index'])->name('semesters.index');
     Route::post('/semester', [SemestersController::class, 'store'])->name('semesters.store');
     Route::put('/semesters/{id}', [SemestersController::class, 'update'])->name('semester.update');
     Route::delete('/semester/{id}', [SemestersController::class, 'destroy'])->name('semesters.destroy');
 
-
+    // Program Mapping --------------------
     Route::get('/program-mapping', [ProgramCourseMappingController::class, 'index'])->name('program.mapping.index');
-    Route::post('/program-mapping/store', [ProgramCourseMappingController::class, 'store'])->name('program.mapping.store');
     Route::delete('/program-mapping/{id}', [ProgramCourseMappingController::class, 'destroy'])->name('program.mapping.destroy');
     Route::post('/program-mapping', [ProgramCourseMappingController::class, 'store'])->name('program.mapping.store');
     // Archive a Program Mapping
     Route::post('/program-mapping/{id}/archive', [ProgramCourseMappingController::class, 'archive'])->name('program.mapping.archive');
-
     // Restore a Program Mapping
     Route::post('/program-mapping/{id}/restore', [ProgramCourseMappingController::class, 'restore'])->name('program.mapping.restore');
     Route::post('/program-mapping/{id}/toggle-active', [ProgramCourseMappingController::class, 'toggleActive'])->name('program.mapping.toggleActive');
-    Route::delete('/program-mapping/{id}', [ProgramCourseMappingController::class, 'destroy'])->name('program.mapping.destroy');
     Route::put('/program-mapping/{id}', [ProgramCourseMappingController::class, 'update'])->name('program.mapping.update');
-    // In routes/web.php
     Route::delete('/program/{program_id}/course/{course_id}/remove', [ProgramController::class, 'removeCourse'])->name('program.mapping.remove');
 
-
+    // Misc Fees --------------------
     Route::post('/misc-fees', [MiscFeeController::class, 'store'])->name('misc-fees.store');
     Route::delete('/misc-fees/{id}', [MiscFeeController::class, 'destroy'])->name('misc-fees.destroy');
 });

@@ -1,10 +1,11 @@
 <?php
 
 use App\Http\Controllers\MiscFeeController;
+use App\Http\Controllers\ScholarshipController;
 use App\Http\Controllers\SchoolYearController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAdminSideBarController;
-//ss
+//sss
 
 Route::get('/vp-admin-db', [VPAdminSideBarController::class, 'dashboard'])
     ->middleware('auth')
@@ -41,3 +42,14 @@ Route::delete('school-years/{id}/force-delete', [SchoolYearController::class, 'f
 
 Route::get('/misc-fees/list/{mappingId}', [MiscFeeController::class, 'getList']);
 Route::post('/misc-fees/store-bulk', [MiscFeeController::class, 'storeBulk'])->name('misc-fees.store-bulk');
+
+Route::post('/scholarships', [ScholarshipController::class, 'store'])->name('scholarships.store');
+Route::get('/scholarships', [ScholarshipController::class, 'index'])->name('scholarships.index');
+Route::patch('/scholarships/{id}/toggle-status', [ScholarshipController::class, 'toggleStatus'])->name('scholarships.toggle-status');
+Route::delete('/scholarships/{id}', [ScholarshipController::class, 'destroy'])->name('scholarships.destroy');
+// In routes/web.php
+
+Route::get('/scholarships/trashed', [ScholarshipController::class, 'trashed'])->name('scholarships.trashed');
+Route::patch('/scholarships/{id}/restore', [ScholarshipController::class, 'restore'])->name('scholarships.restore');
+Route::delete('/scholarships/{id}/force-delete', [ScholarshipController::class, 'forceDelete'])->name('scholarships.forceDelete');
+    

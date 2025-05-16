@@ -14,7 +14,7 @@ class SchoolYearController extends Controller
     {
         $schoolYears = SchoolYear::all();
         $trashedSchoolYears = SchoolYear::onlyTrashed()->get();
-        $activeSchoolYear = SchoolYear::where('is_active', true)->first(); // 👈 get the active one
+        $activeSchoolYear = SchoolYear::where('is_active', true)->first(); //  get the active one
 
         return view('vp_admin.term_config.term-config', compact('schoolYears', 'trashedSchoolYears', 'activeSchoolYear'));
     }
@@ -29,7 +29,14 @@ class SchoolYearController extends Controller
             'default_unit_price' => 'nullable|numeric',
             'is_active' => 'nullable|boolean',
             'semester' => 'required|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'prelims_date' => 'nullable|date',
+            'midterms_date' => 'nullable|date',
+            'pre_finals_date' => 'nullable|date',
+            'finals_date' => 'nullable|date',
         ]);
+
 
         // Check for duplicate name + semester combo
         $existing = SchoolYear::where('name', $request->name)
@@ -58,7 +65,14 @@ class SchoolYearController extends Controller
             'semester' => 'required|string',
             'default_unit_price' => 'nullable|numeric',
             'is_active' => 'nullable|boolean',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'prelims_date' => 'nullable|date',
+            'midterms_date' => 'nullable|date',
+            'pre_finals_date' => 'nullable|date',
+            'finals_date' => 'nullable|date',
         ]);
+
 
         // Check for duplicate name + semester combo, excluding current record
         $existing = SchoolYear::where('name', $request->name)

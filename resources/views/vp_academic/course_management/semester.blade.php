@@ -15,12 +15,10 @@
             @include('layouts.topbar')
 
             <div class="container-fluid">
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                @include('layouts.success-message')
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
                     </div>
                 @endif
 
@@ -33,27 +31,28 @@
                     </button>
                 </div>
 
-<!-- Edit Semester Modal -->
-<div class="modal fade" id="editSemesterModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="editSemesterForm" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Edit Semester</h5>
+                <!-- Edit Semester Modal -->
+                <div class="modal fade" id="editSemesterModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <form id="editSemesterForm" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title">Edit Semester</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="text" id="modal-semester-name" name="name" class="form-control"
+                                        required>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <input type="text" id="modal-semester-name" name="name" class="form-control" required>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
                 <!-- Add Semester Modal -->
                 <div class="modal fade" id="addSemesterModal" tabindex="-1" aria-labelledby="addSemesterModalLabel"
