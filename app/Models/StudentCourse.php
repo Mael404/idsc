@@ -37,4 +37,16 @@ class StudentCourse extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+
+    // In App\Models\StudentCourse.php
+
+    public static function getCurrentCourses($studentId, $schoolYear, $semester)
+    {
+        return self::with('course') // eager load the course data
+            ->where('student_id', $studentId)
+            ->where('school_year', $schoolYear)
+            ->where('semester', $semester)
+            ->where('status', 'enrolled') // or whatever status means "currently taking"
+            ->get();
+    }
 }

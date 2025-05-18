@@ -42,4 +42,8 @@ class ProgramCourseMapping extends Model
     {
         return $this->hasMany(MiscFee::class);
     }
+    public function getCombinationLabelAttribute()
+    {
+        return "{$this->program->name} - {$this->yearLevel->name} - {$this->semester->name} - SY: {$this->effective_sy}";
+    }
 }

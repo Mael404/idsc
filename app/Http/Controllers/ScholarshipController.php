@@ -7,27 +7,33 @@ use Illuminate\Http\Request;
 
 class ScholarshipController extends Controller
 {
+    public function index()
+    {
+        // Fetch all non-deleted scholarships
+        $scholarships = Scholarship::all();
+
+        // Fetch trashed scholarships for the modal
+        $trashedScholarships = Scholarship::onlyTrashed()->get();
+
+        return view('vp_admin.fees.scholarship', compact('scholarships', 'trashedScholarships'));
+    }
+
     public function store(Request $request)
     {
-        // Validate sthe incoming request
+        // Validate the incoming request
         $request->validate([
             'name' => 'required|string|max:255',
             'discount' => 'required|numeric',
         ]);
 
-        // Create the new scholarship record
-        $scholarship = Scholarship::create([
+        // Create a new scholarship
+        Scholarship::create([
             'name' => $request->name,
             'discount' => $request->discount,
-            'status' => 'active', // You can modify this logic as needed
+            'status' => 'active', // Optional default status
         ]);
 
         return redirect()->back()->with('success', 'Scholarship added successfully!');
-    }
-    public function index()
-    {
-        $scholarships = Scholarship::withTrashed()->get();  // Include soft deleted records
-        return view('scholarships.index', compact('scholarships'));
     }
 
     public function toggleStatus($id)
@@ -47,32 +53,19 @@ class ScholarshipController extends Controller
         return redirect()->route('scholarships.index')->with('success', 'Scholarship moved to trash.');
     }
 
-    // In ScholarshipController.php
-
-    public function trashed()
-    {
-        // Fetch trashed scholarships (soft deleted)
-        $trashedScholarships = Scholarship::onlyTrashed()->get();  // Fetch trashed scholarships
-
-        // Return the correct view with the trashed scholarships
-        return view('vp_admin.fees.scholarship', compact('trashedScholarships'));
-    }
-
-
-
     public function restore($id)
     {
         $scholarship = Scholarship::onlyTrashed()->findOrFail($id);
         $scholarship->restore();
 
-        return redirect()->route('scholarships.trashed')->with('success', 'Scholarship restored successfully.');
+        return redirect()->route('scholarships.index')->with('success', 'Scholarship restored successfully.');
     }
 
     public function forceDelete($id)
     {
         $scholarship = Scholarship::onlyTrashed()->findOrFail($id);
-        $scholarship->forceDelete();  // Permanently delete the scholarship
+        $scholarship->forceDelete();  // Permanently delete
 
-        return redirect()->route('scholarships.trashed')->with('success', 'Scholarship permanently deleted.');
+        return redirect()->route('scholarships.index')->with('success', 'Scholarship permanently deleted.');
     }
 }

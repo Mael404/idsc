@@ -30,30 +30,29 @@ class VPAdminSideBarController extends Controller
     public function editTuition()
     {
         // Fetch all scholarships including trashed ones
-        $scholarships = Scholarship::withTrashed()->get();  // This includes soft deleted records
-
-        // Fetch trashed scholarships specifically
-        $trashedScholarships = Scholarship::onlyTrashed()->get();  // Fetch only soft deleted scholarships
+        $scholarships = Scholarship::all(); // Only active
+        $trashedScholarships = Scholarship::onlyTrashed()->get(); // Trashed for modal
 
         // Return the view with both active and trashed scholarships
         return view('vp_admin.fees.scholarship', compact('scholarships', 'trashedScholarships'));
     }
 
 
-
     public function miscFees()
     {
-        $schoolYears = SchoolYear::withTrashed()->get(); // or however you're fetching them
+        $schoolYears = SchoolYear::withTrashed()->get();
+
         $groupedMappings = ProgramCourseMapping::with(['program', 'course', 'yearLevel', 'semester'])
             ->get()
             ->groupBy(function ($item) {
-                return $item->program_id . '-' . $item->year_level_id . '-' . $item->semester_id;
+                return $item->program_id . '-' . $item->year_level_id . '-' . $item->semester_id . '-' . $item->effective_sy;
             })
             ->map(function ($group) {
                 return [
                     'program_name' => $group->first()->program->name,
                     'year_level' => $group->first()->yearLevel->name,
                     'semester' => $group->first()->semester->name ?? 'N/A',
+                    'effective_sy' => $group->first()->effective_sy,
                     'courses' => $group->pluck('course.name')->implode(', '),
                     'mapping_ids' => $group->pluck('id')->toArray(),
                 ];
@@ -61,6 +60,7 @@ class VPAdminSideBarController extends Controller
 
         return view('vp_admin.fees.misc-fees', compact('groupedMappings'));
     }
+
 
 
     public function termConfiguration()

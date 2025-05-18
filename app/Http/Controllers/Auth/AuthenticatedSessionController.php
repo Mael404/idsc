@@ -42,6 +42,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('registrar.dashboard');
         }
 
+        if (Auth::user()->role === 'cashier') {
+            return redirect()->route('cashier.dashboard');  // Use 'cashier.dashboard' (not 'cashier.cashier_db')
+        }
+
         // Ensure default dashboard redirection works if role isn't matched
         return redirect()->route('dashboard');
     }

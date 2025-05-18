@@ -55,7 +55,7 @@
                 @include('layouts.success-message')
 
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">New Enrollment</h1>
+                    <h1 class="h3 mb-0 text-gray-800">Re-Enroll(Regular)</h1>
 
 
                     <button class="btn btn-primary" data-toggle="modal" data-target="#admissionFormModal">
@@ -325,57 +325,6 @@
                                                             @endif
                                                         @endforeach
                                                     </select>
-
-                                                    <div id="totalUnitsContainer" class="alert alert-info mt-3"
-                                                        style="display:none;">
-                                                        Total Units for Selected Mapping: <strong
-                                                            id="totalUnitsValue"></strong>
-                                                    </div>
-                                                    <!-- Tuition Fee will appear here dynamically -->
-                                                    <div id="tuitionFeeContainer" class="alert alert-success mt-2"
-                                                        style="display:none;"></div>
-
-                                                    <input type="hidden" name="tuition_fee" id="tuition_fee_input" />
-
-
-
-                                                    <script>
-                                                        $('#course_mapping_id').on('change', function() {
-                                                            let mappingId = $(this).val();
-
-                                                            if (!mappingId) {
-                                                                $('#totalUnitsContainer').hide();
-                                                                $('#tuitionFeeContainer').hide();
-                                                                return;
-                                                            }
-
-                                                            $.ajax({
-                                                                url: '{{ route('getMappingUnits') }}',
-                                                                type: 'POST',
-                                                                data: {
-                                                                    mapping_id: mappingId,
-                                                                    _token: '{{ csrf_token() }}'
-                                                                },
-                                                                success: function(response) {
-                                                                    $('#totalUnitsValue').text(response.total_units);
-                                                                    $('#totalUnitsContainer').show();
-
-                                                                    $('#tuitionFeeContainer').html('Tuition Fee: <strong>₱' + response.tuition_fee
-                                                                        .toFixed(2) + '</strong>').show();
-
-                                                                    // Set the hidden input's value to the tuition fee number (no formatting)
-                                                                    $('#tuition_fee_input').val(response.tuition_fee);
-                                                                }, // <--- missing comma here
-
-                                                                error: function() {
-                                                                    $('#totalUnitsContainer').hide();
-                                                                    $('#tuitionFeeContainer').hide();
-                                                                }
-                                                            });
-                                                        });
-                                                    </script>
-
-
                                                 </div>
 
                                                 <div class="col-md-6">
@@ -414,7 +363,16 @@
                                                     <label class="form-check-label" for="highschool">High School
                                                         Graduate</label>
                                                 </div>
-
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="admission_status" value="transferee" id="transferee">
+                                                    <label class="form-check-label" for="transferee">Transferee</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="admission_status" value="returnee" id="returnee">
+                                                    <label class="form-check-label" for="returnee">Returnee</label>
+                                                </div>
                                             </div>
 
                                             <div class="row g-3 mt-2" id="transfereeFields" style="display: none;">
@@ -436,14 +394,12 @@
                                                     <select id="scholarship" name="scholarship" class="form-control">
                                                         <option value="" selected disabled>Select Scholarship
                                                         </option>
-                                                        @foreach ($scholarships as $scholarship)
-                                                            <option value="{{ $scholarship->id }}">
-                                                                {{ $scholarship->name }}</option>
-                                                        @endforeach
+                                                        <option value="academic">Academic</option>
+                                                        <option value="athletic">Athletic</option>
+                                                        <option value="government">Government Grant</option>
                                                         <option value="none">None</option>
                                                     </select>
                                                 </div>
-
                                                 <div class="col-md-6">
                                                     <label for="previous_school">Previous School (if any)</label>
                                                     <input type="text" id="previous_school" name="previous_school"
@@ -528,264 +484,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="row justify-content-center mt-3">
-                    <div class="col-md-12">
-                        <div class="card shadow mb-4">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered" id="miscFees">
-                                        <thead>
-                                            <tr>
-                                                <th>Student No.</th>
-                                                <th>Full Name</th>
-                                                <th>Program</th>
-
-                                                <th>Admission Status</th>
-                                                <th>Email</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($admissions as $admission)
-                                                <tr>
-                                                    <td>{{ strtoupper($admission->student_id) }}</td>
-                                                    <td>{{ strtoupper($admission->first_name . ' ' . $admission->middle_name . ' ' . $admission->last_name) }}
-                                                    </td>
-                                                    <td>{{ $admission->courseMapping->combination_label ?? 'N/A' }}</td>
-
-                                                    <td>{{ ucfirst($admission->status) }}</td>
-                                                    <td>{{ $admission->email }}</td>
-                                                    <td>
-                                                        <!-- Trigger modal -->
-                                                        <!-- View Button with Eye Icon -->
-                                                        <button type="button" class="btn btn-info btn-sm"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#studentModal{{ $admission->student_id }}"
-                                                            title="View Student">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-
-                                                        <!-- Print COR Button with Print Icon -->
-                                                        <a href="{{ route('admissions.printCOR', $admission->student_id) }}"
-                                                            target="_blank" rel="noopener" class="btn btn-primary btn-sm"
-                                                            title="Print COR">
-                                                            <i class="fas fa-print"></i>
-                                                        </a>
 
 
-                                                    </td>
-                                                </tr>
-
-                                          <!-- Student Information Modal - Larger Size -->
-<div class="modal fade" id="studentModal{{ $admission->student_id }}" tabindex="-1"
-    aria-labelledby="studentModalLabel{{ $admission->student_id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <!-- Changed to modal-lg for larger size -->
-        <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold" id="studentModalLabel{{ $admission->student_id }}">
-                    <i class="bi bi-person-vcard me-2"></i>Student Details
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-@if($admission->billing)
-            {{-- Form starts here, targeting your update route --}}
-            <form method="POST" action="{{ route('billing.updateInitialPayment', $admission->billing->id) }}">
-                @csrf
-                @method('PUT')
-
-                <div class="modal-body p-4"> <!-- Added more padding -->
-                    <!-- Basic Information Section (unchanged, just display) -->
-                    <div class="mb-4">
-                        <h6 class="fw-bold text-primary mb-3">
-                            <i class="bi bi-info-circle me-2"></i>Basic Information
-                        </h6>
-                        <div class="row g-3">
-                            <!-- Display info only -->
-                            <div class="col-md-6">
-                                <div class="bg-light p-3 rounded">
-                                    <p class="mb-1"><strong>Student ID:</strong></p>
-                                    <p class="text-dark">{{ $admission->student_id }}</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="bg-light p-3 rounded">
-                                    <p class="mb-1"><strong>Full Name:</strong></p>
-                                    <p class="text-dark">
-                                        {{ Str::title("{$admission->last_name}, {$admission->first_name} {$admission->middle_name}") }}
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- Other basic info here similarly... -->
-                        </div>
-                    </div>
-
-                    <!-- Billing Information Section -->
-                    @if ($admission->billing)
-                        <div class="mt-4 pt-3 border-top">
-                            <h6 class="fw-bold text-primary mb-3">
-                                <i class="bi bi-cash-coin me-2"></i>Financial Information
-                            </h6>
-
-                            <!-- Display all billing info readonly -->
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-6">
-                                    <div class="bg-light p-3 rounded">
-                                        <p class="mb-1"><strong>School Year:</strong></p>
-                                        <p class="text-dark">{{ $admission->billing->school_year }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="bg-light p-3 rounded">
-                                        <p class="mb-1"><strong>Semester:</strong></p>
-                                        <p class="text-dark">{{ $admission->billing->semester }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-6">
-                                    <div class="bg-light p-3 rounded">
-                                        <p class="mb-1"><strong>Tuition Fee:</strong></p>
-                                        <p class="text-dark">₱{{ number_format($admission->billing->tuition_fee, 2) }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="bg-light p-3 rounded">
-                                        <p class="mb-1"><strong>Discount:</strong></p>
-                                        <p class="text-dark">{{ $admission->billing->discount }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="alert alert-primary mt-3 mb-4">
-                                <div class="row g-2">
-                                    <div class="col-md-6">
-                                        <div class="p-2">
-                                            <p class="mb-1"><strong>Total Assessment:</strong></p>
-                                            <h5 class="fw-bold mb-0">
-                                                ₱{{ number_format($admission->billing->total_assessment, 2) }}
-                                            </h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="p-2">
-                                            <p class="mb-1"><strong>Balance Due:</strong></p>
-                                            <h5 class="fw-bold mb-0">
-                                                ₱{{ number_format($admission->billing->balance_due, 2) }}
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h6 class="fw-bold mt-4 mb-3">
-                                <i class="bi bi-calendar-check me-2"></i>Payment Schedule
-                            </h6>
-                          <div class="row g-3">
-    <!-- Full width Initial Payment -->
-    <div class="col-12">
-        <div class="mb-3">
-            <label for="initial_payment{{ $admission->id }}" class="form-label"><strong>Initial Payment</strong></label>
-            <input 
-                placeholder="0.00" 
-                type="number" 
-                name="initial_payment" 
-                step="0.01" 
-                min="0"
-                class="form-control"
-                id="initial_payment{{ $admission->id }}"
-                value="{{ old('initial_payment', ($admission->billing->initial_payment ?? 0) > 0 ? $admission->billing->initial_payment : '') }}">
-        </div>
-    </div>
-
-    <!-- Two Columns: Prelims & Midterms -->
-    <div class="col-md-6">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Prelims Due:</strong></p>
-            <p class="text-dark">₱{{ number_format($admission->billing->prelims_due, 2) }}</p>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Midterms Due:</strong></p>
-            <p class="text-dark">₱{{ number_format($admission->billing->midterms_due, 2) }}</p>
-        </div>
-    </div>
-
-    <!-- Two Columns: Pre-Finals & Finals -->
-    <div class="col-md-6">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Pre-Finals Due:</strong></p>
-            <p class="text-dark">₱{{ number_format($admission->billing->prefinals_due, 2) }}</p>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Finals Due:</strong></p>
-            <p class="text-dark">₱{{ number_format($admission->billing->finals_due, 2) }}</p>
-        </div>
-    </div>
-
-    <!-- Payment Status -->
-    <div class="col-12">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Payment Status:</strong></p>
-            <p>
-                @php
-                    $initial = $admission->billing->initial_payment ?? 0;
-                    $balance = $admission->billing->balance_due ?? 0;
-                @endphp
-
-                @if ($balance == 0)
-                    <span class="badge bg-success p-2">Fully Paid</span>
-                @elseif ($initial > 0 && $initial < $balance)
-                    <span class="badge bg-warning p-2">Installment</span>
-                @else
-                    <span class="badge bg-secondary p-2">—</span>
-                @endif
-            </p>
-        </div>
-    </div>
-</div>
-
-                        </div>
-                    @else
-                        <div class="alert alert-warning mt-4">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            No billing information available for this student.
-                        </div>
-                    @endif
-                </div>
-
-                <div class="modal-footer">
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save me-2"></i>Save Payment
-                        </button>
-                    </div>
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="bi bi-x-lg me-2"></i> Close
-                    </button>
-                </div>
-            </form>
-            @else
-    <p><em>No billing record found for this admission.</em></p>
-@endif
-            {{-- Form ends here --}}
-        </div>
-    </div>
-</div>
-
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
             </div>
 
@@ -798,19 +498,6 @@
     </div>
     <!-- End of Content Wrapper -->
 @endsection
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- REQUIRED for DataTables -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        $('#miscFees').DataTable({
-            responsive: true,
-            pageLength: 10
-        });
-    });
-</script>
 
 <!-- Font Awesome for icons (include in your head tag) -->
 <script>
@@ -983,38 +670,5 @@
             // Add your step validation logic here if needed
             return true;
         }
-    });
-</script>
-<script>
-    document.getElementById('course_mapping_id').addEventListener('change', function() {
-        const mappingId = this.value;
-
-        if (!mappingId) {
-            document.getElementById('tuition_fee').value = '';
-            return;
-        }
-
-        fetch('{{ route('calculate.tuition.fee') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    course_mapping_id: mappingId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.tuition_fee !== undefined) {
-                    document.getElementById('tuition_fee').value = data.tuition_fee;
-                } else {
-                    document.getElementById('tuition_fee').value = '';
-                    console.error(data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching tuition fee:', error);
-            });
     });
 </script>

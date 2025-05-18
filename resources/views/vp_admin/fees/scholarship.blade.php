@@ -111,7 +111,7 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($scholarships as $scholarship)
-                                                <tr class="{{ $scholarship->deleted_at ? 'table-danger' : '' }}">
+                                                <tr>
                                                     <td>{{ $scholarship->name }}</td>
                                                     <td>{{ $scholarship->discount ?? 'N/A' }}</td>
                                                     <td class="text-center">
@@ -126,7 +126,7 @@
                                                             style="gap: 5px;">
                                                             <!-- Toggle Active/Inactive Status Button -->
                                                             <form
-                                                                action="{{ route('scholarships.toggle-status', $scholarship->id) }}"
+                                                                action="{{ route('scholarships.toggleStatus', $scholarship->id) }}"
                                                                 method="POST" class="d-inline">
                                                                 @csrf
                                                                 @method('PATCH')
@@ -138,6 +138,7 @@
                                                                         style="font-size: 14px;"></i>
                                                                 </button>
                                                             </form>
+
 
                                                             <!-- Soft Delete Button -->
                                                             <form
