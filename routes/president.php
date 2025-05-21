@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\PresidentSidebarController;
 use Illuminate\Support\Facades\Route;
 
@@ -8,3 +9,5 @@ Route::get('/president/revenue-trends', [PresidentSidebarController::class, 'rev
 Route::get('/president/scholarships-discounts', [PresidentSidebarController::class, 'scholarshipsDiscounts'])->name('president.scholarships-discounts');
 Route::get('/president/enrollment-heatmap', [PresidentSidebarController::class, 'enrollmentHeatmap'])->name('president.enrollment-heatmap');
 Route::get('/president/financial-alerts', [PresidentSidebarController::class, 'financialAlerts'])->name('president.financial-alerts');
+Route::get('/api/revenue-trends', [BillingController::class, 'getRevenueTrends']);
+Route::get('/api/balance-due', [BillingController::class, 'getBalanceDue']);

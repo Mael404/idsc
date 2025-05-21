@@ -161,7 +161,6 @@ class AdmissionController extends Controller
     }
 
 
-
     public function store(Request $request)
     {
         Log::debug('Form submission data:', $request->all());
@@ -256,8 +255,6 @@ class AdmissionController extends Controller
 
         $tuitionFee = $request->input('tuition_fee');  // This will be a numeric value submitted by the form
 
-
-
         // Calculate discount
         $discountValue = 0;
         $tuitionFeeDiscount = $tuitionFee;
@@ -265,7 +262,7 @@ class AdmissionController extends Controller
         if ($request->scholarship !== 'none' && $request->scholarship !== null) {
             $scholarship = Scholarship::find($request->scholarship);
             if ($scholarship && $scholarship->discount) {
-                // discount is percentage
+                // Discount is percentage
                 $discountValue = $tuitionFee * ($scholarship->discount / 100);
                 $tuitionFeeDiscount = $tuitionFee - $discountValue;
             }
@@ -277,7 +274,7 @@ class AdmissionController extends Controller
             $miscFee = MiscFee::where('program_course_mapping_id', $request->course_mapping_id)->sum('amount');
         }
 
-        // initial payment and old accounts default to 0 or null, you can adjust
+        // Initial payment and old accounts default to 0 or null, you can adjust
         $initialPayment = 0;
         $oldAccounts = 0;
 

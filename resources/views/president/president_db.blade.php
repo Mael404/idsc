@@ -22,16 +22,7 @@
                         <i class="fas fa-download fa-sm text-white-50"></i> Download Financial Report
                     </a>
                 </div>
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
-
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">📊 Dashboard</h1>
-                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
-                        </a>
-                    </div>
+             
 
                     <!-- Row: Revenue Dashboard -->
                     <div class="row">
@@ -47,17 +38,18 @@
                             </div>
                         </div>
 
-                        <!-- Pie Chart for Scholarship/Discount Impact -->
+
                         <div class="col-xl-4 col-lg-5">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">🎓 Scholarships vs Discounts</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">📊 Balance Due</h6>
                                 </div>
                                 <div class="card-body">
                                     <canvas id="scholarshipPieChart"></canvas>
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
                     <!-- Row: Enrollment Analytics -->
@@ -66,7 +58,7 @@
                         <div class="col-xl-12 col-lg-12">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">📊 Program-wise Enrollment Heatmap</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary"> Program-wise Enrollment Heatmap</h6>
                                 </div>
                                 <div class="card-body">
                                     <table class="table table-bordered text-center">
@@ -107,7 +99,7 @@
                         <div class="col-xl-12">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3 bg-danger">
-                                    <h6 class="m-0 font-weight-bold text-white">🚨 Top 10 Unpaid Balances (₱10,000+)</h6>
+                                    <h6 class="m-0 font-weight-bold text-white"> Top 10 Unpaid Balances (₱10,000+)</h6>
                                 </div>
                                 <div class="card-body">
                                     <ul class="list-group">
@@ -127,7 +119,6 @@
                 </div>
                 <!-- /.container-fluid -->
 
-            </div>
             <!-- End of Main Content -->
 
             @include('layouts.footer')
@@ -136,88 +127,97 @@
         <!-- End of Content Wrapper -->
     @endsection
 
+
+
     <script>
-        const balanceDistributionData = @json($balanceDistributionData);
-        const paymentSourcesData = @json($paymentSourcesData);
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('scholarshipPieChart').getContext('2d');
+
+            // Fetch balance due data from the backend
+            fetch('/api/balance-due') // Update with the correct endpoint
+                .then(response => response.json())
+                .then(data => {
+                    const labels = data.map(item => item.semester); // X-axis labels (semesters)
+                    const balanceDue = data.map(item => item.total_balance_due); // Values (total balance due)
+
+                    // Render the pie chart
+                    new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Balance Due',
+                                data: balanceDue,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    'rgba(255, 206, 86, 0.2)',
+                                    'rgba(75, 192, 192, 0.2)',
+                                    'rgba(153, 102, 255, 0.2)'
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(75, 192, 192, 1)',
+                                    'rgba(153, 102, 255, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching balance due data:', error));
+        });
     </script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Prepare Balance Distribution Data
-            const balanceLabels = balanceDistributionData.map(data => data.month);
-            const collectedData = balanceDistributionData.map(data => data.collected);
-            const outstandingData = balanceDistributionData.map(data => data.outstanding);
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
 
-            // Balance Distribution Chart
-            var balanceCtx = document.getElementById("balanceDistributionChart").getContext("2d");
-            new Chart(balanceCtx, {
-                type: "bar",
-                data: {
-                    labels: balanceLabels,
-                    datasets: [{
-                            label: "Tuition Fees Collected",
-                            backgroundColor: "#4e73df",
-                            hoverBackgroundColor: "#2e59d9",
-                            data: collectedData,
-                        },
-                        {
-                            label: "Outstanding Balances",
-                            backgroundColor: "#e74a3b",
-                            hoverBackgroundColor: "#c0392b",
-                            data: outstandingData,
-                        },
-                    ],
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                maxTicksLimit: 6
-                            },
-                        },
-                        y: {
-                            ticks: {
-                                beginAtZero: true,
-                            },
-                        },
-                    },
-                    plugins: {
-                        legend: {
-                            display: true
-                        },
-                    },
-                },
-            });
+            // Fetch revenue data from the backend
+            fetch('/api/revenue-trends') // Update with the correct endpoint
+                .then(response => response.json())
+                .then(data => {
+                    const labels = data.map(item => item.semester); // X-axis labels (semesters)
+                    const revenue = data.map(item => item.total_revenue); // Y-axis values (total revenue)
 
-            // Prepare Payment Sources Data
-            const paymentLabels = paymentSourcesData.map(data => data.remarks);
-            const paymentCounts = paymentSourcesData.map(data => data.count);
-
-            // Payment Sources Pie Chart
-            var paymentCtx = document.getElementById("paymentSourcesChart").getContext("2d");
-            new Chart(paymentCtx, {
-                type: "pie",
-                data: {
-                    labels: paymentLabels,
-                    datasets: [{
-                        data: paymentCounts,
-                        backgroundColor: ["#4e73df", "#1cc88a", "#36b9cc", "#f6c23e"],
-                        hoverBackgroundColor: ["#2e59d9", "#17a673", "#2c9faf", "#f39c12"],
-                    }, ],
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: "bottom"
+                    // Render the chart
+                    new Chart(ctx, {
+                        type: 'line', // Use 'bar' or 'line' as desired
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Total Revenue',
+                                data: revenue,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
                         },
-                    },
-                },
-            });
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching revenue trends:', error));
         });
     </script>

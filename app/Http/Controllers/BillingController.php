@@ -20,27 +20,27 @@ class BillingController extends Controller
     public function searchStudents(Request $request)
     {
         $query = $request->input('query');
-        
+
         $students = Admission::where('student_id', 'like', "%$query%")
             ->orWhere('first_name', 'like', "%$query%")
             ->orWhere('last_name', 'like', "%$query%")
             ->orWhere('birthdate', 'like', "%$query%")
-            ->with(['billing' => function($q) {
+            ->with(['billing' => function ($q) {
                 $q->select('student_id', 'balance_due');
             }])
             ->select('student_id', 'first_name', 'middle_name', 'last_name', 'birthdate')
             ->limit(10)
             ->get();
-            
+
         // Format the data for the modal
-        $formattedStudents = $students->map(function($student) {
+        $formattedStudents = $students->map(function ($student) {
             return [
                 'student_id' => $student->student_id,
                 'full_name' => $student->full_name,
                 'current_balance' => $student->billing ? $student->billing->balance_due : 0
             ];
         });
-        
+
         return response()->json($formattedStudents);
     }
 
@@ -48,11 +48,11 @@ class BillingController extends Controller
     public function getStudentBilling($studentId)
     {
         $student = Admission::with('billing')->find($studentId);
-        
+
         if (!$student) {
             return response()->json(['error' => 'Student not found'], 404);
         }
-        
+
         return response()->json([
             'student' => [
                 'student_id' => $student->student_id,
@@ -106,5 +106,28 @@ class BillingController extends Controller
         $billing->delete();
 
         return redirect()->route('billings.index')->with('success', 'Billing deleted successfully.');
+    }
+
+
+    public function getRevenueTrends()
+    {
+        // Aggregate total_assessment grouped by semester
+        $revenueTrends = Billing::selectRaw('semester, SUM(total_assessment) as total_revenue')
+            ->groupBy('semester')
+            ->orderBy('semester', 'asc')
+            ->get();
+
+        return response()->json($revenueTrends);
+    }
+
+    public function getBalanceDue()
+    {
+        // Aggregate balance_due grouped by semester or any relevant category
+        $balanceDueData = Billing::selectRaw('semester, SUM(balance_due) as total_balance_due')
+            ->groupBy('semester')
+            ->orderBy('semester', 'asc')
+            ->get();
+
+        return response()->json($balanceDueData);
     }
 }

@@ -528,6 +528,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="row justify-content-center mt-3">
                     <div class="col-md-12">
                         <div class="card shadow mb-4">
@@ -683,71 +684,71 @@
                                 <i class="bi bi-calendar-check me-2"></i>Payment Schedule
                             </h6>
                           <div class="row g-3">
-    <!-- Full width Initial Payment -->
-    <div class="col-12">
-        <div class="mb-3">
-            <label for="initial_payment{{ $admission->id }}" class="form-label"><strong>Initial Payment</strong></label>
-            <input 
-                placeholder="0.00" 
-                type="number" 
-                name="initial_payment" 
-                step="0.01" 
-                min="0"
-                class="form-control"
-                id="initial_payment{{ $admission->id }}"
-                value="{{ old('initial_payment', ($admission->billing->initial_payment ?? 0) > 0 ? $admission->billing->initial_payment : '') }}">
-        </div>
-    </div>
+                                <!-- Full width Initial Payment -->
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="initial_payment{{ $admission->id }}" class="form-label"><strong>Initial Payment</strong></label>
+                                        <input 
+                                            placeholder="0.00" 
+                                            type="number" 
+                                            name="initial_payment" 
+                                            step="0.01" 
+                                            min="0"
+                                            class="form-control"
+                                            id="initial_payment{{ $admission->id }}"
+                                            value="{{ old('initial_payment', ($admission->billing->initial_payment ?? 0) > 0 ? $admission->billing->initial_payment : '') }}">
+                                    </div>
+                                </div>
 
-    <!-- Two Columns: Prelims & Midterms -->
-    <div class="col-md-6">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Prelims Due:</strong></p>
-            <p class="text-dark">₱{{ number_format($admission->billing->prelims_due, 2) }}</p>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Midterms Due:</strong></p>
-            <p class="text-dark">₱{{ number_format($admission->billing->midterms_due, 2) }}</p>
-        </div>
-    </div>
+                                <!-- Two Columns: Prelims & Midterms -->
+                                <div class="col-md-6">
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-1"><strong>Prelims Due:</strong></p>
+                                        <p class="text-dark">₱{{ number_format($admission->billing->prelims_due, 2) }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-1"><strong>Midterms Due:</strong></p>
+                                        <p class="text-dark">₱{{ number_format($admission->billing->midterms_due, 2) }}</p>
+                                    </div>
+                                </div>
 
-    <!-- Two Columns: Pre-Finals & Finals -->
-    <div class="col-md-6">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Pre-Finals Due:</strong></p>
-            <p class="text-dark">₱{{ number_format($admission->billing->prefinals_due, 2) }}</p>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Finals Due:</strong></p>
-            <p class="text-dark">₱{{ number_format($admission->billing->finals_due, 2) }}</p>
-        </div>
-    </div>
+                                <!-- Two Columns: Pre-Finals & Finals -->
+                                <div class="col-md-6">
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-1"><strong>Pre-Finals Due:</strong></p>
+                                        <p class="text-dark">₱{{ number_format($admission->billing->prefinals_due, 2) }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-1"><strong>Finals Due:</strong></p>
+                                        <p class="text-dark">₱{{ number_format($admission->billing->finals_due, 2) }}</p>
+                                    </div>
+                                </div>
 
-    <!-- Payment Status -->
-    <div class="col-12">
-        <div class="bg-light p-3 rounded">
-            <p class="mb-1"><strong>Payment Status:</strong></p>
-            <p>
-                @php
-                    $initial = $admission->billing->initial_payment ?? 0;
-                    $balance = $admission->billing->balance_due ?? 0;
-                @endphp
+                                <!-- Payment Status -->
+                                <div class="col-12">
+                                    <div class="bg-light p-3 rounded">
+                                        <p class="mb-1"><strong>Payment Status:</strong></p>
+                                        <p>
+                                            @php
+                                                $initial = $admission->billing->initial_payment ?? 0;
+                                                $balance = $admission->billing->balance_due ?? 0;
+                                            @endphp
 
-                @if ($balance == 0)
-                    <span class="badge bg-success p-2">Fully Paid</span>
-                @elseif ($initial > 0 && $initial < $balance)
-                    <span class="badge bg-warning p-2">Installment</span>
-                @else
-                    <span class="badge bg-secondary p-2">—</span>
-                @endif
-            </p>
-        </div>
-    </div>
-</div>
+                                            @if ($balance == 0)
+                                                <span class="badge bg-success p-2">Fully Paid</span>
+                                            @elseif ($initial > 0 && $initial < $balance)
+                                                <span class="badge bg-warning p-2">Installment</span>
+                                            @else
+                                                <span class="badge bg-secondary p-2">—</span>
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
                     @else
@@ -815,176 +816,256 @@
 <!-- Font Awesome for icons (include in your head tag) -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Tab navigation variables
-        const formTabs = document.querySelectorAll('#formTabs .nav-link');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const submitBtn = document.getElementById('submitBtn');
-        const progressBar = document.querySelector('.progress-bar');
-        let currentTab = 0;
+    // Tab navigation variables
+    const formTabs = document.querySelectorAll('#formTabs .nav-link');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressBar = document.querySelector('.progress-bar');
+    let currentTab = 0;
 
-        // Admission info elements
-        const admissionStatusRadios = document.querySelectorAll('input[name="admission_status"]');
-        const transfereeFields = document.getElementById('transfereeFields');
-        const manualCourseSelection = document.getElementById('manualCourseSelection');
+    // Admission info elements
+    const admissionStatusRadios = document.querySelectorAll('input[name="admission_status"]');
+    const transfereeFields = document.getElementById('transfereeFields');
+    const manualCourseSelection = document.getElementById('manualCourseSelection');
 
-        // Course selection elements
-        const courseSelect = document.getElementById('course_ids');
-        const selectedCoursesList = document.getElementById('selectedCoursesList');
+    // Course selection elements
+    const courseSelect = document.getElementById('course_ids');
+    const selectedCoursesList = document.getElementById('selectedCoursesList');
 
-        // Track selected courses
-        let selectedCourses = [];
+    // Track selected courses
+    let selectedCourses = [];
 
-        // Initialize UI
+    // Define required fields for each step (0-indexed)
+  const requiredFields = [
+    // Step 1: Personal Info
+    ['last_name', 'first_name', 'contact_number', 'email', 'address_line1'],
+    
+    // Step 2: Parents Info (optional)
+    [],
+    
+    // Step 3: Other Personal Details
+    ['gender', 'birthdate', 'citizenship'],
+    
+    // Step 4: Admission Info
+    ['course_mapping_id', 'admission_status'],
+    
+    // Step 5: Education History
+    ['secondary_school', 'secondary_address']
+];
+
+    // Initialize UI
+    updateTabs();
+    if (manualCourseSelection) manualCourseSelection.style.display = 'none';
+    if (transfereeFields) transfereeFields.style.display = 'none';
+    updateSelectedCoursesDisplay();
+
+    // Tab navigation functions
+    nextBtn.addEventListener('click', function() {
+        if (validateCurrentStep(currentTab)) {
+            currentTab++;
+            updateTabs();
+        }
+    });
+
+    prevBtn.addEventListener('click', function() {
+        currentTab--;
         updateTabs();
-        if (manualCourseSelection) manualCourseSelection.style.display = 'none';
-        if (transfereeFields) transfereeFields.style.display = 'none';
-        updateSelectedCoursesDisplay();
+    });
 
-        // Tab navigation functions
-        nextBtn.addEventListener('click', function() {
-            if (validateStep(currentTab) && currentTab < formTabs.length - 1) {
-                currentTab++;
-                updateTabs();
+    function updateTabs() {
+        formTabs.forEach((tab, index) => {
+            const tabPane = document.querySelector(tab.getAttribute('href'));
+            if (index === currentTab) {
+                tab.classList.add('active');
+                tabPane.classList.add('show', 'active');
+            } else {
+                tab.classList.remove('active');
+                tabPane.classList.remove('show', 'active');
             }
         });
 
-        prevBtn.addEventListener('click', function() {
-            if (currentTab > 0) {
-                currentTab--;
-                updateTabs();
-            }
-        });
+        prevBtn.disabled = currentTab === 0;
+        nextBtn.style.display = currentTab === formTabs.length - 1 ? 'none' : 'block';
+        submitBtn.style.display = currentTab === formTabs.length - 1 ? 'block' : 'none';
 
-        function updateTabs() {
-            formTabs.forEach((tab, index) => {
-                const tabPane = document.querySelector(tab.getAttribute('href'));
-                if (index === currentTab) {
-                    tab.classList.add('active');
-                    tabPane.classList.add('show', 'active');
-                } else {
-                    tab.classList.remove('active');
-                    tabPane.classList.remove('show', 'active');
-                }
-            });
+        const progress = ((currentTab + 1) / formTabs.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        progressBar.textContent = `Step ${currentTab + 1} of ${formTabs.length}`;
+        progressBar.setAttribute('aria-valuenow', progress);
+    }
 
-            prevBtn.disabled = currentTab === 0;
-            nextBtn.style.display = currentTab === formTabs.length - 1 ? 'none' : 'block';
-            submitBtn.style.display = currentTab === formTabs.length - 1 ? 'block' : 'none';
-
-            const progress = ((currentTab + 1) / formTabs.length) * 100;
-            progressBar.style.width = `${progress}%`;
-            progressBar.textContent = `Step ${currentTab + 1} of ${formTabs.length}`;
-            progressBar.setAttribute('aria-valuenow', progress);
-        }
-
-        // Admission status change handler
-        admissionStatusRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                // Show/hide transferee fields
+    // Admission status change handler
+    admissionStatusRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Show/hide transferee fields
+            if (transfereeFields) {
                 transfereeFields.style.display = this.value === 'transferee' ? 'block' : 'none';
-
-                // Show/hide manual course selection
-                const showCourseSelection = (this.value === 'transferee' || this.value ===
-                    'returnee');
-                manualCourseSelection.style.display = showCourseSelection ? 'block' : 'none';
-
-                // Clear selections when switching away from irregular status
-                if (!showCourseSelection) {
-                    clearCourseSelections();
-                }
-            });
-        });
-
-        // Course selection handling
-        if (courseSelect && selectedCoursesList) {
-            courseSelect.addEventListener('change', function() {
-                // Get newly selected options that aren't already tracked
-                const newSelections = Array.from(this.selectedOptions)
-                    .filter(option => !selectedCourses.some(c => c.value === option.value));
-
-                // Add new selections to our array
-                selectedCourses = selectedCourses.concat(newSelections.map(option => ({
-                    value: option.value,
-                    text: option.text
-                })));
-
-                updateSelectedCoursesDisplay();
-            });
-        }
-
-        function updateSelectedCoursesDisplay() {
-            selectedCoursesList.innerHTML = '';
-
-            if (selectedCourses.length === 0) {
-                selectedCoursesList.innerHTML = '<li class="text-muted">No courses selected</li>';
-                return;
             }
 
-            selectedCourses.forEach(course => {
-                const li = document.createElement('li');
-                li.className = 'd-flex justify-content-between align-items-center mb-2';
-                li.innerHTML = `
+            // Show/hide manual course selection
+            if (manualCourseSelection) {
+                const showCourseSelection = (this.value === 'transferee' || this.value === 'returnee');
+                manualCourseSelection.style.display = showCourseSelection ? 'block' : 'none';
+            }
+
+            // Clear selections when switching away from irregular status
+            if (!showCourseSelection) {
+                clearCourseSelections();
+            }
+        });
+    });
+
+    // Course selection handling
+    if (courseSelect && selectedCoursesList) {
+        courseSelect.addEventListener('change', function() {
+            // Get newly selected options that aren't already tracked
+            const newSelections = Array.from(this.selectedOptions)
+                .filter(option => !selectedCourses.some(c => c.value === option.value));
+
+            // Add new selections to our array
+            selectedCourses = selectedCourses.concat(newSelections.map(option => ({
+                value: option.value,
+                text: option.text
+            })));
+
+            updateSelectedCoursesDisplay();
+        });
+    }
+
+    function updateSelectedCoursesDisplay() {
+        if (!selectedCoursesList) return;
+        
+        selectedCoursesList.innerHTML = '';
+
+        if (selectedCourses.length === 0) {
+            selectedCoursesList.innerHTML = '<li class="text-muted">No courses selected</li>';
+            return;
+        }
+
+        selectedCourses.forEach(course => {
+            const li = document.createElement('li');
+            li.className = 'd-flex justify-content-between align-items-center mb-2';
+            li.innerHTML = `
                 <span>${course.text}</span>
                 <button type="button" class="btn btn-sm btn-outline-danger remove-course" 
                         data-value="${course.value}" title="Remove course">
                     <i class="fas fa-times"></i>
                 </button>
             `;
-                selectedCoursesList.appendChild(li);
+            selectedCoursesList.appendChild(li);
+        });
+
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-course').forEach(button => {
+            button.addEventListener('click', function() {
+                const valueToRemove = this.getAttribute('data-value');
+
+                // Remove from our array
+                selectedCourses = selectedCourses.filter(c => c.value !== valueToRemove);
+
+                // Update the select element
+                const option = Array.from(courseSelect.options)
+                    .find(opt => opt.value === valueToRemove);
+                if (option) option.selected = false;
+
+                updateSelectedCoursesDisplay();
             });
+        });
+    }
 
-            // Add event listeners to remove buttons
-            document.querySelectorAll('.remove-course').forEach(button => {
-                button.addEventListener('click', function() {
-                    const valueToRemove = this.getAttribute('data-value');
-
-                    // Remove from our array
-                    selectedCourses = selectedCourses.filter(c => c.value !== valueToRemove);
-
-                    // Update the select element
-                    const option = Array.from(courseSelect.options)
-                        .find(opt => opt.value === valueToRemove);
-                    if (option) option.selected = false;
-
-                    updateSelectedCoursesDisplay();
-                });
-            });
-        }
-
-        function clearCourseSelections() {
-            selectedCourses = [];
+    function clearCourseSelections() {
+        selectedCourses = [];
+        if (courseSelect) {
             Array.from(courseSelect.options).forEach(opt => opt.selected = false);
-            updateSelectedCoursesDisplay();
+        }
+        updateSelectedCoursesDisplay();
+    }
+
+    // Form submission handler
+    document.getElementById('admissionForm').addEventListener('submit', function(e) {
+        // Verify courses are selected if manual selection is shown
+        if (manualCourseSelection && manualCourseSelection.style.display === 'block' && selectedCourses.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one course');
+            return;
         }
 
-        // Form submission handler
-        document.getElementById('admissionForm').addEventListener('submit', function(e) {
-            // Verify courses are selected if required
-            if (manualCourseSelection.style.display === 'block' && selectedCourses.length === 0) {
-                e.preventDefault();
-                alert('Please select at least one course');
-                return;
-            }
-
-            // Sync selections with the select element before submission
+        // Sync selections with the select element before submission
+        if (courseSelect) {
             Array.from(courseSelect.options).forEach(opt => opt.selected = false);
             selectedCourses.forEach(course => {
                 const option = Array.from(courseSelect.options)
                     .find(opt => opt.value === course.value);
                 if (option) option.selected = true;
             });
+        }
 
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
-            submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
+        submitBtn.disabled = true;
+    });
+
+    function validateCurrentStep(step) {
+        const fields = requiredFields[step];
+        let isValid = true;
+        let firstInvalidField = null;
+        
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            }
         });
 
-        function validateStep(step) {
-            // Add your step validation logic here if needed
-            return true;
+        // Special validation for admission status in step 4
+        if (step === 3) { // Step 4 is index 3
+            const admissionStatusSelected = document.querySelector('input[name="admission_status"]:checked');
+            if (!admissionStatusSelected && requiredFields[3].includes('admission_status')) {
+                isValid = false;
+                admissionStatusRadios.forEach(radio => {
+                    radio.closest('.form-check').classList.add('is-invalid');
+                });
+            } else {
+                admissionStatusRadios.forEach(radio => {
+                    radio.closest('.form-check').classList.remove('is-invalid');
+                });
+            }
+        }
+
+        if (!isValid) {
+            alert('Please fill in all required fields before proceeding.');
+            if (firstInvalidField) {
+                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalidField.focus();
+            }
+        }
+
+        return isValid;
+    }
+
+    // Add input event listeners to clear validation errors when typing
+    requiredFields.flat().forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                }
+            });
         }
     });
+});
 </script>
+
+
 <script>
     document.getElementById('course_mapping_id').addEventListener('change', function() {
         const mappingId = this.value;
