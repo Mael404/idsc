@@ -381,7 +381,7 @@
                                                 <div class="col-md-6">
                                                     <label for="major">Major</label>
                                                     <input type="text" id="major" name="major"
-                                                        class="form-control" placeholder="e.g., Computer Programming">
+                                                        class="form-control" placeholder="e.g., N/A if None">
                                                 </div>
                                             </div>
 
@@ -404,18 +404,14 @@
                                                 </div>
                                             </div>
 
-                                            <div class="mt-3">
-                                                <label class="form-label">Admission Status <span
-                                                        class="text-danger">*</span></label>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio"
-                                                        name="admission_status" value="highschool" id="highschool"
-                                                        required>
-                                                    <label class="form-check-label" for="highschool">High School
-                                                        Graduate</label>
-                                                </div>
+                                         <div class="mt-3">
+    <label class="form-label">Admission Status <span class="text-danger">*</span></label>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="admission_status" value="highschool" id="highschool" required checked>
+        <label class="form-check-label" for="highschool">High School Graduate</label>
+    </div>
+</div>
 
-                                            </div>
 
                                             <div class="row g-3 mt-2" id="transfereeFields" style="display: none;">
                                                 <div class="col-md-6">
@@ -848,7 +844,7 @@
     ['gender', 'birthdate', 'citizenship'],
     
     // Step 4: Admission Info
-    ['course_mapping_id', 'admission_status'],
+    ['course_mapping_id', 'admission_status' ,'major' ,'previous_school'],
     
     // Step 5: Education History
     ['secondary_school', 'secondary_address']
@@ -895,26 +891,37 @@
         progressBar.setAttribute('aria-valuenow', progress);
     }
 
-    // Admission status change handler
-    admissionStatusRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            // Show/hide transferee fields
-            if (transfereeFields) {
-                transfereeFields.style.display = this.value === 'transferee' ? 'block' : 'none';
-            }
+  // Admission status change handler
+admissionStatusRadios.forEach(radio => {
+    // Check the default selected radio button on page load
+    if (radio.checked) {
+        handleAdmissionStatusChange(radio.value);
+    }
 
-            // Show/hide manual course selection
-            if (manualCourseSelection) {
-                const showCourseSelection = (this.value === 'transferee' || this.value === 'returnee');
-                manualCourseSelection.style.display = showCourseSelection ? 'block' : 'none';
-            }
-
-            // Clear selections when switching away from irregular status
-            if (!showCourseSelection) {
-                clearCourseSelections();
-            }
-        });
+    radio.addEventListener('change', function() {
+        handleAdmissionStatusChange(this.value);
     });
+});
+
+// Function to handle admission status changes
+function handleAdmissionStatusChange(value) {
+    // Show/hide transferee fields
+    if (transfereeFields) {
+        transfereeFields.style.display = value === 'transferee' ? 'block' : 'none';
+    }
+
+    // Show/hide manual course selection
+    if (manualCourseSelection) {
+        const showCourseSelection = (value === 'transferee' || value === 'returnee');
+        manualCourseSelection.style.display = showCourseSelection ? 'block' : 'none';
+    }
+
+    // Clear selections when switching away from irregular status
+    if (!showCourseSelection) {
+        clearCourseSelections();
+    }
+}
+
 
     // Course selection handling
     if (courseSelect && selectedCoursesList) {
