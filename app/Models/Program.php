@@ -15,5 +15,9 @@ class Program extends Model
     {
         return $this->hasMany(ProgramCourseMapping::class);
     }
-    
+
+    public function program()
+    {
+        return $this->belongsTo(\App\Models\Program::class, 'program_id', 'id');
+    }
 }

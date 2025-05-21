@@ -25,4 +25,5 @@ require __DIR__ . '/vpadminsidebar.php';
 require __DIR__ . '/registrarsidebar.php';
 require __DIR__ . '/vpacademicssidebar.php';
 require __DIR__ . '/cashier.php';
-
+require __DIR__ . '/accounting.php';
+require __DIR__ . '/president.php';

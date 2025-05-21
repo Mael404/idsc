@@ -81,4 +81,9 @@ class Admission extends Model
     {
         return trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
     }
+
+    public function programCourseMapping()
+    {
+        return $this->belongsTo(ProgramCourseMapping::class, 'course_mapping_id', 'id');
+    }
 }

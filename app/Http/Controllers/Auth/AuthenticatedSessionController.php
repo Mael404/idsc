@@ -43,16 +43,20 @@ class AuthenticatedSessionController extends Controller
         }
 
         if (Auth::user()->role === 'cashier') {
-            return redirect()->route('cashier.dashboard');  // Use 'cashier.dashboard' (not 'cashier.cashier_db')
+            return redirect()->route('cashier.dashboard');
         }
+        if (Auth::user()->role === 'accounting') {
+            return redirect()->route('accountant.accountant_db');
+        }
+        if (Auth::user()->role === 'president') {
+            return redirect()->route('president.dashboard');
+        }
+        
+        // If no matching role, logout user and clear session
+        $this->destroy($request);
 
-        // Ensure default dashboard redirection works if role isn't matched
-        return redirect()->route('dashboard');
+        return redirect('/')->with('message', 'Error 404. Please try again.');
     }
-
-
-
-
 
     public function destroy(Request $request): RedirectResponse
     {

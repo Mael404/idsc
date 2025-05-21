@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Billing;
 use App\Models\Payment;
-use App\Models\Admission; // Include the Admission model
+use App\Models\Admission;
 
 class PaymentController extends Controller
 {
@@ -14,7 +14,7 @@ class PaymentController extends Controller
         $request->validate([
             'student_id' => 'required|exists:billings,student_id',
             'payment_amount' => 'required|numeric|min:0.01',
-            'or_number' => 'required|string|unique:payments,or_number', // Validate OR number
+            'or_number' => 'required|string|unique:payments,or_number',
             'remarks' => 'nullable|string',
         ]);
 
@@ -30,13 +30,30 @@ class PaymentController extends Controller
             return redirect()->back()->withErrors(['error' => 'Billing record not found for this student.']);
         }
 
-        // Deduct payment from balance
-        $billing->balance_due -= $paymentAmount;
+        // Deduct payment from prelims_due, midterms_due, prefinals_due, and finals_due
+        $dues = ['prelims_due', 'midterms_due', 'prefinals_due', 'finals_due'];
 
-        // Ensure balance is not negative
-        if ($billing->balance_due < 0) {
-            $billing->balance_due = 0;
+        foreach ($dues as $due) {
+            if ($paymentAmount <= 0) {
+                break;
+            }
+
+            if ($billing->$due > 0) {
+                if ($paymentAmount >= $billing->$due) {
+                    $paymentAmount -= $billing->$due;
+                    $billing->$due = 0;
+                } else {
+                    $billing->$due -= $paymentAmount;
+                    $paymentAmount = 0;
+                }
+            }
         }
+
+        // Update balance_due to the sum of the updated dues
+        $billing->balance_due = $billing->prelims_due 
+                                + $billing->midterms_due 
+                                + $billing->prefinals_due 
+                                + $billing->finals_due;
 
         $billing->save();
 
@@ -53,8 +70,8 @@ class PaymentController extends Controller
         // Log the payment
         Payment::create([
             'student_id' => $studentId,
-            'amount' => $paymentAmount,
-            'or_number' => $orNumber, // Store the OR number
+            'amount' => $request->payment_amount,
+            'or_number' => $orNumber,
             'remarks' => $remarks,
             'payment_date' => now(),
         ]);

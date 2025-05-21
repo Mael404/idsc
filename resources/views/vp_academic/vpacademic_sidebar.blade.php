@@ -80,7 +80,7 @@
                 <a class="collapse-item {{ request()->is('programs') || request()->is('programs/*') ? 'active' : '' }}"
                     href="{{ url('programs') }}"> Manage Programs</a>
                 <a class="collapse-item {{ request()->is('courses') || request()->is('courses/*') ? 'active' : '' }}"
-                    href="{{ url('courses') }}"> Manage Courses</a>
+                    href="{{ url('courses') }}"> Manage Subjects</a>
                 <a class="collapse-item {{ request()->is('year') || request()->is('year/*') ? 'active' : '' }}"
                     href="{{ url('year') }}"> Manage Year</a>
                 <a class="collapse-item {{ request()->is('semester') || request()->is('semester/*') ? 'active' : '' }}"

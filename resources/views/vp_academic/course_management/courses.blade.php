@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('tab_title', 'Manage Courses')
+@section('tab_title', 'Manage Subjects')
 @section('vpacademic_sidebar')
     @include('vp_academic.vpacademic_sidebar')
 @endsection
@@ -21,7 +21,7 @@
 
                 <!-- Page Heading with Button on Same Row -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">Manage Courses</h1>
+                    <h1 class="h3 mb-0 text-gray-800">Manage Subjects</h1>
 
                     <!-- Button to Open Add Course Form -->
                     <button class="btn btn-primary" data-toggle="modal" data-target="#addCourseModal">
@@ -55,7 +55,7 @@
                                             </div>
 
                                             <div class="col-md-6">
-                                                <label class="form-label">Course Name</label>
+                                                <label class="form-label">Subject Name</label>
                                                 <input type="text" class="form-control" id="modal-name" name="name"
                                                     required>
                                             </div>
@@ -147,7 +147,7 @@
                                             </div>
 
                                             <div class="col-md-6">
-                                                <label class="form-label">Course Name</label>
+                                                <label class="form-label">Subject Name</label>
                                                 <input type="text" name="name" class="form-control"
                                                     placeholder="Course Name" required>
                                             </div>
@@ -233,7 +233,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Course Code</th>
-                                                <th>Course Name</th>
+                                                <th>Subject name</th>
                                                 <th>Description</th>
                                                 <th>Units</th>
                                               

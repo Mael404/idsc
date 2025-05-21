@@ -69,6 +69,14 @@
                 @include('cashier.cashier_sidebar')
             @break
 
+            @case('accounting')
+                @include('accountant.accountant_sidebar')
+            @break
+
+            @case('president')
+                @include('president.president_sidebar')
+            @break
+
             @default
                 {{-- Optional: fallback sidebar --}}
                 <p>No sidebar available for this role.</p>

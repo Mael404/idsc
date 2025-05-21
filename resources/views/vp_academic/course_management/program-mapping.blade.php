@@ -16,7 +16,7 @@
 
             <div class="container-fluid">
                 @include('layouts.success-message')
-          
+
 
                 <!-- Page Heading with Button on Same Row -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -74,14 +74,16 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
 
-                                        <!-- TOGGLE ACTIVE/INACTIVE BUTTON -->
-                                        <form action="{{ route('program.mapping.toggleActive', $first->id) }}"
-                                            method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn btn-warning btn-sm fixed-width-btn">
-                                                <i class="fas {{ $first->active ? 'fa-times' : 'fa-check' }}"></i>
-                                            </button>
-                                        </form>
+                                                                        {{-- 
+                                    <!-- TOGGLE ACTIVE/INACTIVE BUTTON -->
+                                    <form action="{{ route('program.mapping.toggleActive', $first->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-warning btn-sm fixed-width-btn">
+                                            <i class="fas {{ $first->active ? 'fa-times' : 'fa-check' }}"></i>
+                                        </button>
+                                    </form>
+                                --}}
+
 
                                         <!-- DELETE BUTTON -->
                                         <button type="button" class="btn btn-danger btn-sm fixed-width-btn"
@@ -141,7 +143,7 @@
 
 
                                                                 <label for="courseSearch{{ $first->id }}">Add
-                                                                    Course</label>
+                                                                    Subjects</label>
                                                                 <div class="position-relative d-flex flex-column"
                                                                     style="gap: 10px;">
                                                                     <input type="text" class="form-control"
@@ -280,99 +282,108 @@
                 </table>
 
 
-<!-- Modal for Create Program Mapping -->
-<div class="modal fade" id="createProgramMappingModal" tabindex="-1"
-    aria-labelledby="createProgramMappingModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" action="{{ route('program.mapping.store') }}" id="programMappingForm">
-            @csrf
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="createProgramMappingModalLabel">Create Program Mapping</h5>
-                    <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                <!-- Modal for Create Program Mapping -->
+                <div class="modal fade" id="createProgramMappingModal" tabindex="-1"
+                    aria-labelledby="createProgramMappingModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <form method="POST" action="{{ route('program.mapping.store') }}" id="programMappingForm">
+                            @csrf
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title" id="createProgramMappingModalLabel">Create Program Mapping
+                                    </h5>
+                                    <button type="button" class="close text-white" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
 
-                <div class="modal-body">
-                    <div class="container-fluid">
-                        <div class="row g-3">
+                                <div class="modal-body">
+                                    <div class="container-fluid">
+                                        <div class="row g-3">
 
-                            <div class="col-md-6">
-                                <label class="form-label">Program <span class="text-danger">*</span></label>
-                                <select class="form-control" name="program_id" required>
-                                    <option value="">Select Program</option>
-                                    @foreach ($programs as $program)
-                                        <option value="{{ $program->id }}">{{ $program->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Program <span
+                                                        class="text-danger">*</span></label>
+                                                <select class="form-control" name="program_id" required>
+                                                    <option value="">Select Program</option>
+                                                    @foreach ($programs as $program)
+                                                        <option value="{{ $program->id }}">{{ $program->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Effective School Year <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="effective_sy"
-                                    placeholder="e.g., 2025-2026" required>
-                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Effective School Year <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" name="effective_sy"
+                                                    placeholder="e.g., 2025-2026" required>
+                                            </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Year Level <span class="text-danger">*</span></label>
-                                <select class="form-control" name="year_level_id" required>
-                                    <option value="">Select Year Level</option>
-                                    @foreach ($yearLevels as $yearLevel)
-                                        <option value="{{ $yearLevel->id }}">{{ $yearLevel->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Year Level <span
+                                                        class="text-danger">*</span></label>
+                                                <select class="form-control" name="year_level_id" required>
+                                                    <option value="">Select Year Level</option>
+                                                    @foreach ($yearLevels as $yearLevel)
+                                                        <option value="{{ $yearLevel->id }}">{{ $yearLevel->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Semester <span class="text-danger">*</span></label>
-                                <select class="form-control" name="semester_id" required>
-                                    <option value="">Select Semester</option>
-                                    @foreach ($semesters as $semester)
-                                        <option value="{{ $semester->id }}">{{ $semester->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Semester <span
+                                                        class="text-danger">*</span></label>
+                                                <select class="form-control" name="semester_id" required>
+                                                    <option value="">Select Semester</option>
+                                                    @foreach ($semesters as $semester)
+                                                        <option value="{{ $semester->id }}">{{ $semester->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
-                            <div class="col-12 mt-2">
-                                <fieldset class="border p-3 rounded">
-                                    <legend class="float-none w-auto px-2" style="font-size: 1rem;">
-                                        Add Courses
-                                    </legend>
+                                            <div class="col-12 mt-2">
+                                                <fieldset class="border p-3 rounded">
+                                                    <legend class="float-none w-auto px-2" style="font-size: 1rem;">
+                                                        Add Courses
+                                                    </legend>
 
-                                    <div class="form-group mb-3">
-                                        <input type="text" id="courseSearchInput" class="form-control"
-                                            placeholder="Search course by name...">
+                                                    <div class="form-group mb-3">
+                                                        <input type="text" id="courseSearchInput" class="form-control"
+                                                            placeholder="Search course by name...">
+                                                    </div>
+
+                                                    <ul id="courseSuggestions" class="list-group mb-3"
+                                                        style="display: none; max-height: 200px; overflow-y: auto;">
+                                                        <!-- Dynamic suggestions go here -->
+                                                    </ul>
+
+                                                    <div class="form-group">
+                                                        <label>Selected Subjects</label>
+                                                        <ul class="list-group" id="selectedCoursesList"></ul>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+
+                                            <!-- Hidden course inputs -->
+                                            <div id="hiddenCoursesInputs"></div>
+                                            <input type="hidden" name="action_type" value="create_mapping">
+
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <ul id="courseSuggestions" class="list-group mb-3"
-                                        style="display: none; max-height: 200px; overflow-y: auto;">
-                                        <!-- Dynamic suggestions go here -->
-                                    </ul>
-
-                                    <div class="form-group">
-                                        <label>Selected Courses</label>
-                                        <ul class="list-group" id="selectedCoursesList"></ul>
-                                    </div>
-                                </fieldset>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-success">Save Mapping</button>
+                                </div>
                             </div>
-
-                            <!-- Hidden course inputs -->
-                            <div id="hiddenCoursesInputs"></div>
-                            <input type="hidden" name="action_type" value="create_mapping">
-
-                        </div>
+                        </form>
                     </div>
                 </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Save Mapping</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
 
             </div>
@@ -421,7 +432,7 @@
                     filtered.forEach(course => {
                         const item = $(
                                 '<li class="list-group-item list-group-item-action cursor-pointer"></li>'
-                                )
+                            )
                             .text(course.name)
                             .on('click', function() {
                                 addCourseToSelected(course.id, course.name);
