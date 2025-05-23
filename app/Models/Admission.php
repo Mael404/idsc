@@ -18,6 +18,10 @@ class Admission extends Model
         'middle_name',
         'address_line1',
         'address_line2',
+        'region', // New field
+        'province', // New field
+        'city', // New field
+        'barangay', // New field
         'zip_code',
         'contact_number',
         'email',

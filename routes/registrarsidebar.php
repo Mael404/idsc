@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProgramCourseMappingController;
 use App\Http\Controllers\RegistrarSideBarController;
 use Illuminate\Support\Facades\Route;
@@ -53,4 +54,7 @@ Route::post('/get-mapping-units', [AdmissionController::class, 'getMappingUnits'
 Route::put('/billing/{studentId}/initial-payment', [AdmissionController::class, 'updateInitialPayment'])
     ->name('billing.updateInitialPayment');
 
-    
+// Routes for fetching data for cascading dropdowns
+Route::get('/provinces/{regionCode}', [LocationController::class, 'getProvinces']);
+Route::get('/cities/{provinceCode}', [LocationController::class, 'getCities']);
+Route::get('/barangays/{citymunCode}', [LocationController::class, 'getBarangays']);

@@ -7,6 +7,7 @@ use App\Models\Billing;
 use App\Models\Course;
 use App\Models\MiscFee;
 use App\Models\ProgramCourseMapping;
+use App\Models\RefRegion;
 use App\Models\Scholarship;
 use App\Models\SchoolYear;
 use App\Models\StudentCourse;
@@ -147,7 +148,7 @@ class AdmissionController extends Controller
                 $totalUnits = \App\Models\Course::whereIn('id', $courseIds)->sum('units');
             }
         }
-
+        $regions = RefRegion::with('provinces.cities.barangays')->get();
         // Pass all data to view
         return view('registrar.enrollment.enrollment', compact(
             'admissions',
@@ -156,210 +157,213 @@ class AdmissionController extends Controller
             'scholarships',
             'sampleMappingId',
             'selectedMappingId',
+            'regions',
             'totalUnits'
         ));
     }
 
 
     public function store(Request $request)
-{
-    Log::debug('Form submission data:', $request->all());
+    {
+        Log::debug('Form submission data:', $request->all());
 
-    if ($request->has('course_ids')) {
-        Log::debug('Selected course IDs:', ['courses' => $request->course_ids]);
-    }
+        if ($request->has('course_ids')) {
+            Log::debug('Selected course IDs:', ['courses' => $request->course_ids]);
+        }
 
-    $request->validate([
-        'last_name' => 'required|string|max:255',
-        'first_name' => 'required|string|max:255',
-        'contact_number' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
-        'school_year' => 'required|string|max:255',
-        'semester' => 'required|string|max:255',
-        'course_mapping_id' => 'nullable|exists:program_course_mappings,id',
-        'scholarship' => 'nullable|string', // expecting scholarship id or 'none'
-    ]);
+        $request->validate([
+            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'birthdate' => 'required|date',
+            'contact_number' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'school_year' => 'required|string|max:255',
+            'semester' => 'required|string|max:255',
+            'course_mapping_id' => 'nullable|exists:program_course_mappings,id',
+            'scholarship' => 'nullable|string', // expecting scholarship id or 'none'
+        ]);
 
-    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+        // Check if student already exists
+        // Check if student already exists
+        $existingStudent = Admission::where('first_name', $request->first_name)
+            ->where('last_name', $request->last_name)
+            ->where('middle_name', $request->middle_name)
+            ->where('birthdate', $request->birthdate)
+            ->first();
 
-    // Generate unique student ID (format: YY-XXX)
-    do {
-        $studentId = date('y') . '-' . rand(100, 999);
-    } while (Admission::where('student_id', $studentId)->exists());
+        if ($existingStudent) {
+            return redirect()->back()->with('error', 'This student already exists in the database!');
+        }
 
-    // Create admission record
-    $admission = Admission::create([
-        'student_id' => $studentId,
-        'last_name' => $request->last_name,
-        'first_name' => $request->first_name,
-        'middle_name' => $request->middle_name,
-        'address_line1' => $request->address_line1,
-        'address_line2' => $request->address_line2,
-        'zip_code' => $request->zip_code,
-        'contact_number' => $request->contact_number,
-        'email' => $request->email,
-        'father_last_name' => $request->father_last_name,
-        'father_first_name' => $request->father_first_name,
-        'father_middle_name' => $request->father_middle_name,
-        'father_contact' => $request->father_contact,
-        'father_profession' => $request->father_profession,
-        'father_industry' => $request->father_industry,
-        'mother_last_name' => $request->mother_last_name,
-        'mother_first_name' => $request->mother_first_name,
-        'mother_middle_name' => $request->mother_middle_name,
-        'mother_contact' => $request->mother_contact,
-        'mother_profession' => $request->mother_profession,
-        'mother_industry' => $request->mother_industry,
-        'gender' => $request->gender,
-        'birthdate' => $request->birthdate,
-        'birthplace' => $request->birthplace,
-        'citizenship' => $request->citizenship,
-        'religion' => $request->religion,
-        'civil_status' => $request->civil_status,
-        'course_mapping_id' => $request->course_mapping_id,
-        'major' => $request->major,
-        'admission_status' => $request->admission_status,
-        'student_no' => $request->student_no,
-        'admission_year' => $request->admission_year,
-        'scholarship_id' => $request->scholarship !== 'none' ? $request->scholarship : null,
-        'previous_school' => $request->previous_school,
-        'previous_school_address' => $request->previous_school_address,
-        'elementary_school' => $request->elementary_school,
-        'elementary_address' => $request->elementary_address,
-        'secondary_school' => $request->secondary_school,
-        'secondary_address' => $request->secondary_address,
-        'honors' => $request->honors,
-        'school_year' => $activeSchoolYear ? $activeSchoolYear->name : $request->school_year,
-        'semester' => $activeSchoolYear ? $activeSchoolYear->semester : $request->semester,
-        'status' => 'Pending',
-    ]);
 
-    // Calculate tuition fee by summing course units from program_course_mappings + courses
-    $mapping = ProgramCourseMapping::find($request->course_mapping_id);
-    $totalUnits = 0;
-    if ($mapping) {
-        $relatedCourseIds = ProgramCourseMapping::where('program_id', $mapping->program_id)
-            ->where('year_level_id', $mapping->year_level_id)
-            ->where('semester_id', $mapping->semester_id)
-            ->where(function ($query) use ($mapping) {
-                if ($mapping->effective_sy === null) {
-                    $query->whereNull('effective_sy');
-                } else {
-                    $query->where('effective_sy', $mapping->effective_sy);
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+
+        // Generate unique student ID (format: YY-XXX)
+        do {
+            $studentId = date('y') . '-' . rand(100, 999);
+        } while (Admission::where('student_id', $studentId)->exists());
+
+        // Create admission record
+        $admission = Admission::create([
+            'student_id' => $studentId,
+            'last_name' => $request->last_name,
+            'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'address_line1' => $request->address_line1,
+            'address_line2' => $request->address_line2,
+            'region' => $request->region,
+            'province' => $request->province,
+            'city' => $request->city,
+            'barangay' => $request->barangay,
+            'zip_code' => $request->zip_code,
+            'contact_number' => $request->contact_number,
+            'email' => $request->email,
+            'father_last_name' => $request->father_last_name,
+            'father_first_name' => $request->father_first_name,
+            'father_middle_name' => $request->father_middle_name,
+            'father_contact' => $request->father_contact,
+            'father_profession' => $request->father_profession,
+            'father_industry' => $request->father_industry,
+            'mother_last_name' => $request->mother_last_name,
+            'mother_first_name' => $request->mother_first_name,
+            'mother_middle_name' => $request->mother_middle_name,
+            'mother_contact' => $request->mother_contact,
+            'mother_profession' => $request->mother_profession,
+            'mother_industry' => $request->mother_industry,
+            'gender' => $request->gender,
+            'birthdate' => $request->birthdate,
+            'birthplace' => $request->birthplace,
+            'citizenship' => $request->citizenship,
+            'religion' => $request->religion,
+            'civil_status' => $request->civil_status,
+            'course_mapping_id' => $request->course_mapping_id,
+            'major' => $request->major,
+            'admission_status' => $request->admission_status,
+            'student_no' => $request->student_no,
+            'admission_year' => $request->admission_year,
+            'scholarship_id' => $request->scholarship !== 'none' ? $request->scholarship : null,
+            'previous_school' => $request->previous_school,
+            'previous_school_address' => $request->previous_school_address,
+            'elementary_school' => $request->elementary_school,
+            'elementary_address' => $request->elementary_address,
+            'secondary_school' => $request->secondary_school,
+            'secondary_address' => $request->secondary_address,
+            'honors' => $request->honors,
+            'school_year' => $activeSchoolYear ? $activeSchoolYear->name : $request->school_year,
+            'semester' => $activeSchoolYear ? $activeSchoolYear->semester : $request->semester,
+            'status' => 'Pending',
+        ]);
+
+        $mapping = ProgramCourseMapping::find($request->course_mapping_id);
+        $totalUnits = 0;
+        if ($mapping) {
+            $relatedCourseIds = ProgramCourseMapping::where('program_id', $mapping->program_id)
+                ->where('year_level_id', $mapping->year_level_id)
+                ->where('semester_id', $mapping->semester_id)
+                ->where(function ($query) use ($mapping) {
+                    if ($mapping->effective_sy === null) {
+                        $query->whereNull('effective_sy');
+                    } else {
+                        $query->where('effective_sy', $mapping->effective_sy);
+                    }
+                })
+                ->pluck('course_id');
+
+            $totalUnits = Course::whereIn('id', $relatedCourseIds)->sum('units');
+        }
+
+        $tuitionFee = $request->input('tuition_fee');
+        $discountValue = 0;
+        $tuitionFeeDiscount = $tuitionFee;
+        $miscFee = 0;
+        $balanceDue = null;
+
+        if ($request->scholarship !== 'none' && $request->scholarship !== null) {
+            $scholarship = Scholarship::find($request->scholarship);
+
+            if ($scholarship) {
+                if (stripos($scholarship->name, 'Top Notcher') !== false) {
+                    $discountValue = $tuitionFee;
+                    $tuitionFeeDiscount = 0;
+                    $miscFee = 0;
+                    $balanceDue = 0;
+                } elseif ($scholarship->discount) {
+                    $discountValue = $tuitionFee * ($scholarship->discount / 100);
+                    $tuitionFeeDiscount = $tuitionFee - $discountValue;
                 }
-            })
-            ->pluck('course_id');
-
-        $totalUnits = Course::whereIn('id', $relatedCourseIds)->sum('units');
-    }
-
-    $tuitionFee = $request->input('tuition_fee'); // This will be a numeric value submitted by the form
-
-    // Default values for discount and fees
-    $discountValue = 0;
-    $tuitionFeeDiscount = $tuitionFee;
-    $miscFee = 0;
-
-    // Calculate discount
-    $balanceDue = null; // We'll set this explicitly for "Top Notcher" cases
-    if ($request->scholarship !== 'none' && $request->scholarship !== null) {
-        $scholarship = Scholarship::find($request->scholarship);
-
-        if ($scholarship) {
-            // Check if scholarship is "Top Notcher" (case-insensitive)
-            if (stripos($scholarship->name, 'Top Notcher') !== false) {
-                $discountValue = $tuitionFee; // Full discount
-                $tuitionFeeDiscount = 0; // No tuition fee left to pay
-                $miscFee = 0; // No miscellaneous fee
-                $balanceDue = 0; // Ensure balance due is 0
-            } elseif ($scholarship->discount) {
-                // Apply percentage discount
-                $discountValue = $tuitionFee * ($scholarship->discount / 100);
-                $tuitionFeeDiscount = $tuitionFee - $discountValue;
             }
         }
-    }
 
-    // Calculate misc_fee if not "Top Notcher"
-    if ($balanceDue === null && $request->course_mapping_id) {
-        $miscFee = MiscFee::where('program_course_mapping_id', $request->course_mapping_id)->sum('amount');
-    }
+        if ($balanceDue === null && $request->course_mapping_id) {
+            $miscFee = MiscFee::where('program_course_mapping_id', $request->course_mapping_id)->sum('amount');
+        }
 
-    // Initial payment and old accounts default to 0
-    $initialPayment = 0;
-    $oldAccounts = 0;
+        $initialPayment = 0;
+        $oldAccounts = 0;
 
-    // Calculate total assessment and balance due
-    if ($balanceDue === null) {
-        $totalAssessment = $tuitionFeeDiscount + $miscFee + $oldAccounts;
-        $balanceDue = $totalAssessment - $initialPayment;
-    }
+        if ($balanceDue === null) {
+            $totalAssessment = $tuitionFeeDiscount + $miscFee + $oldAccounts;
+            $balanceDue = $totalAssessment - $initialPayment;
+        }
 
-    // Create billing record
-    Billing::create([
-        'student_id' => $admission->student_id,
-        'school_year' => $admission->school_year,
-        'semester' => $admission->semester,
-        'tuition_fee' => $tuitionFee,
-        'discount' => $discountValue,
-        'tuition_fee_discount' => $tuitionFeeDiscount,
-        'misc_fee' => $miscFee,
-        'old_accounts' => $oldAccounts,
-        'total_assessment' => $totalAssessment ?? 0,
-        'initial_payment' => $initialPayment,
-        'balance_due' => $balanceDue,
-        'is_full_payment' => false,
-        'prelims_due' => null,
-        'midterms_due' => null,
-        'prefinals_due' => null,
-        'finals_due' => null,
-    ]);
+        Billing::create([
+            'student_id' => $admission->student_id,
+            'school_year' => $admission->school_year,
+            'semester' => $admission->semester,
+            'tuition_fee' => $tuitionFee,
+            'discount' => $discountValue,
+            'tuition_fee_discount' => $tuitionFeeDiscount,
+            'misc_fee' => $miscFee,
+            'old_accounts' => $oldAccounts,
+            'total_assessment' => $totalAssessment ?? 0,
+            'initial_payment' => $initialPayment,
+            'balance_due' => $balanceDue,
+            'is_full_payment' => false,
+        ]);
 
-    // Insert StudentCourses (as before)
-    $isIrregular = in_array($request->admission_status, ['transferee', 'returnee']);
+        $isIrregular = in_array($request->admission_status, ['transferee', 'returnee']);
 
-    if ($isIrregular && $request->has('course_ids')) {
-        foreach ($request->course_ids as $courseId) {
-            try {
+        if ($isIrregular && $request->has('course_ids')) {
+            foreach ($request->course_ids as $courseId) {
+                try {
+                    StudentCourse::create([
+                        'student_id' => $admission->student_id,
+                        'course_id' => $courseId,
+                        'school_year' => $admission->school_year,
+                        'semester' => $admission->semester,
+                        'status' => 'Pending',
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Error inserting student course: ' . $e->getMessage());
+                }
+            }
+        } else {
+            $relatedMappings = ProgramCourseMapping::where('program_id', $mapping->program_id)
+                ->where('year_level_id', $mapping->year_level_id)
+                ->where('semester_id', $mapping->semester_id)
+                ->where(function ($query) use ($mapping) {
+                    if ($mapping->effective_sy === null) {
+                        $query->whereNull('effective_sy');
+                    } else {
+                        $query->where('effective_sy', $mapping->effective_sy);
+                    }
+                })
+                ->get();
+
+            foreach ($relatedMappings as $map) {
                 StudentCourse::create([
                     'student_id' => $admission->student_id,
-                    'course_id' => $courseId,
+                    'course_id' => $map->course_id,
                     'school_year' => $admission->school_year,
                     'semester' => $admission->semester,
                     'status' => 'Pending',
                 ]);
-            } catch (\Exception $e) {
-                Log::error('Error inserting student course: ' . $e->getMessage());
             }
         }
-    } else {
-        $relatedMappings = ProgramCourseMapping::where('program_id', $mapping->program_id)
-            ->where('year_level_id', $mapping->year_level_id)
-            ->where('semester_id', $mapping->semester_id)
-            ->where(function ($query) use ($mapping) {
-                if ($mapping->effective_sy === null) {
-                    $query->whereNull('effective_sy');
-                } else {
-                    $query->where('effective_sy', $mapping->effective_sy);
-                }
-            })
-            ->get();
 
-        foreach ($relatedMappings as $map) {
-            StudentCourse::create([
-                'student_id' => $admission->student_id,
-                'course_id' => $map->course_id,
-                'school_year' => $admission->school_year,
-                'semester' => $admission->semester,
-                'status' => 'Pending',
-            ]);
-        }
+        return redirect()->route('admissions.index')->with('success', 'Admission and billing created successfully!');
     }
-
-    return redirect()->route('admissions.index')->with('success', 'Admission and billing created successfully!');
-}
-
-
 
 
 
@@ -447,6 +451,8 @@ class AdmissionController extends Controller
 
         $scholarships = Scholarship::where('status', 1)->orderBy('name')->get(); // Only active ones
 
-        return view('registrar.enrollment.enrollment', compact('courseMappings', 'allCourses', 'scholarships'));
+        $regions = RefRegion::with('provinces.cities.barangays')->get();
+
+        return view('registrar.enrollment.enrollment', compact('courseMappings', 'allCourses', 'scholarships', 'regions'));
     }
 }

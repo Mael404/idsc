@@ -123,61 +123,122 @@
 
                                     <div class="tab-content">
                                         <!-- Step 1: Personal Info -->
-                                        <div class="tab-pane fade show active" id="step1" role="tabpanel"
-                                            aria-labelledby="step1-tab">
-                                            <div class="alert alert-info mb-3">
-                                                <i class="fas fa-info-circle mr-2"></i>Fields marked with <span
-                                                    class="text-danger">*</span> are required.
-                                            </div>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <label for="last_name">Last Name <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" id="last_name" name="last_name"
-                                                        class="form-control" required placeholder="e.g., Dela Cruz">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="first_name">First Name <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" id="first_name" name="first_name"
-                                                        class="form-control" required placeholder="e.g., Juan">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="middle_name">Middle Name</label>
-                                                    <input type="text" id="middle_name" name="middle_name"
-                                                        class="form-control" placeholder="e.g., Reyes">
-                                                </div>
-                                                <div class="col-12">
-                                                    <label for="address_line1">Street/Barangay/City</label>
-                                                    <input type="text" id="address_line1" name="address_line1"
-                                                        class="form-control"
-                                                        placeholder="e.g., 123 Main St, Brgy. San Jose">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="address_line2">District/Province/Region</label>
-                                                    <input type="text" id="address_line2" name="address_line2"
-                                                        class="form-control" placeholder="e.g., Metro Manila">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="zip_code">Zip Code</label>
-                                                    <input type="text" id="zip_code" name="zip_code"
-                                                        class="form-control" placeholder="e.g., 1000">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="contact_number">Contact Number <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="tel" id="contact_number" name="contact_number"
-                                                        class="form-control" required placeholder="e.g., 09123456789">
-                                                </div>
-                                                <div class="col-12">
-                                                    <label for="email">Email Address <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="email" id="email" name="email"
-                                                        class="form-control" required
-                                                        placeholder="e.g., juan.delacruz@example.com">
-                                                </div>
-                                            </div>
-                                        </div>
+                                      <div class="tab-pane fade show active" id="step1" role="tabpanel" aria-labelledby="step1-tab">
+    <div class="alert alert-info mb-3">
+        <i class="fas fa-info-circle mr-2"></i>Fields marked with <span class="text-danger">*</span> are required.
+    </div>
+    <div class="row g-3">
+        <!-- Name Fields -->
+        <div class="col-md-4">
+            <label for="last_name">Last Name <span class="text-danger">*</span></label>
+            <input type="text" id="last_name" name="last_name" class="form-control" required placeholder="e.g., Dela Cruz">
+        </div>
+        <div class="col-md-4">
+            <label for="first_name">First Name <span class="text-danger">*</span></label>
+            <input type="text" id="first_name" name="first_name" class="form-control" required placeholder="e.g., Juan">
+        </div>
+        <div class="col-md-4">
+            <label for="middle_name">Middle Name</label>
+            <input type="text" id="middle_name" name="middle_name" class="form-control" placeholder="e.g., Reyes">
+        </div>
+        <!-- Address Fields with Cascading Dropdowns -->
+      <div class="form-group">
+    <label for="region">Region</label>
+    <select id="region" name="region" class="form-control">
+        <option value="">Select Region</option>
+        @foreach ($regions as $region)
+            <option value="{{ $region->regCode }}">{{ $region->regDesc }}</option>
+        @endforeach
+    </select>
+</div>
+<div class="form-group">
+    <label for="province">Province</label>
+    <select id="province" name="province" class="form-control" disabled>
+        <option value="">Select Province</option>
+    </select>
+</div>
+<div class="form-group">
+    <label for="city">City/Municipality</label>
+    <select id="city" name="city" class="form-control" disabled>
+        <option value="">Select City/Municipality</option>
+    </select>
+</div>
+<div class="form-group">
+    <label for="barangay">Barangay</label>
+    <select id="barangay" name="barangay" class="form-control" disabled>
+        <option value="">Select Barangay</option>
+    </select>
+</div>
+
+        <!-- Additional Address and Contact Fields -->
+        <div class="col-md-6">
+            <label for="zip_code">Zip Code</label>
+            <input type="text" id="zip_code" name="zip_code" class="form-control" placeholder="e.g., 1000">
+        </div>
+        <div class="col-md-6">
+            <label for="contact_number">Contact Number <span class="text-danger">*</span></label>
+            <input type="tel" id="contact_number" name="contact_number" class="form-control" required placeholder="e.g., 09123456789">
+        </div>
+        <div class="col-12">
+            <label for="email">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="email" name="email" class="form-control" required placeholder="e.g., juan.delacruz@example.com">
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const region = document.getElementById('region');
+    const province = document.getElementById('province');
+    const city = document.getElementById('city');
+    const barangay = document.getElementById('barangay');
+
+    region.addEventListener('change', () => {
+        fetch(`/provinces/${region.value}`)
+            .then(response => response.json())
+            .then(data => {
+                province.innerHTML = '<option value="">Select Province</option>';
+                city.innerHTML = '<option value="">Select City/Municipality</option>';
+                barangay.innerHTML = '<option value="">Select Barangay</option>';
+                city.disabled = true;
+                barangay.disabled = true;
+
+                data.forEach(provinceItem => {
+                    province.innerHTML += `<option value="${provinceItem.provCode}">${provinceItem.provDesc}</option>`;
+                });
+                province.disabled = false;
+            });
+    });
+
+    province.addEventListener('change', () => {
+        fetch(`/cities/${province.value}`)
+            .then(response => response.json())
+            .then(data => {
+                city.innerHTML = '<option value="">Select City/Municipality</option>';
+                barangay.innerHTML = '<option value="">Select Barangay</option>';
+                barangay.disabled = true;
+
+                data.forEach(cityItem => {
+                    city.innerHTML += `<option value="${cityItem.citymunCode}">${cityItem.citymunDesc}</option>`;
+                });
+                city.disabled = false;
+            });
+    });
+
+    city.addEventListener('change', () => {
+        fetch(`/barangays/${city.value}`)
+            .then(response => response.json())
+            .then(data => {
+                barangay.innerHTML = '<option value="">Select Barangay</option>';
+                data.forEach(brgyItem => {
+                    barangay.innerHTML += `<option value="${brgyItem.brgyCode}">${brgyItem.brgyDesc}</option>`;
+                });
+                barangay.disabled = false;
+            });
+    });
+});
+</script>
+
 
                                         <!-- Step 2: Parents Info -->
                                         <div class="tab-pane fade" id="step2" role="tabpanel"

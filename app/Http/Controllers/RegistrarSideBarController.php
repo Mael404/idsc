@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admission;
 use App\Models\ProgramCourseMapping;
+use App\Models\RefRegion;
 use App\Models\Scholarship;
 use Illuminate\Http\Request;
 
@@ -72,7 +73,7 @@ class RegistrarSideBarController extends Controller
                 $totalUnits = \App\Models\Course::whereIn('id', $courseIds)->sum('units');
             }
         }
-
+   $regions = RefRegion::with('provinces.cities.barangays')->get();
         // Pass all data to view
         return view('registrar.enrollment.enrollment', compact(
             'admissions',
@@ -81,6 +82,7 @@ class RegistrarSideBarController extends Controller
             'scholarships',
             'sampleMappingId',
             'selectedMappingId',
+            'regions',
             'totalUnits'
         ));
     }
