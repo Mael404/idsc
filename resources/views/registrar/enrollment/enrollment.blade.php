@@ -616,12 +616,36 @@ document.addEventListener('DOMContentLoaded', () => {
                                                     <td>
                                                         <!-- Trigger modal -->
                                                         <!-- View Button with Eye Icon -->
-                                                        <button type="button" class="btn btn-info btn-sm"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#studentModal{{ $admission->student_id }}"
-                                                            title="View Student">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
+                                                     @php
+    $initialPayment = $admission->billing->initial_payment ?? 0;
+@endphp
+
+<div class="position-relative d-inline-block">
+    <button type="button" 
+            class="btn btn-info btn-sm position-relative"
+            data-bs-toggle="modal"
+            data-bs-target="#studentModal{{ $admission->student_id }}"
+            title="View Student">
+        <i class="fas fa-eye"></i>
+
+        @if($initialPayment <= 0)
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
+                  data-bs-toggle="tooltip"
+                  title="This student hasn't made an initial payment yet.">
+                Warning
+            </span>
+        @endif
+    </button>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+
 
                                                         <!-- Print COR Button with Print Icon -->
                                                         <a href="{{ route('admissions.printCOR', $admission->student_id) }}"
@@ -896,7 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Define required fields for each step (0-indexed)
   const requiredFields = [
     // Step 1: Personal Info
-    ['last_name', 'first_name', 'contact_number', 'email', 'address_line1'],
+    ['last_name', 'first_name', 'contact_number', 'email', 'region', 'province', 'city', 'barangay'],
     
     // Step 2: Parents Info (optional)
     [],

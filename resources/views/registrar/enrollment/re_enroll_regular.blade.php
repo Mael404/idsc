@@ -55,7 +55,7 @@
                 @include('layouts.success-message')
 
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">Re-Enroll(Regular)</h1>
+                    <h1 class="h3 mb-0 text-gray-800">Existing Students</h1>
 
 
                     <button class="btn btn-primary" data-toggle="modal" data-target="#admissionFormModal">
@@ -65,9 +65,9 @@
                 </div>
                 <div class="modal fade" id="admissionFormModal" tabindex="-1" aria-labelledby="admissionFormModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
+                    <div class="modal-dialog modal-lg">
                         <div class="modal-content">
-                            <form method="POST" action="{{ route('admissions.store') }}" id="admissionForm">
+                            <form method="POST" action="{{ route('re_enroll_regular.store') }}" id="admissionForm">
                                 @csrf
                                 <div class="modal-header bg-primary text-white">
                                     <h5 class="modal-title">Admission Form</h5>
@@ -77,404 +77,161 @@
                                 </div>
 
                                 <div class="modal-body">
-                                    <input type="hidden" name="school_year"
-                                        value="{{ $activeSchoolYear ? $activeSchoolYear->name : '' }}">
-                                    <input type="hidden" name="semester"
-                                        value="{{ $activeSchoolYear ? $activeSchoolYear->semester : '' }}">
-
                                     <!-- Progress Indicator -->
                                     <div class="progress mb-4">
-                                        <div class="progress-bar" role="progressbar" style="width: 20%;" aria-valuenow="20"
-                                            aria-valuemin="0" aria-valuemax="100">Step 1 of 5</div>
+                                        <div class="progress-bar" id="progressBar" role="progressbar" style="width: 50%;"
+                                            aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                            Step 1 of 2
+                                        </div>
                                     </div>
 
+                                    <!-- Tab Navigation -->
                                     <ul class="nav nav-tabs mb-3" id="formTabs" role="tablist">
                                         <li class="nav-item">
                                             <a class="nav-link active" id="step1-tab" data-toggle="tab" href="#step1"
                                                 role="tab" aria-controls="step1" aria-selected="true">
-                                                <i class="fas fa-user mr-1"></i> Personal Info
+                                                <i class="fas fa-search mr-1"></i> Student Verification
                                             </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="step2-tab" data-toggle="tab" href="#step2"
+                                            <a class="nav-link disabled" id="step2-tab" data-toggle="tab" href="#step2"
                                                 role="tab" aria-controls="step2" aria-selected="false">
-                                                <i class="fas fa-users mr-1"></i> Parents
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" id="step3-tab" data-toggle="tab" href="#step3"
-                                                role="tab" aria-controls="step3" aria-selected="false">
-                                                <i class="fas fa-info-circle mr-1"></i> Other Details
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" id="step4-tab" data-toggle="tab" href="#step4"
-                                                role="tab" aria-controls="step4" aria-selected="false">
-                                                <i class="fas fa-graduation-cap mr-1"></i> Admission
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" id="step5-tab" data-toggle="tab" href="#step5"
-                                                role="tab" aria-controls="step5" aria-selected="false">
-                                                <i class="fas fa-book mr-1"></i> Education
+                                                <i class="fas fa-graduation-cap mr-1"></i> Course Mapping
                                             </a>
                                         </li>
                                     </ul>
 
+                                    <!-- Tab Content -->
                                     <div class="tab-content">
-                                        <!-- Step 1: Personal Info -->
+                                        <!-- Step 1: Search for Student -->
                                         <div class="tab-pane fade show active" id="step1" role="tabpanel"
                                             aria-labelledby="step1-tab">
-                                            <div class="alert alert-info mb-3">
-                                                <i class="fas fa-info-circle mr-2"></i>Fields marked with <span
-                                                    class="text-danger">*</span> are required.
-                                            </div>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <label for="last_name">Last Name <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" id="last_name" name="last_name"
-                                                        class="form-control" required placeholder="e.g., Dela Cruz">
+                                            <div class="form-group">
+                                                <label for="student_search">Search Student (Name or Student ID) <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group mb-3">
+                                                    <input type="text" id="student_search" name="student_search"
+                                                        class="form-control" placeholder="Enter student ID or name" />
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-primary" type="button"
+                                                            id="searchStudentBtn">
+                                                            <i class="fas fa-search"></i> Search
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label for="first_name">First Name <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" id="first_name" name="first_name"
-                                                        class="form-control" required placeholder="e.g., Juan">
+
+                                                <!-- Loading indicator -->
+                                                <div id="searchLoading" class="text-center" style="display: none;">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                    <p>Searching student...</p>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label for="middle_name">Middle Name</label>
-                                                    <input type="text" id="middle_name" name="middle_name"
-                                                        class="form-control" placeholder="e.g., Reyes">
-                                                </div>
-                                                <div class="col-12">
-                                                    <label for="address_line1">Street/Barangay/City</label>
-                                                    <input type="text" id="address_line1" name="address_line1"
-                                                        class="form-control"
-                                                        placeholder="e.g., 123 Main St, Brgy. San Jose">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="address_line2">District/Province/Region</label>
-                                                    <input type="text" id="address_line2" name="address_line2"
-                                                        class="form-control" placeholder="e.g., Metro Manila">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="zip_code">Zip Code</label>
-                                                    <input type="text" id="zip_code" name="zip_code"
-                                                        class="form-control" placeholder="e.g., 1000">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="contact_number">Contact Number <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="tel" id="contact_number" name="contact_number"
-                                                        class="form-control" required placeholder="e.g., 09123456789">
-                                                </div>
-                                                <div class="col-12">
-                                                    <label for="email">Email Address <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="email" id="email" name="email"
-                                                        class="form-control" required
-                                                        placeholder="e.g., juan.delacruz@example.com">
+
+                                                <!-- Student info display -->
+                                                <div id="studentInfoContainer" style="display: none;">
+                                                    <div class="card mt-3">
+                                                        <div class="card-header bg-info text-white">
+                                                            <strong>Student Information</strong>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div id="studentInfo"></div>
+                                                            <div id="enrollmentWarnings" class="mt-3"></div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Step 2: Parents Info -->
+                                        <!-- Step 2: Course Mapping (updated version) -->
+                                        <!-- Step 2: Course Mapping -->
                                         <div class="tab-pane fade" id="step2" role="tabpanel"
                                             aria-labelledby="step2-tab">
-                                            <div class="alert alert-info mb-3">
-                                                <i class="fas fa-info-circle mr-2"></i>Please provide your parents'
-                                                information.
-                                            </div>
+                                            <input type="hidden" name="student_id" id="student_id_input">
 
-                                            <h5 class="mb-3"><i class="fas fa-male mr-2"></i>Father's Information</h5>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <label for="father_last_name">Last Name</label>
-                                                    <input type="text" id="father_last_name" name="father_last_name"
-                                                        class="form-control" placeholder="e.g., Dela Cruz">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="father_first_name">First Name</label>
-                                                    <input type="text" id="father_first_name" name="father_first_name"
-                                                        class="form-control" placeholder="e.g., Pedro">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="father_middle_name">Middle Name</label>
-                                                    <input type="text" id="father_middle_name"
-                                                        name="father_middle_name" class="form-control"
-                                                        placeholder="e.g., Santos">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="father_contact">Contact Number</label>
-                                                    <input type="tel" id="father_contact" name="father_contact"
-                                                        class="form-control" placeholder="e.g., 09123456789">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="father_profession">Profession</label>
-                                                    <input type="text" id="father_profession" name="father_profession"
-                                                        class="form-control" placeholder="e.g., Engineer">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="father_industry">Industry</label>
-                                                    <input type="text" id="father_industry" name="father_industry"
-                                                        class="form-control" placeholder="e.g., Construction">
-                                                </div>
-                                            </div>
-
-                                            <h5 class="mt-4 mb-3"><i class="fas fa-female mr-2"></i>Mother's Information
-                                            </h5>
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <label for="mother_last_name">Last Name</label>
-                                                    <input type="text" id="mother_last_name" name="mother_last_name"
-                                                        class="form-control" placeholder="e.g., Dela Cruz">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="mother_first_name">First Name</label>
-                                                    <input type="text" id="mother_first_name" name="mother_first_name"
-                                                        class="form-control" placeholder="e.g., Maria">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="mother_middle_name">Middle Name</label>
-                                                    <input type="text" id="mother_middle_name"
-                                                        name="mother_middle_name" class="form-control"
-                                                        placeholder="e.g., Reyes">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="mother_contact">Contact Number</label>
-                                                    <input type="tel" id="mother_contact" name="mother_contact"
-                                                        class="form-control" placeholder="e.g., 09123456789">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="mother_profession">Profession</label>
-                                                    <input type="text" id="mother_profession" name="mother_profession"
-                                                        class="form-control" placeholder="e.g., Teacher">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="mother_industry">Industry</label>
-                                                    <input type="text" id="mother_industry" name="mother_industry"
-                                                        class="form-control" placeholder="e.g., Education">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 3: Other Personal Details -->
-                                        <div class="tab-pane fade" id="step3" role="tabpanel"
-                                            aria-labelledby="step3-tab">
-                                            <div class="row g-3">
-                                                <div class="col-md-3">
-                                                    <label for="gender">Gender</label>
-                                                    <select id="gender" name="gender" class="form-control">
-                                                        <option value="" selected disabled>Select Gender</option>
-                                                        <option value="male">Male</option>
-                                                        <option value="female">Female</option>
-                                                        <option value="other">Other</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="birthdate">Birthdate</label>
-                                                    <input type="date" id="birthdate" name="birthdate"
-                                                        class="form-control">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="birthplace">Birthplace</label>
-                                                    <input type="text" id="birthplace" name="birthplace"
-                                                        class="form-control" placeholder="e.g., Manila City">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="citizenship">Citizenship</label>
-                                                    <input type="text" id="citizenship" name="citizenship"
-                                                        class="form-control" placeholder="e.g., Filipino">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="religion">Religion</label>
-                                                    <input type="text" id="religion" name="religion"
-                                                        class="form-control" placeholder="e.g., Roman Catholic">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label for="civil_status">Civil Status</label>
-                                                    <select id="civil_status" name="civil_status" class="form-control">
-                                                        <option value="" selected disabled>Select Status</option>
-                                                        <option value="single">Single</option>
-                                                        <option value="married">Married</option>
-                                                        <option value="separated">Separated</option>
-                                                        <option value="widowed">Widowed</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 4: Admission Info -->
-                                        <div class="tab-pane fade" id="step4" role="tabpanel"
-                                            aria-labelledby="step4-tab">
                                             <div class="row g-3">
                                                 <div class="col-md-6">
                                                     <label for="course_mapping_id">Course Mapping <span
                                                             class="text-danger">*</span></label>
                                                     <select id="course_mapping_id" name="course_mapping_id"
-                                                        class="form-control">
+                                                        class="form-control" required>
                                                         <option value="" selected disabled>Choose Mapping</option>
                                                         @foreach ($courseMappings as $mapping)
                                                             @if ($mapping->program && $mapping->yearLevel)
-                                                                <option value="{{ $mapping->id }}">
-                                                                    {{ $mapping->program->name }} -
+                                                                <option value="{{ $mapping->id }}"
+                                                                    data-program="{{ $mapping->program_id }}"
+                                                                    data-year="{{ $mapping->year_level_id }}"
+                                                                    data-semester="{{ $mapping->semester_id }}"
+                                                                    data-sy="{{ $mapping->effective_sy }}">
+                                                                    [ID: {{ $mapping->id }}] {{ $mapping->program->name }}
+                                                                    -
                                                                     {{ $mapping->yearLevel->name }}
                                                                     ({{ $mapping->effective_sy }})
                                                                 </option>
                                                             @endif
                                                         @endforeach
                                                     </select>
+
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Selected Mapping ID: <span
+                                                                id="displayMappingId">-</span></small>
+                                                    </div>
+
+                                                    <div id="totalUnitsContainer" class="alert alert-info mt-3"
+                                                        style="display:none;">
+                                                        Total Units: <strong id="totalUnitsValue"></strong>
+                                                    </div>
+                                                    <div id="tuitionFeeContainer" class="alert alert-success mt-2"
+                                                        style="display:none;">
+                                                        Tuition Fee: <strong id="tuitionFeeValue"></strong>
+                                                    </div>
+                                                    <div id="feeCalculationContainer" class="alert alert-secondary mt-2"
+                                                        style="display:none;">
+                                                        <small>Calculation: <span
+                                                                id="feeCalculationDetails"></span></small>
+                                                    </div>
                                                 </div>
 
                                                 <div class="col-md-6">
-                                                    <label for="major">Major</label>
-                                                    <input type="text" id="major" name="major"
-                                                        class="form-control" placeholder="e.g., Computer Programming">
-                                                </div>
-                                            </div>
+                                                    <div class="form-group">
+                                                        <label for="major">Major</label>
+                                                        <input type="text" id="major" name="major"
+                                                            class="form-control"
+                                                            placeholder="Enter major (if applicable)">
+                                                    </div>
 
-                                            <div id="manualCourseSelection" style="display: none;" class="mt-3">
-                                                <label for="course_ids">Select Courses (for
-                                                    irregular/transferee/returnee)</label>
-                                                <select id="course_ids" name="course_ids[]" class="form-control"
-                                                    multiple>
-                                                    @foreach ($allCourses as $course)
-                                                        <option value="{{ $course->id }}">{{ $course->code }} -
-                                                            {{ $course->title }}</option>
-                                                    @endforeach
-                                                </select>
-
-                                                <!-- Selected Courses List -->
-                                                <div id="selectedCoursesContainer" class="mt-3">
-                                                    <h5>Selected Courses:</h5>
-                                                    <ul id="selectedCoursesList"
-                                                        style="list-style-type:none; padding-left:0;"></ul>
-                                                </div>
-                                            </div>
-
-                                            <div class="mt-3">
-                                                <label class="form-label">Admission Status <span
-                                                        class="text-danger">*</span></label>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio"
-                                                        name="admission_status" value="highschool" id="highschool"
-                                                        required>
-                                                    <label class="form-check-label" for="highschool">High School
-                                                        Graduate</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio"
-                                                        name="admission_status" value="transferee" id="transferee">
-                                                    <label class="form-check-label" for="transferee">Transferee</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio"
-                                                        name="admission_status" value="returnee" id="returnee">
-                                                    <label class="form-check-label" for="returnee">Returnee</label>
-                                                </div>
-                                            </div>
-
-                                            <div class="row g-3 mt-2" id="transfereeFields" style="display: none;">
-                                                <div class="col-md-6">
-                                                    <label for="student_no">Student No. (if transferee)</label>
-                                                    <input type="text" id="student_no" name="student_no"
-                                                        class="form-control" placeholder="e.g., 2020-12345">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="admission_year">Year When Admitted</label>
-                                                    <input type="text" id="admission_year" name="admission_year"
-                                                        class="form-control" placeholder="e.g., 2023">
-                                                </div>
-                                            </div>
-
-                                            <div class="row g-3 mt-2">
-                                                <div class="col-md-6">
-                                                    <label for="scholarship">Scholarship</label>
-                                                    <select id="scholarship" name="scholarship" class="form-control">
-                                                        <option value="" selected disabled>Select Scholarship
-                                                        </option>
-                                                        <option value="academic">Academic</option>
-                                                        <option value="athletic">Athletic</option>
-                                                        <option value="government">Government Grant</option>
-                                                        <option value="none">None</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="previous_school">Previous School (if any)</label>
-                                                    <input type="text" id="previous_school" name="previous_school"
-                                                        class="form-control" placeholder="e.g., ABC University">
-                                                </div>
-                                                <div class="col-12">
-                                                    <label for="previous_school_address">School Address (if any)</label>
-                                                    <input type="text" id="previous_school_address"
-                                                        name="previous_school_address" class="form-control"
-                                                        placeholder="e.g., 123 College Ave, City">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 5: Education History -->
-                                        <div class="tab-pane fade" id="step5" role="tabpanel"
-                                            aria-labelledby="step5-tab">
-                                            <div class="alert alert-info mb-3">
-                                                <i class="fas fa-info-circle mr-2"></i>Please provide your educational
-                                                background.
-                                            </div>
-
-                                            <h5 class="mb-3"><i class="fas fa-school mr-2"></i>Elementary Education</h5>
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <label for="elementary_school">School Name</label>
-                                                    <input type="text" id="elementary_school" name="elementary_school"
-                                                        class="form-control" placeholder="e.g., ABC Elementary School">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="elementary_address">School Address</label>
-                                                    <input type="text" id="elementary_address"
-                                                        name="elementary_address" class="form-control"
-                                                        placeholder="e.g., 123 School St, City">
-                                                </div>
-                                            </div>
-
-                                            <h5 class="mt-4 mb-3"><i class="fas fa-school mr-2"></i>Secondary Education
-                                            </h5>
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <label for="secondary_school">School Name</label>
-                                                    <input type="text" id="secondary_school" name="secondary_school"
-                                                        class="form-control" placeholder="e.g., XYZ High School">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="secondary_address">School Address</label>
-                                                    <input type="text" id="secondary_address" name="secondary_address"
-                                                        class="form-control"
-                                                        placeholder="e.g., 456 High School Ave, City">
-                                                </div>
-                                            </div>
-
-                                            <div class="row g-3 mt-2">
-                                                <div class="col-12">
-                                                    <label for="honors">Honors Received</label>
-                                                    <input type="text" id="honors" name="honors"
-                                                        class="form-control"
-                                                        placeholder="e.g., With Honors, Best in Math, Valedictorian">
+                                                    <div class="form-group">
+                                                        <label for="scholarship">Scholarship</label>
+                                                        <select id="scholarship" name="scholarship" class="form-control">
+                                                            <option value="" selected disabled>Select Scholarship
+                                                            </option>
+                                                            @foreach ($scholarships as $scholarship)
+                                                                <option value="{{ $scholarship->id }}">
+                                                                    {{ $scholarship->name }}
+                                                                    ({{ $scholarship->discount_percentage }}% Discount)
+                                                                </option>
+                                                            @endforeach
+                                                            <option value="none">None</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
+                                <!-- Modal Footer -->
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" id="prevBtn" disabled>
-                                        <i class="fas fa-arrow-left mr-1"></i> Previous
-                                    </button>
-                                    <button type="button" class="btn btn-primary" id="nextBtn">
-                                        Next <i class="fas fa-arrow-right ml-1"></i>
+                                    <button type="button" class="btn btn-secondary" id="prevBtn"
+                                        style="display: none;">
+                                        <i class="fas fa-arrow-left mr-1"></i> Back
                                     </button>
                                     <button type="submit" class="btn btn-success" id="submitBtn"
                                         style="display: none;">
-                                        <i class="fas fa-check mr-1"></i> Submit Application
+                                        <i class="fas fa-check mr-1"></i> Submit Enrollment
+                                    </button>
+                                    <button type="button" class="btn btn-primary" id="nextBtn" disabled>
+                                        Continue <i class="fas fa-arrow-right ml-1"></i>
                                     </button>
                                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
                                         <i class="fas fa-times mr-1"></i> Close
@@ -486,6 +243,580 @@
                 </div>
 
 
+                <div class="row justify-content-center mt-3">
+                    <div class="col-md-12">
+                        <div class="card shadow mb-4">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="miscFees">
+                                        <thead>
+                                            <tr>
+                                                <th>Student No.</th>
+                                                <th>Full Name</th>
+                                                <th>Program</th>
+
+                                                <th>Admission Status</th>
+                                                <th>Email</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($enrollments as $enrollment)
+                                                <tr>
+                                                    <td>{{ strtoupper($enrollment->student_id) }}</td>
+                                                    <td>{{ strtoupper($enrollment->admission->full_name ?? 'N/A') }}</td>
+                                                    <td>{{ $enrollment->courseMapping->combination_label ?? 'N/A' }}</td>
+                                                    <td>{{ ucfirst($enrollment->status) }}</td>
+                                                    <td>{{ $enrollment->admission->email ?? 'N/A' }}</td>
+                                                    <td>
+                                                      @php
+    $initialPayment = $enrollment->billing->initial_payment ?? 0;
+    $studentId = $enrollment->student_id;
+@endphp
+
+<div class="col-12">
+    <div class="mb-2">
+  
+      <input 
+    type="hidden" 
+    name="initial_payment" 
+    id="initial_payment{{ $enrollment->student_id }}"
+    value="{{ old('initial_payment', ($billing->initial_payment ?? 0) > 0 ? $billing->initial_payment : '') }}">
+
+    </div>
+</div>
+
+<div class="position-relative d-inline-block">
+    <button type="button"
+        class="btn btn-info btn-sm position-relative"
+        data-bs-toggle="modal"
+        data-bs-target="#studentModal{{ $studentId }}"
+        id="viewBtn{{ $studentId }}"
+        title="View Student">
+        <i class="fas fa-eye"></i>
+
+        {{-- Warning badge, initially hidden --}}
+        <span
+            id="warning-badge-{{ $studentId }}"
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark d-none"
+            data-bs-toggle="tooltip"
+            title="This student hasn't made an initial payment yet.">
+            Warning
+        </span>
+    </button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        const input = document.getElementById('initial_payment{{ $studentId }}');
+        const warningBadge = document.getElementById('warning-badge-{{ $studentId }}');
+
+        function checkInitialPayment() {
+            const value = parseFloat(input.value);
+            if (isNaN(value) || value <= 0) {
+                warningBadge.classList.remove('d-none');
+            }
+        }
+
+        // Initial check on page load
+        checkInitialPayment();
+
+        // Optional: Recheck on input change
+        input.addEventListener('input', checkInitialPayment);
+    });
+</script>
+
+                                                        <a href="{{ route('admissions.printCOR', $enrollment->student_id) }}"
+                                                            target="_blank" rel="noopener" class="btn btn-primary btn-sm"
+                                                            title="Print COR">
+                                                            <i class="fas fa-print"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                             <div class="modal fade" id="studentModal{{ $enrollment->student_id }}" tabindex="-1"
+    aria-labelledby="studentModalLabel{{ $enrollment->student_id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="studentModalLabel{{ $enrollment->student_id }}">
+                    <i class="bi bi-person-vcard me-2"></i>Student Billing Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            @php
+            
+                // Get current active school year
+                $activeSchoolYear = \App\Models\SchoolYear::where('is_active', 1)->first();
+                
+                // Get billing information for this student in the active school year
+                $billing = \App\Models\Billing::where('student_id', $enrollment->student_id)
+                    ->where('school_year', $activeSchoolYear->name ?? null)
+                    ->where('semester', $activeSchoolYear->semester ?? null)
+                    ->first();
+            @endphp
+
+            @if($billing)
+            <form method="POST" action="{{ route('billing.updateInitialPayment', $billing->id) }}">
+                @csrf
+                @method('PUT')
+                <div class="modal-body p-4">
+                    <!-- Basic Information Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-info-circle me-2"></i>Basic Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Student ID:</strong></p>
+                                    <p class="text-dark">{{ strtoupper($enrollment->student_id) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Full Name:</strong></p>
+                                    <p class="text-dark">{{ strtoupper($enrollment->admission->full_name ?? 'N/A') }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Program:</strong></p>
+                                    <p class="text-dark">{{ $enrollment->courseMapping->combination_label ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Admission Status:</strong></p>
+                                    <p class="text-dark">{{ ucfirst($enrollment->status) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Billing Information Section -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-cash-coin me-2"></i>Financial Information
+                        </h6>
+
+                        <!-- School Year and Semester -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>School Year:</strong></p>
+                                    <p class="text-dark">{{ $activeSchoolYear->name ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Semester:</strong></p>
+                                    <p class="text-dark">{{ $activeSchoolYear->semester ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fee Breakdown -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Tuition Fee:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->tuition_fee, 2) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Discount:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->discount, 2) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Tuition After Discount:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->tuition_fee_discount, 2) }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Miscellaneous Fee:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->misc_fee, 2) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Old Accounts Balance:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->old_accounts, 2) }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Assessment and Balance Due -->
+                        <div class="alert alert-primary mt-3 mb-4">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="p-2">
+                                        <p class="mb-1"><strong>Total Assessment:</strong></p>
+                                        <h5 class="fw-bold mb-0">
+                                            ₱{{ number_format($billing->total_assessment, 2) }}
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-2">
+                                        <p class="mb-1"><strong>Balance Due:</strong></p>
+                                        <h5 class="fw-bold mb-0">
+                                            ₱{{ number_format($billing->balance_due, 2) }}
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Section -->
+                        <h6 class="fw-bold mt-4 mb-3">
+                            <i class="bi bi-calendar-check me-2"></i>Payment Information
+                        </h6>
+                        
+                        <div class="row g-3">
+                            <!-- Initial Payment Input -->
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="initial_payment{{ $enrollment->student_id }}" class="form-label"><strong>Initial Payment</strong></label>
+                                    <input 
+                                        placeholder="0.00" 
+                                        type="number" 
+                                        name="initial_payment" 
+                                        step="0.01" 
+                                        min="0"
+                                        class="form-control"
+                                        id="initial_payment{{ $enrollment->student_id }}"
+                                        value="{{ old('initial_payment', ($billing->initial_payment ?? 0) > 0 ? $billing->initial_payment : '') }}">
+                                </div>
+                            </div>
+
+                            <!-- Payment Schedule -->
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Prelims Due:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->prelims_due, 2) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Midterms Due:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->midterms_due, 2) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Pre-Finals Due:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->prefinals_due, 2) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Finals Due:</strong></p>
+                                    <p class="text-dark">₱{{ number_format($billing->finals_due, 2) }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Payment Status -->
+                            <div class="col-12">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Payment Status:</strong></p>
+                                    <p>
+                                        @if ($billing->is_full_payment)
+                                            <span class="badge bg-success p-2">Fully Paid</span>
+                                        @elseif ($billing->initial_payment > 0)
+                                            <span class="badge bg-warning p-2">Partial Payment</span>
+                                        @else
+                                            <span class="badge bg-secondary p-2">No Payment Yet</span>
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Save Payment
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-2"></i> Close
+                    </button>
+                </div>
+            </form>
+            @else
+                <div class="modal-body p-4">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        No billing information found for the current active school year ({{ $activeSchoolYear->name ?? 'N/A' }} - {{ $activeSchoolYear->semester ?? 'N/A' }}).
+                    </div>
+                    
+                    <!-- At least show basic student info -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-info-circle me-2"></i>Basic Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Student ID:</strong></p>
+                                    <p class="text-dark">{{ strtoupper($enrollment->student_id) }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1"><strong>Full Name:</strong></p>
+                                    <p class="text-dark">{{ strtoupper($enrollment->admission->full_name ?? 'N/A') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-2"></i> Close
+                    </button>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+                                            @endforeach
+
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <script>
+                    $(document).ready(function() {
+                        // Student search functionality
+                        $('#searchStudentBtn').click(function() {
+                            let query = $('#student_search').val().trim();
+                            if (!query) {
+                                alert('Please enter a student ID or name to search.');
+                                return;
+                            }
+
+                            $('#searchLoading').show();
+                            $('#studentInfoContainer').hide();
+                            $('#studentInfo').html('');
+                            $('#enrollmentWarnings').html('');
+                            $('#nextBtn').prop('disabled', true);
+
+                            $.ajax({
+                                url: '{{ route('search.student') }}',
+                                method: 'GET',
+                                data: {
+                                    query: query
+                                },
+                                success: function(data) {
+                                    $('#searchLoading').hide();
+
+                                    if (data.length === 0) {
+                                        $('#studentInfo').html(
+                                            '<div class="alert alert-warning">No students found.</div>');
+                                        $('#studentInfoContainer').show();
+                                        return;
+                                    }
+
+                                    let studentObj = data[0];
+                                    let student = studentObj.student;
+
+                                    // Store student ID in hidden field for form submission
+                                    $('#student_id_input').val(student.student_id);
+
+                                    let html = `
+                    <p><strong>Student ID:</strong> ${student.student_id}</p>
+                    <p><strong>Name:</strong> ${student.first_name} ${student.middle_name || ''} ${student.last_name}</p>
+                    <p><strong>Current Program:</strong> ${student.program ? student.program.name : 'N/A'}</p>
+                `;
+
+                                    $('#studentInfo').html(html);
+
+                                    let warnings = [];
+                                    let canProceed = true;
+
+                                    if (studentObj.has_unpaid_balance) {
+                                        warnings.push(
+                                            '<div class="alert alert-danger">Student has unpaid balance.</div>'
+                                        );
+                                        canProceed = false;
+                                    }
+
+                                    if (studentObj.already_enrolled) {
+                                        warnings.push(
+                                            '<div class="alert alert-danger">Student is already enrolled for current term.</div>'
+                                        );
+                                        canProceed = false;
+                                    }
+
+                                    if (studentObj.has_failing_grades) {
+                                        warnings.push(
+                                            '<div class="alert alert-danger">Student has failing grades.</div>'
+                                        );
+                                        canProceed = false;
+                                    }
+
+                                    $('#enrollmentWarnings').html(warnings.join(''));
+                                    $('#nextBtn').prop('disabled', !canProceed);
+                                    $('#studentInfoContainer').show();
+                                },
+                                error: function(xhr) {
+                                    $('#searchLoading').hide();
+                                    alert('An error occurred while searching. Please try again.');
+                                    console.error('Search error:', xhr.responseText);
+                                }
+                            });
+                        });
+
+                        // Tab navigation and progress control
+                        $('#nextBtn').click(function() {
+                            const currentTab = $('.tab-pane.active');
+                            const nextTab = currentTab.next('.tab-pane');
+
+                            if (currentTab.attr('id') === 'step1') {
+                                // Validate student is selected before proceeding
+                                if (!$('#student_id_input').val()) {
+                                    alert('Please search and select a valid student first.');
+                                    return;
+                                }
+
+                                // Move to step 2
+                                currentTab.removeClass('show active');
+                                nextTab.addClass('show active');
+                                $('#step1-tab').removeClass('active').addClass('disabled');
+                                $('#step2-tab').addClass('active').removeClass('disabled');
+
+                                // Update UI
+                                $('#progressBar').css('width', '100%').text('Step 2 of 2');
+                                $('#prevBtn').show();
+                                $('#nextBtn').hide();
+                                $('#submitBtn').show();
+                            }
+                        });
+
+                        $('#prevBtn').click(function() {
+                            const currentTab = $('.tab-pane.active');
+                            const prevTab = currentTab.prev('.tab-pane');
+
+                            // Move back to step 1
+                            currentTab.removeClass('show active');
+                            prevTab.addClass('show active');
+                            $('#step2-tab').removeClass('active').addClass('disabled');
+                            $('#step1-tab').addClass('active').removeClass('disabled');
+
+                            // Update UI
+                            $('#progressBar').css('width', '50%').text('Step 1 of 2');
+                            $('#prevBtn').hide();
+                            $('#submitBtn').hide();
+                            $('#nextBtn').show();
+                        });
+
+
+                        // Form submission handler
+                        $('#admissionForm').submit(function(e) {
+                            // Validate course mapping is selected
+                            if (!$('#course_mapping_id').val()) {
+                                e.preventDefault();
+                                alert('Please select a course mapping before submitting.');
+                                return false;
+                            }
+
+                            // You can add additional validation here if needed
+                            return true;
+                        });
+                    });
+
+                    // Course mapping selection handler
+                    $('#course_mapping_id').change(function() {
+                        const selectedOption = $(this).find('option:selected');
+                        const mappingId = selectedOption.val();
+
+                        if (!mappingId) {
+                            $('#displayMappingId').text('-');
+                            $('#totalUnitsContainer').hide();
+                            $('#tuitionFeeContainer').hide();
+                            $('#feeCalculationContainer').hide();
+                            return;
+                        }
+
+                        // Show loading state
+                        $('#totalUnitsContainer').html('Calculating units...').show();
+                        $('#tuitionFeeContainer').html('Calculating fee...').show();
+                        $('#feeCalculationContainer').hide();
+
+                        // Get the mapping details from data attributes
+                        const programId = selectedOption.data('program');
+                        const yearLevelId = selectedOption.data('year');
+                        const semesterId = selectedOption.data('semester');
+                        const effectiveSY = selectedOption.data('sy');
+
+                        // Update displayed mapping ID
+                        $('#displayMappingId').text(mappingId);
+
+                        // AJAX call to calculate total units and tuition fee
+                        $.ajax({
+                            url: '{{ route('calculate.tuition.fee') }}',
+                            method: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                program_id: programId,
+                                year_level_id: yearLevelId,
+                                semester_id: semesterId,
+                                effective_sy: effectiveSY
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    // Display total units
+                                    $('#totalUnitsValue').text(response.total_units);
+                                    $('#totalUnitsContainer').show();
+
+                                    // Display tuition fee
+                                    $('#tuitionFeeValue').text('₱' + response.tuition_fee.toLocaleString());
+                                    $('#tuitionFeeContainer').show();
+
+                                    // Display calculation details
+                                    $('#feeCalculationDetails').html(`
+                    ${response.total_units} units × ₱${response.unit_price.toLocaleString()} 
+                    (current unit price) = ₱${response.tuition_fee.toLocaleString()}
+                `);
+                                    $('#feeCalculationContainer').show();
+
+                                    // Store the calculated fee in a hidden field if needed
+                                    $('#tuition_fee_input').val(response.tuition_fee);
+                                } else {
+                                    alert('Error calculating tuition fee: ' + response.message);
+                                }
+                            },
+                            error: function(xhr) {
+                                console.error('Error:', xhr.responseText);
+                                alert('An error occurred while calculating the tuition fee.');
+                            }
+                        });
+                    });
+                </script>
+
+
 
             </div>
 
@@ -495,180 +826,56 @@
 
         @include('layouts.footer')
 
+
     </div>
     <!-- End of Content Wrapper -->
 @endsection
 
-<!-- Font Awesome for icons (include in your head tag) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- REQUIRED for DataTables -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tab navigation variables
-        const formTabs = document.querySelectorAll('#formTabs .nav-link');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const submitBtn = document.getElementById('submitBtn');
-        const progressBar = document.querySelector('.progress-bar');
-        let currentTab = 0;
-
-        // Admission info elements
-        const admissionStatusRadios = document.querySelectorAll('input[name="admission_status"]');
-        const transfereeFields = document.getElementById('transfereeFields');
-        const manualCourseSelection = document.getElementById('manualCourseSelection');
-
-        // Course selection elements
-        const courseSelect = document.getElementById('course_ids');
-        const selectedCoursesList = document.getElementById('selectedCoursesList');
-
-        // Track selected courses
-        let selectedCourses = [];
-
-        // Initialize UI
-        updateTabs();
-        if (manualCourseSelection) manualCourseSelection.style.display = 'none';
-        if (transfereeFields) transfereeFields.style.display = 'none';
-        updateSelectedCoursesDisplay();
-
-        // Tab navigation functions
-        nextBtn.addEventListener('click', function() {
-            if (validateStep(currentTab) && currentTab < formTabs.length - 1) {
-                currentTab++;
-                updateTabs();
-            }
+    $(document).ready(function() {
+        $('#miscFees').DataTable({
+            responsive: true,
+            pageLength: 10
         });
+    });
+</script>
 
-        prevBtn.addEventListener('click', function() {
-            if (currentTab > 0) {
-                currentTab--;
-                updateTabs();
-            }
-        });
 
-        function updateTabs() {
-            formTabs.forEach((tab, index) => {
-                const tabPane = document.querySelector(tab.getAttribute('href'));
-                if (index === currentTab) {
-                    tab.classList.add('active');
-                    tabPane.classList.add('show', 'active');
+
+<script>
+    document.getElementById('course_mapping_id').addEventListener('change', function() {
+        const mappingId = this.value;
+
+        if (!mappingId) {
+            document.getElementById('tuition_fee').value = '';
+            return;
+        }
+
+        fetch('{{ route('calculate.tuition.fee') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    course_mapping_id: mappingId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.tuition_fee !== undefined) {
+                    document.getElementById('tuition_fee').value = data.tuition_fee;
                 } else {
-                    tab.classList.remove('active');
-                    tabPane.classList.remove('show', 'active');
+                    document.getElementById('tuition_fee').value = '';
+                    console.error(data.error);
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching tuition fee:', error);
             });
-
-            prevBtn.disabled = currentTab === 0;
-            nextBtn.style.display = currentTab === formTabs.length - 1 ? 'none' : 'block';
-            submitBtn.style.display = currentTab === formTabs.length - 1 ? 'block' : 'none';
-
-            const progress = ((currentTab + 1) / formTabs.length) * 100;
-            progressBar.style.width = `${progress}%`;
-            progressBar.textContent = `Step ${currentTab + 1} of ${formTabs.length}`;
-            progressBar.setAttribute('aria-valuenow', progress);
-        }
-
-        // Admission status change handler
-        admissionStatusRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                // Show/hide transferee fields
-                transfereeFields.style.display = this.value === 'transferee' ? 'block' : 'none';
-
-                // Show/hide manual course selection
-                const showCourseSelection = (this.value === 'transferee' || this.value ===
-                    'returnee');
-                manualCourseSelection.style.display = showCourseSelection ? 'block' : 'none';
-
-                // Clear selections when switching away from irregular status
-                if (!showCourseSelection) {
-                    clearCourseSelections();
-                }
-            });
-        });
-
-        // Course selection handling
-        if (courseSelect && selectedCoursesList) {
-            courseSelect.addEventListener('change', function() {
-                // Get newly selected options that aren't already tracked
-                const newSelections = Array.from(this.selectedOptions)
-                    .filter(option => !selectedCourses.some(c => c.value === option.value));
-
-                // Add new selections to our array
-                selectedCourses = selectedCourses.concat(newSelections.map(option => ({
-                    value: option.value,
-                    text: option.text
-                })));
-
-                updateSelectedCoursesDisplay();
-            });
-        }
-
-        function updateSelectedCoursesDisplay() {
-            selectedCoursesList.innerHTML = '';
-
-            if (selectedCourses.length === 0) {
-                selectedCoursesList.innerHTML = '<li class="text-muted">No courses selected</li>';
-                return;
-            }
-
-            selectedCourses.forEach(course => {
-                const li = document.createElement('li');
-                li.className = 'd-flex justify-content-between align-items-center mb-2';
-                li.innerHTML = `
-                <span>${course.text}</span>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-course" 
-                        data-value="${course.value}" title="Remove course">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-                selectedCoursesList.appendChild(li);
-            });
-
-            // Add event listeners to remove buttons
-            document.querySelectorAll('.remove-course').forEach(button => {
-                button.addEventListener('click', function() {
-                    const valueToRemove = this.getAttribute('data-value');
-
-                    // Remove from our array
-                    selectedCourses = selectedCourses.filter(c => c.value !== valueToRemove);
-
-                    // Update the select element
-                    const option = Array.from(courseSelect.options)
-                        .find(opt => opt.value === valueToRemove);
-                    if (option) option.selected = false;
-
-                    updateSelectedCoursesDisplay();
-                });
-            });
-        }
-
-        function clearCourseSelections() {
-            selectedCourses = [];
-            Array.from(courseSelect.options).forEach(opt => opt.selected = false);
-            updateSelectedCoursesDisplay();
-        }
-
-        // Form submission handler
-        document.getElementById('admissionForm').addEventListener('submit', function(e) {
-            // Verify courses are selected if required
-            if (manualCourseSelection.style.display === 'block' && selectedCourses.length === 0) {
-                e.preventDefault();
-                alert('Please select at least one course');
-                return;
-            }
-
-            // Sync selections with the select element before submission
-            Array.from(courseSelect.options).forEach(opt => opt.selected = false);
-            selectedCourses.forEach(course => {
-                const option = Array.from(courseSelect.options)
-                    .find(opt => opt.value === course.value);
-                if (option) option.selected = true;
-            });
-
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
-            submitBtn.disabled = true;
-        });
-
-        function validateStep(step) {
-            // Add your step validation logic here if needed
-            return true;
-        }
     });
 </script>

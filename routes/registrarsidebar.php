@@ -3,7 +3,9 @@
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProgramCourseMappingController;
+use App\Http\Controllers\ReEnrollRegularController;
 use App\Http\Controllers\RegistrarSideBarController;
+use App\Http\Controllers\StudentSearchController;
 use Illuminate\Support\Facades\Route;
 
 // Apply 'auth' middleware to the whole 'registrar' prefix group
@@ -58,3 +60,13 @@ Route::put('/billing/{studentId}/initial-payment', [AdmissionController::class, 
 Route::get('/provinces/{regionCode}', [LocationController::class, 'getProvinces']);
 Route::get('/cities/{provinceCode}', [LocationController::class, 'getCities']);
 Route::get('/barangays/{citymunCode}', [LocationController::class, 'getBarangays']);
+
+
+// In web.php, define this if your form uses 're_enroll_regular.store'
+Route::post('/re-enroll-regular', [ReEnrollRegularController::class, 'submitForm'])
+    ->name('re_enroll_regular.store');
+
+    Route::get('/search-student', [ReEnrollRegularController::class, 'search'])->name('search.student');
+Route::post('/calculate-tuition-fee', [ReEnrollRegularController::class, 'calculateTuitionFee'])
+    ->name('calculate.tuition.fee');
+    

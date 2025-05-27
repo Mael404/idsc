@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Admission extends Model
 {
     use HasFactory;
-    protected $primaryKey = 'student_id'; // ✅ use student_id instead of id
-    public $incrementing = false;         // ✅ if student_id is not auto-incrementing
-    protected $keyType = 'string';        // ✅ if student_id is a string (like '25-624')
+    protected $primaryKey = 'student_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
     protected $fillable = [
         'student_id',
         'last_name',
@@ -69,7 +69,7 @@ class Admission extends Model
     // In App\Models\Admission.php
     public function billing()
     {
-        return $this->hasOne(Billing::class, 'student_id', 'student_id');
+        return $this->hasOne(Billing::class, 'student_id', 'student_id')->latest('created_at');
     }
 
     public function scholarship()
@@ -89,5 +89,14 @@ class Admission extends Model
     public function programCourseMapping()
     {
         return $this->belongsTo(ProgramCourseMapping::class, 'course_mapping_id', 'id');
+    }
+
+    public function latestStudentCourse()
+    {
+        return $this->hasOne(StudentCourse::class, 'student_id', 'student_id')->latest('created_at');
+    }
+    public function latestMiscFee()
+    {
+        return $this->hasOne(MiscFee::class, 'program_course_mapping_id', 'course_mapping_id')->latest('created_at');
     }
 }

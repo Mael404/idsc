@@ -118,25 +118,61 @@
 </head>
 
 <body>
+    <img src="{{ asset('img/idslogo.png') }}" alt="Logo Watermark" 
+     style="
+       position: fixed;
+       top: 50%;
+       left: 50%;
+       transform: translate(-50%, -50%);
+       width: 500px;  /* big size */
+       height: auto;
+       opacity: 0.1;  /* low opacity for watermark effect */
+       pointer-events: none;  /* so it won't interfere with clicking */
+       z-index: 0;
+     ">
+
+    <div class="d-flex justify-content-between px-4" style="margin-top:-2px ">
+        <p style="margin: 0; font-size: 0.6rem;">Date Printed: {{ \Carbon\Carbon::now()->format('m/d/Y') }}</p>
+        <p style="margin: 0; font-size: 0.6rem;">Time Printed: {{ \Carbon\Carbon::now('Asia/Manila')->format('h:i A') }}
+        </p>
+
+    </div>
     <div class="text-center my-3 no-print">
         <button class="btn btn-primary" onclick="window.print()">Print Certificate</button>
     </div>
 
     <!-- Header -->
-    <div class="d-flex flex-column align-items-center text-center mb-1">
+    <div class="d-flex flex-column align-items-center text-center mb-3 mt-3">
         <div class="d-flex align-items-center">
             <div class="sidebar-brand-icon">
-                <img src="{{ asset('img/idslogo.png') }}" alt="Logo"
-                    style="width: 85px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));">
+                <img src="{{ asset('img/idslogo.png') }}" alt="Logo" style="width: 85px; height: auto;">
             </div>
             <div class="ms-3 text-start">
-                <h4 class="mb-1">Infotech Development Systems Colleges, Inc.</h4>
-                <h5 class="mb-1">OFFICE OF THE REGISTRAR</h5>
-                <div>Telephone No. (052) 201-2151 | 0917 881 2638</div>
-                <div>Email: idscollegescinc@gmail.com | idscolleges@yahoo.com</div>
+                <h4 class="mb-0 fw-bold" style="font-family: 'Times New Roman', Times, serif;">
+                    Infotech Development Systems Colleges, Inc.
+                </h4>
+                <div class="fw-semibold" style="font-size: 0.95rem; font-family: 'Times New Roman', Times, serif;">
+                    OFFICE OF THE REGISTRAR
+                </div>
+
+                <div style="font-size: 0.9rem;">Telephone No. (052) 201-2151 | 0917 881 2638</div>
+                <div style="font-size: 0.9rem;">
+                    Email: <a href="mailto:idscollegesinc@gmail.com">idscollegesinc@gmail.com</a> |
+                    <a href="mailto:idscolleges@yahoo.com">idscolleges@yahoo.com</a>
+                </div>
             </div>
         </div>
-        <h6 class="mt-3">CERTIFICATE OF REGISTRATION</h6>
+        <div class="mt-3 mx-auto"
+            style="width: 85%; margin-bottom: 2px; border-top: 4px solid #005d3e; border-bottom: 1.5px solid #005d3e;">
+        </div>
+        <div class="mx-auto" style="width: 85%; margin-top: 0px;">
+            <div style="border-top: 2px solid #005d3e;"></div>
+        </div>
+
+
+
+
+        <h5 class="mt-3 fw-bold" style="letter-spacing: 6px; font-weight:900;">CERTIFICATE OF REGISTRATION</h5>
     </div>
 
 
@@ -147,43 +183,45 @@
             <div class="left-side">
                 <div class="info-block">
                     <span class="info-label">Name:</span>
-                    {{ ucfirst(strtolower($admission->first_name)) }}
-                    {{ ucfirst(strtolower($admission->middle_name)) }}
-                    {{ ucfirst(strtolower($admission->last_name)) }}
+                    {{ ucfirst(strtolower($enrollment->admission->first_name ?? '')) }}
+                    {{ ucfirst(strtolower($enrollment->admission->middle_name ?? '')) }}
+                    {{ ucfirst(strtolower($enrollment->admission->last_name ?? '')) }}
+
                 </div>
 
-
-                <div class="info-block">
+                <div class="info-block" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     <span class="info-label">Course:</span>
-                    {{ $admission->courseMapping->program->name ?? 'N/A' }}
+                    {{ $enrollment->courseMapping->program->name ?? 'N/A' }}
                 </div>
+
 
                 <div class="info-block">
                     <span class="info-label">Major:</span>
-                    {{ $admission->major ?? '_______________________________' }}
+                    {{ $enrollment->admission->major ?? '_______________________________' }}
                 </div>
+
             </div>
 
             <!-- RIGHT SIDE -->
             <div class="right-side">
                 <div class="info-block">
                     <span class="info-label">Term:</span>
-                    {{ $admission->semester ?? 'N/A' }}, SY {{ $admission->school_year ?? 'N/A' }}
+                    {{ $enrollment->semester ?? 'N/A' }}, SY {{ $enrollment->school_year ?? 'N/A' }}
                 </div>
 
                 <div class="info-block">
                     <span class="info-label">Year Level:</span>
-                    {{ optional($admission->courseMapping->yearLevel)->name ?? 'N/A' }}
+                    {{ optional($enrollment->courseMapping->yearLevel)->name ?? 'N/A' }}
                 </div>
 
                 <div class="info-block">
                     <span class="info-label">Student No:</span>
-                    {{ $admission->student_id ?? '____________________' }}
+                    {{ $enrollment->student_id ?? '____________________' }}
                 </div>
 
                 <div class="info-block">
                     <span class="info-label">Scholarship:</span>
-                    {{ optional($admission->scholarship)->name ?? 'None' }}
+                    {{ optional($enrollment->scholarship)->name ?? 'None' }}
                 </div>
             </div>
         </div>
@@ -236,7 +274,7 @@
     <div class="row">
         <!-- MISCELLANEOUS -->
         <div class="col-3">
-            <div class="section-title">MISCELLANEOUS</div>
+            <div class="section-title" style="text-align: center; font-size: larger;">MISCELLANEOUS</div>
             <table>
                 @php $totalMisc = 0; @endphp
                 @foreach ($miscFees as $fee)
@@ -260,7 +298,7 @@
 
         <!-- ASSESSMENT + SCHEDULE -->
         <div class="col-5">
-            <div class="section-title">ASSESSMENT</div>
+            <div class="section-title" style="text-align: center font-size: larger;">ASSESSMENT</div>
             <table>
                 <tr>
                     <td>Tuition Fee</td>
@@ -299,7 +337,7 @@
                 $installment = $billing->balance_due / 4;
             @endphp
 
-            <div class="section-title" style="margin-top: 20px;">SCHEDULE OF PAYMENT</div>
+            <div class="section-title" style="margin-top: 20px; text-align: center font-size: larger;">SCHEDULE OF PAYMENT</div>
             <table>
                 <tr>
                     <td>PRELIM - {{ \Carbon\Carbon::parse($activeSchoolYear->prelims_date)->format('M d, Y') }}</td>
@@ -408,6 +446,18 @@
 
 
     </div>
+
+    </div>
+     <div style="position: absolute; bottom: 2.2rem; left: 0; right: 0;  font-size: 0.7rem; font-weight: bold;">
+    Note:
+</div>
+  <div style="position: absolute; bottom: 1.2rem; left: 0; right: 0;  font-size: 0.7rem; font-style:italic">
+    * A replacement copy may be issued upon payment of Php 50.00 to the college cashier.
+</div>
+<div style="position: absolute; bottom: 0; left: 0; right: 0; font-size: 0.7rem;">
+    IDSC-F-REG-001
+</div>
+
 
 </body>
 
