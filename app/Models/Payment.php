@@ -12,6 +12,11 @@ class Payment extends Model
         'remarks',
         'payment_date',
         'or_number',
+        'school_year',
+        'semester',
+        'payment_type',
+        'is_void',
+        'voided_at'
     ];
 
     // Relationships

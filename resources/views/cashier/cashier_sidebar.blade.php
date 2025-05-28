@@ -29,11 +29,32 @@
 
     <!-- Payment Processing Menu -->
     <li class="nav-item {{ request()->is('cashier/payment/*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('cashier.payment.process') }}">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePayments"
+            aria-expanded="true" aria-controls="collapsePayments">
             <i class="fas fa-fw fa-credit-card"></i>
-            <span>Process Payment</span>
+            <span>Payments</span>
         </a>
+        <div id="collapsePayments" class="collapse {{ request()->is('cashier/payment/*') ? 'show' : '' }}">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item {{ request()->routeIs('cashier.payment.process') ? 'active' : '' }}"
+                    href="{{ route('cashier.payment.process') }}">
+                    New Payments
+                </a>
+                <a class="collapse-item {{ request()->routeIs('cashier.payment.pending') ? 'active' : '' }}"
+                    href="{{ route('cashier.payment.pending') }}">
+                    Pending Enrollments
+                </a>
+                <a class="collapse-item {{ request()->routeIs('cashier.payment.other') ? 'active' : '' }}"
+                    href="{{ route('cashier.payment.other') }}">
+                    Other Payments
+                </a>
+            </div>
+
+        </div>
     </li>
+
+
+
 
     <!-- Divider -->
     <hr class="sidebar-divider">
@@ -44,7 +65,8 @@
     <!-- Payment Reports Menu -->
     <li class="nav-item {{ request()->is('cashier/reports/*') ? 'active' : '' }}">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReports"
-            aria-expanded="{{ request()->is('cashier/reports/*') ? 'true' : 'false' }}" aria-controls="collapseReports">
+            aria-expanded="{{ request()->is('cashier/reports/*') ? 'true' : 'false' }}"
+            aria-controls="collapseReports">
             <i class="fas fa-fw fa-file-invoice-dollar"></i>
             <span>Payment Reports</span>
         </a>
@@ -52,13 +74,20 @@
             aria-labelledby="headingReports" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Reports</h6>
+
+                {{-- Tuition Fee Payments --}}
                 <a class="collapse-item {{ request()->routeIs('cashier.reports.index') ? 'active' : '' }}"
                     href="{{ route('cashier.reports.index') }}">
-                    View Reports
+                    Tuition Fee Payments
+                </a>
+
+                {{-- Other Payments --}}
+                <a class="collapse-item {{ request()->routeIs('cashier.reports.other') ? 'active' : '' }}"
+                    href="{{ route('cashier.reports.other') }}">
+                    Other Payments
                 </a>
             </div>
         </div>
-
     </li>
 
     <!-- Divider -->

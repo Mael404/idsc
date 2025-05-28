@@ -10,14 +10,14 @@
             @include('layouts.success-message')
 
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Manage Student Billings</h1>
+                <h1 class="h3 mb-0 text-gray-800">Other Payments</h1>
 
                 <button class="btn btn-primary" onclick="printTable()">
                     <i class="fas fa-print mr-1"></i> Print
                 </button>
             </div>
 
-            <!-- Filter and Total -->
+            <!-- Filter Buttons and Total Amount -->
             <div class="row justify-content-between mt-4 mb-2">
                 <div class="col-md-6">
                     <button class="btn btn-primary filter-btn" data-filter="today">Today</button>
@@ -35,7 +35,6 @@
                         <table class="table table-bordered" id="paymentsTable">
                             <thead>
                                 <tr>
-                                    <th>Student ID</th>
                                     <th>Student Name</th>
                                     <th>Amount</th>
                                     <th>Payment Date</th>
@@ -47,21 +46,20 @@
                             <tbody>
                                 @foreach ($payments as $payment)
                                     <tr>
-                                        <td>{{ $payment->student_id }}</td>
-                                        <td>{{ $payment->student->full_name ?? 'No student found' }}</td>
-                                        <td class="amount">{{ number_format($payment->amount, 2, '.', '') }}</td>
-                                        <td class="payment-date">{{ $payment->payment_date }}</td>
+                                        <td>{{ $payment->student->first_name }} {{ $payment->student->last_name }}</td>
+                                        <td class="amount">₱{{ number_format($payment->amount, 2) }}</td>
+                                        <td class="payment-date">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}</td>
                                         <td>{{ $payment->remarks }}</td>
                                         <td>{{ $payment->or_number }}</td>
                                         <td>
-                                            <button class="btn btn-danger btn-sm void-payment"
-                                                data-payment-id="{{ $payment->id }}"
-                                                data-student-id="{{ $payment->student_id }}"
-                                                data-amount="{{ $payment->amount }}"
-                                                data-semester="{{ $payment->semester }}"
-                                                data-school-year="{{ $payment->school_year }}">
-                                                Void
-                                            </button>
+                                            @if (!$payment->is_void)
+                                                <button class="btn btn-danger btn-sm void-payment"
+                                                    data-payment-id="{{ $payment->id }}">
+                                                    Void
+                                                </button>
+                                            @else
+                                                <span class="badge badge-secondary">Voided</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
@@ -83,7 +81,7 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            Are you sure you want to void this transaction? This action is not undoable.
+                            Are you sure you want to void this payment? This action cannot be undone.
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -118,10 +116,7 @@
 
                     printWindow.document.write(`
                         <html>
-                            <head>
-                                <title>Print Table</title>
-                                ${styles}
-                            </head>
+                            <head><title>Print Table</title>${styles}</head>
                             <body>
                                 <h1>Payment Reports</h1>
                                 ${tableHTML}
@@ -140,8 +135,7 @@
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-<!-- Include DataTables + Buttons + Moment -->
+<!-- DataTables + Buttons + Moment.js + Export Dependencies -->
 <script src="https://cdn.datatables.net/v/bs5/dt-1.13.6/b-2.4.1/b-html5-2.4.1/b-print-2.4.1/datatables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -160,7 +154,9 @@
         function updateTotal() {
             let total = 0;
             table.rows({ search: 'applied' }).every(function () {
-                const amount = parseFloat($(this.node()).find('.amount').text());
+                // Remove ₱ and commas before parsing number
+                let amountText = $(this.node()).find('.amount').text().replace(/[₱,]/g, '');
+                const amount = parseFloat(amountText);
                 if (!isNaN(amount)) total += amount;
             });
             $('#totalAmount').text(total.toFixed(2));
@@ -176,7 +172,7 @@
             table.rows().every(function () {
                 const row = $(this.node());
                 const dateStr = row.find('.payment-date').text().trim();
-                const date = moment(dateStr);
+                const date = moment(dateStr, 'MMMM DD, YYYY');
                 let show = false;
 
                 if (filter === 'today') {
@@ -193,45 +189,33 @@
             table.draw();
         });
 
-        let currentPaymentData = null;
+        let currentPaymentId = null;
 
         $(document).on('click', '.void-payment', function () {
-            currentPaymentData = {
-                paymentId: $(this).data('payment-id'),
-                studentId: $(this).data('student-id'),
-                amount: $(this).data('amount'),
-                semester: $(this).data('semester'),
-                schoolYear: $(this).data('school-year')
-            };
-
+            currentPaymentId = $(this).data('payment-id');
             $('#voidConfirmationModal').modal('show');
         });
 
         $('#confirmVoid').on('click', function () {
-            if (!currentPaymentData) return;
+            if (!currentPaymentId) return;
 
             $.ajax({
-                url: '{{ route("payments.void") }}',
+                url: '{{ route("payments.other-void") }}',
                 method: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    payment_id: currentPaymentData.paymentId,
-                    student_id: currentPaymentData.studentId,
-                    amount: currentPaymentData.amount,
-                    semester: currentPaymentData.semester,
-                    school_year: currentPaymentData.schoolYear
+                    payment_id: currentPaymentId
                 },
                 success: function (response) {
                     if (response.success) {
-                        alert('Payment voided successfully');
+                        alert('Payment successfully voided.');
                         location.reload();
                     } else {
                         alert('Error: ' + response.message);
                     }
                 },
-                error: function (xhr) {
-                    alert('An error occurred while voiding the payment');
-                    console.error(xhr.responseText);
+                error: function () {
+                    alert('Something went wrong while voiding the payment.');
                 }
             });
 

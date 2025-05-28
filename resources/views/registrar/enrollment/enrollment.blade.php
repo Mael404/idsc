@@ -401,39 +401,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                                                     <script>
-                                                        $('#course_mapping_id').on('change', function() {
-                                                            let mappingId = $(this).val();
+                                                  $('#course_mapping_id').on('change', function() {
+    let mappingId = $(this).val();
 
-                                                            if (!mappingId) {
-                                                                $('#totalUnitsContainer').hide();
-                                                                $('#tuitionFeeContainer').hide();
-                                                                return;
-                                                            }
+    if (!mappingId) {
+        $('#totalUnitsContainer').hide();
+        $('#tuitionFeeContainer').hide();
+        return;
+    }
 
-                                                            $.ajax({
-                                                                url: '{{ route('getMappingUnits') }}',
-                                                                type: 'POST',
-                                                                data: {
-                                                                    mapping_id: mappingId,
-                                                                    _token: '{{ csrf_token() }}'
-                                                                },
-                                                                success: function(response) {
-                                                                    $('#totalUnitsValue').text(response.total_units);
-                                                                    $('#totalUnitsContainer').show();
+    $.ajax({
+        url: '{{ route('getMappingUnits') }}',
+        type: 'POST',
+        data: {
+            mapping_id: mappingId,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            let totalUnits = response.total_units;
+            let tuitionFee = response.tuition_fee;
+            
+            // Check if the mapping has NSTP course
+            if (response.courses && Array.isArray(response.courses)) {
+                let hasNSTP = response.courses.some(course => 
+                    course.name && course.name.toLowerCase().includes('nstp')
+                );
+                
+                if (hasNSTP) {
+                    totalUnits = totalUnits / 2;
+                    tuitionFee = tuitionFee / 2;
+                }
+            }
 
-                                                                    $('#tuitionFeeContainer').html('Tuition Fee: <strong>₱' + response.tuition_fee
-                                                                        .toFixed(2) + '</strong>').show();
+            $('#totalUnitsValue').text(totalUnits);
+            $('#totalUnitsContainer').show();
 
-                                                                    // Set the hidden input's value to the tuition fee number (no formatting)
-                                                                    $('#tuition_fee_input').val(response.tuition_fee);
-                                                                }, // <--- missing comma here
+            $('#tuitionFeeContainer').html('Tuition Fee: <strong>₱' + tuitionFee.toFixed(2) + '</strong>').show();
 
-                                                                error: function() {
-                                                                    $('#totalUnitsContainer').hide();
-                                                                    $('#tuitionFeeContainer').hide();
-                                                                }
-                                                            });
-                                                        });
+            // Set the hidden input's value to the tuition fee number (no formatting)
+            $('#tuition_fee_input').val(tuitionFee);
+        },
+        error: function() {
+            $('#totalUnitsContainer').hide();
+            $('#tuitionFeeContainer').hide();
+        }
+    });
+});
                                                     </script>
 
 
@@ -470,8 +483,14 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="form-check">
         <input class="form-check-input" type="radio" name="admission_status" value="highschool" id="highschool" required checked>
         <label class="form-check-label" for="highschool">High School Graduate</label>
+     <div class="col-md-6 mt-2">
+                                                    <label for="lrn">LRN:</label>
+                                                    <input type="text" id="lrn" name="lrn"
+                                                        class="form-control" placeholder="e.g., 2025-12345">
+                                                </div>
     </div>
 </div>
+
 
 
                                             <div class="row g-3 mt-2" id="transfereeFields" style="display: none;">

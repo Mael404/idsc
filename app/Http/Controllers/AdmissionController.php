@@ -19,61 +19,61 @@ use Illuminate\Support\Facades\Log;
 
 class AdmissionController extends Controller
 {
-public function updateInitialPayment(Request $request, $id)
-{
-    $billing = Billing::findOrFail($id);
+    public function updateInitialPayment(Request $request, $id)
+    {
+        $billing = Billing::findOrFail($id);
 
-    $request->validate([
-        'initial_payment' => 'required|numeric|min:0',
-    ]);
+        $request->validate([
+            'initial_payment' => 'required|numeric|min:0',
+        ]);
 
-    // Check if initial payment exceeds total assessment
-    if ($request->input('initial_payment') > $billing->total_assessment) {
-        return back()->with('error', 'Initial payment cannot be greater than the total assessment.');
-    }
-
-    // Check if initial payment exceeds remaining balance (if balance_due is already set)
-    if (isset($billing->balance_due) && $request->input('initial_payment') > $billing->balance_due + $billing->initial_payment) {
-        return back()->with('error', 'Initial payment cannot be greater than the remaining balance due.');
-    }
-
-    // Store the previous initial payment in case we need to revert
-    $previousInitialPayment = $billing->initial_payment;
-
-    try {
-        $billing->initial_payment = $request->input('initial_payment');
-
-        // Recalculate balance due
-        $billing->balance_due = $billing->total_assessment - $billing->initial_payment;
-
-        // Only divide balance if there's still balance due
-        if ($billing->balance_due > 0) {
-            $installment = $billing->balance_due / 4;
-            
-            $billing->prelims_due = $installment;
-            $billing->midterms_due = $installment;
-            $billing->prefinals_due = $installment;
-            $billing->finals_due = $installment;
-        } else {
-            // If balance is fully paid, set all installments to 0
-            $billing->prelims_due = 0;
-            $billing->midterms_due = 0;
-            $billing->prefinals_due = 0;
-            $billing->finals_due = 0;
-            $billing->balance_due = 0; // Ensure balance is 0
+        // Check if initial payment exceeds total assessment
+        if ($request->input('initial_payment') > $billing->total_assessment) {
+            return back()->with('error', 'Initial payment cannot be greater than the total assessment.');
         }
 
-        $billing->save();
+        // Check if initial payment exceeds remaining balance (if balance_due is already set)
+        if (isset($billing->balance_due) && $request->input('initial_payment') > $billing->balance_due + $billing->initial_payment) {
+            return back()->with('error', 'Initial payment cannot be greater than the remaining balance due.');
+        }
 
-        return back()->with('success', 'Initial payment, balance due, and schedule updated.');
-    } catch (\Exception $e) {
-        // Revert to previous initial payment in case of error
-        $billing->initial_payment = $previousInitialPayment;
-        $billing->balance_due = $billing->total_assessment - $billing->initial_payment;
-        
-        return back()->with('error', 'An error occurred while updating the payment. Changes were not saved.');
+        // Store the previous initial payment in case we need to revert
+        $previousInitialPayment = $billing->initial_payment;
+
+        try {
+            $billing->initial_payment = $request->input('initial_payment');
+
+            // Recalculate balance due
+            $billing->balance_due = $billing->total_assessment - $billing->initial_payment;
+
+            // Only divide balance if there's still balance due
+            if ($billing->balance_due > 0) {
+                $installment = $billing->balance_due / 4;
+
+                $billing->prelims_due = $installment;
+                $billing->midterms_due = $installment;
+                $billing->prefinals_due = $installment;
+                $billing->finals_due = $installment;
+            } else {
+                // If balance is fully paid, set all installments to 0
+                $billing->prelims_due = 0;
+                $billing->midterms_due = 0;
+                $billing->prefinals_due = 0;
+                $billing->finals_due = 0;
+                $billing->balance_due = 0; // Ensure balance is 0
+            }
+
+            $billing->save();
+
+            return back()->with('success', 'Initial payment, balance due, and schedule updated.');
+        } catch (\Exception $e) {
+            // Revert to previous initial payment in case of error
+            $billing->initial_payment = $previousInitialPayment;
+            $billing->balance_due = $billing->total_assessment - $billing->initial_payment;
+
+            return back()->with('error', 'An error occurred while updating the payment. Changes were not saved.');
+        }
     }
-}
 
 
     public function show($id)
@@ -265,9 +265,26 @@ public function updateInitialPayment(Request $request, $id)
         $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
         // Generate student ID
+        $yearPrefix = date('y');
+
         do {
-            $studentId = date('y') . '-' . rand(100, 999);
+            // Get the latest student_id for the current year
+            $latest = Admission::where('student_id', 'like', "$yearPrefix-%")
+                ->orderBy('student_id', 'desc')
+                ->first();
+
+            if ($latest) {
+                $lastNumber = (int) substr($latest->student_id, -3); // Extract 'XXX'
+                $nextNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+            } else {
+                $nextNumber = '001';
+            }
+
+            $studentId = "$yearPrefix-$nextNumber";
+
+            // Loop continues only if there's a rare conflict
         } while (Admission::where('student_id', $studentId)->exists());
+
 
         // Create admission record
         $admission = Admission::create([
@@ -315,6 +332,7 @@ public function updateInitialPayment(Request $request, $id)
             'secondary_school' => $request->secondary_school,
             'secondary_address' => $request->secondary_address,
             'honors' => $request->honors,
+            'lrn' => $request->lrn,
             'school_year' => $activeSchoolYear ? $activeSchoolYear->name : $request->school_year,
             'semester' => $activeSchoolYear ? $activeSchoolYear->semester : $request->semester,
             'status' => 'Pending',
@@ -481,42 +499,50 @@ public function updateInitialPayment(Request $request, $id)
         ]);
     }
 
-    public function getMappingUnits(Request $request)
-    {
-        $mappingId = $request->input('mapping_id');
-        $totalUnits = 0;
-        $tuitionFee = 0;
-        $unitPrice = 0;
+  public function getMappingUnits(Request $request)
+{
+    $mappingId = $request->input('mapping_id');
+    $totalUnits = 0;
+    $tuitionFee = 0;
+    $unitPrice = 0;
+    $courses = []; // Array to store course info
 
-        if ($mappingId) {
-            $selectedMapping = ProgramCourseMapping::find($mappingId);
+    if ($mappingId) {
+        $selectedMapping = ProgramCourseMapping::find($mappingId);
 
-            if ($selectedMapping) {
-                $matchingMappings = ProgramCourseMapping::where('program_id', $selectedMapping->program_id)
-                    ->where('year_level_id', $selectedMapping->year_level_id)
-                    ->where('semester_id', $selectedMapping->semester_id)
-                    ->where('effective_sy', $selectedMapping->effective_sy)
-                    ->get();
+        if ($selectedMapping) {
+            $matchingMappings = ProgramCourseMapping::where('program_id', $selectedMapping->program_id)
+                ->where('year_level_id', $selectedMapping->year_level_id)
+                ->where('semester_id', $selectedMapping->semester_id)
+                ->where('effective_sy', $selectedMapping->effective_sy)
+                ->get();
 
-                $courseIds = $matchingMappings->pluck('course_id')->unique();
+            $courseIds = $matchingMappings->pluck('course_id')->unique();
 
-                $totalUnits = \App\Models\Course::whereIn('id', $courseIds)->sum('units');
-            }
+            // Get all courses with their names and units
+            $courses = \App\Models\Course::whereIn('id', $courseIds)
+                ->select('id', 'name', 'units')
+                ->get()
+                ->toArray();
+
+            $totalUnits = array_sum(array_column($courses, 'units'));
         }
-
-        $activeSchoolYear = \App\Models\SchoolYear::where('is_active', true)->first();
-
-        if ($activeSchoolYear) {
-            $unitPrice = $activeSchoolYear->default_unit_price ?? 0;
-            $tuitionFee = $totalUnits * $unitPrice;
-        }
-
-        return response()->json([
-            'total_units' => $totalUnits,
-            'tuition_fee' => $tuitionFee,
-            'unit_price' => $unitPrice,
-        ]);
     }
+
+    $activeSchoolYear = \App\Models\SchoolYear::where('is_active', true)->first();
+
+    if ($activeSchoolYear) {
+        $unitPrice = $activeSchoolYear->default_unit_price ?? 0;
+        $tuitionFee = $totalUnits * $unitPrice;
+    }
+
+    return response()->json([
+        'total_units' => $totalUnits,
+        'tuition_fee' => $tuitionFee,
+        'unit_price' => $unitPrice,
+        'courses' => $courses, // Include course data in response
+    ]);
+}
 
 
     public function create()

@@ -35,3 +35,16 @@ Route::get('/api/search-students', [StudentSearchController::class, 'search']);
 
 Route::get('/reports', [ReportGenerationController::class, 'index'])->name('reports.index');
 Route::post('/reports/generate', [ReportGenerationController::class, 'generate'])->name('reports.generate');
+
+Route::get('/cashier/payment/pending', [CashierSideBarController::class, 'pendingEnrollments'])->name('cashier.payment.pending');
+
+Route::post('/cashier/confirm/{id}', [CashierSideBarController::class, 'confirmPending'])->name('cashier.confirm');
+Route::get('/cashier/payment/other', [CashierSideBarController::class, 'otherPayments'])->name('cashier.payment.other');
+
+Route::post('/payments/input', [PaymentController::class, 'input'])->name('payment.input');
+Route::get('/cashier/reports/other', [CashierSideBarController::class, 'reportOtherPayments'])->name('cashier.reports.other');
+
+Route::post('/payments/void', [PaymentController::class, 'voidPayment'])->name('payments.void');
+
+Route::post('/payments/void-other', [PaymentController::class, 'voidOtherPayment'])
+    ->name('payments.other-void');

@@ -58,6 +58,7 @@ class Admission extends Model
         'honors',
         'school_year',
         'semester',
+        'lrn',
         'status',
     ];
 
