@@ -18,9 +18,11 @@ class StudentSearchController extends Controller
             ->get()
             ->map(function ($student) {
                 return [
-                    'student_id' => $student->student_id,
-                    'full_name' => $student->getFullNameAttribute(),
+                    'student_id'  => $student->student_id,
+                    'full_name'   => $student->getFullNameAttribute(),
                     'balance_due' => optional($student->billing)->balance_due ?? 0,
+                    'school_year' => optional($student->billing)->school_year ?? '',
+                    'semester'    => optional($student->billing)->semester ?? '',
                 ];
             });
 
