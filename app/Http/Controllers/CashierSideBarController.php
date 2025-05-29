@@ -13,59 +13,55 @@ use Illuminate\Http\Request;
 
 class CashierSideBarController extends Controller
 {
-    /**
-     * Show the cashier dashboard.
-     */
+
     public function dashboard()
     {
         return view('cashier.cashier_db');
     }
 
-    /**
-     * Show the payment processing page.
-     */
-   public function reportOtherPayments()
-{
-    $payments = Payment::where('payment_type', 'others')
-                       ->where('is_void', 0)   // only not voided
-                       ->with('student')
-                       ->get();
 
-    return view('cashier.reports.other', compact('payments'));
-}
+    public function reportOtherPayments()
+    {
+        $payments = Payment::where('payment_type', 'others')
+            ->where('is_void', 0)   // only not voided
+            ->with('student')
+            ->get();
+
+        return view('cashier.reports.other', compact('payments'));
+    }
 
 
-   public function processPayment()
-{
-    $billings = Billing::with('student')->get()->map(function ($billing) {
-        $billing->full_name = Str::title($billing->student->first_name . ' ' . $billing->student->last_name);
-        $billing->school_year_semester = "{$billing->school_year} - {$billing->semester}";
-        return $billing;
-    });
+    public function processPayment()
+    {
+        $billings = Billing::with('student')->get()->map(function ($billing) {
+            $billing->full_name = Str::title($billing->student->first_name . ' ' . $billing->student->last_name);
+            $billing->school_year_semester = "{$billing->school_year} - {$billing->semester}";
+            return $billing;
+        });
 
-    // Only show non-voided payments
-    $payments = Payment::with('student')
-        ->where('is_void', false)
-        ->get();
+        // Only show non-voided payments
+        $payments = Payment::with('student')
+            ->where('is_void', false)
+            ->get();
 
-    return view('cashier.payment.process', compact('billings', 'payments'));
-}
+        return view('cashier.payment.process', compact('billings', 'payments'));
+    }
 
     /**
      * Show the list of payment reports.
      */
-   public function reportsIndex()
-{
-    $payments = Payment::with('student')
-        ->where(function($query) {
-            $query->whereNull('payment_type')
-                  ->orWhere('payment_type', '');
-        })
-        ->where('is_void', false) // Only show non-voided payments
-        ->get();
+    public function reportsIndex()
+    {
+        $payments = Payment::with('student')
+            ->where(function ($query) {
+                $query->whereNull('payment_type')
+                    ->orWhere('payment_type', '');
+            })
+            ->where('is_void', false) // Only show non-voided payments
+            ->get();
 
-    return view('cashier.reports.index', compact('payments'));
-}
+        return view('cashier.reports.index', compact('payments'));
+    }
 
 
 

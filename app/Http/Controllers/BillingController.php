@@ -111,9 +111,10 @@ class BillingController extends Controller
 
     public function getRevenueTrends()
     {
-        // Aggregate total_assessment grouped by semester
-        $revenueTrends = Billing::selectRaw('semester, SUM(total_assessment) as total_revenue')
-            ->groupBy('semester')
+        // Aggregate total_assessment grouped by both school_year and semester
+        $revenueTrends = Billing::selectRaw('school_year, semester, SUM(total_assessment) as total_revenue')
+            ->groupBy('school_year', 'semester')
+            ->orderBy('school_year', 'asc')
             ->orderBy('semester', 'asc')
             ->get();
 
@@ -129,5 +130,36 @@ class BillingController extends Controller
             ->get();
 
         return response()->json($balanceDueData);
+    }
+
+    // Add this method to your BillingController
+    public function getDailySales()
+    {
+        // Get active school year and semester
+        $activeSemester = \App\Models\SchoolYear::where('is_active', 1)->first();
+
+        if (!$activeSemester) {
+            return response()->json([
+                'error' => 'No active semester found'
+            ], 404);
+        }
+
+        // Calculate totals from payments table
+        $data = [
+            'total_sales' => \App\Models\Payment::where('school_year', $activeSemester->name)
+                ->where('semester', $activeSemester->semester)
+                ->sum('amount'),
+            'regular_payments' => \App\Models\Payment::where('school_year', $activeSemester->name)
+                ->where('semester', $activeSemester->semester)
+                ->whereNull('payment_type')
+                ->sum('amount'),
+            'other_payments' => \App\Models\Payment::where('school_year', $activeSemester->name)
+                ->where('semester', $activeSemester->semester)
+                ->where('payment_type', 'others')
+                ->sum('amount'),
+            'semester_info' => $activeSemester->name . ' - ' . $activeSemester->semester
+        ];
+
+        return response()->json($data);
     }
 }
