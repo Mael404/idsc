@@ -18,8 +18,9 @@ class Payment extends Model
         'is_void',
         'voided_at',
         'grading_period',
-
+        'remaining_balance',
     ];
+
 
     // Relationships
     public function student()

@@ -47,8 +47,6 @@ class PaymentController extends Controller
         ]);
 
         $gradingPeriod = $request->grading_period;
-
-
         $studentId = $request->student_id;
         $paymentAmount = $request->payment_amount;
         $orNumber = $request->or_number;
@@ -71,21 +69,28 @@ class PaymentController extends Controller
             return redirect()->back()->withErrors(['error' => 'Billing record not found for this student.']);
         }
 
+        // Check if payment amount is greater than the current balance due
+        if ($paymentAmount > $billing->balance_due) {
+            return redirect()->back()->with('error', 'The payment amount cannot be greater than the current balance due.');
+        }
+
         // Deduct payment from prelims_due, midterms_due, prefinals_due, and finals_due
         $dues = ['prelims_due', 'midterms_due', 'prefinals_due', 'finals_due'];
 
+        $remainingPayment = $paymentAmount;  // use this to deduct from dues
+
         foreach ($dues as $due) {
-            if ($paymentAmount <= 0) {
+            if ($remainingPayment <= 0) {
                 break;
             }
 
             if ($billing->$due > 0) {
-                if ($paymentAmount >= $billing->$due) {
-                    $paymentAmount -= $billing->$due;
+                if ($remainingPayment >= $billing->$due) {
+                    $remainingPayment -= $billing->$due;
                     $billing->$due = 0;
                 } else {
-                    $billing->$due -= $paymentAmount;
-                    $paymentAmount = 0;
+                    $billing->$due -= $remainingPayment;
+                    $remainingPayment = 0;
                 }
             }
         }
@@ -108,22 +113,21 @@ class PaymentController extends Controller
             return redirect()->back()->withErrors(['error' => 'Admission record not found for this student.']);
         }
 
-        // Log the payment
+        // Log the payment with remaining_balance
         Payment::create([
-            'student_id'     => $studentId,
-            'school_year'    => $activeSchoolYear->name,
-            'semester'       => $activeSchoolYear->semester,
-            'grading_period' => $gradingPeriod,
-            'amount'         => $request->payment_amount,
-            'or_number'      => $orNumber,
-            'remarks'        => $remarks,
-            'payment_date'   => now(),
+            'student_id'        => $studentId,
+            'school_year'       => $activeSchoolYear->name,
+            'semester'          => $activeSchoolYear->semester,
+            'grading_period'    => $gradingPeriod,
+            'amount'            => $paymentAmount,
+            'or_number'         => $orNumber,
+            'remarks'           => $remarks,
+            'payment_date'      => now(),
+            'remaining_balance' => $billing->balance_due,  // store remaining balance here
         ]);
-
 
         return redirect()->back()->with('success', 'Payment processed successfully!');
     }
-
     public function input(Request $request)
     {
         $request->validate([

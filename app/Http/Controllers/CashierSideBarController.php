@@ -160,10 +160,11 @@ class CashierSideBarController extends Controller
         return back()->with('success', 'Student enrollment and payment recorded successfully!');
     }
 
-    public function otherPayments()
-    {
-        $payments = Payment::where('payment_type', 'others')->with('student')->get();
+   public function otherPayments()
+{
+    $payments = Payment::where('payment_type', 'others')->with('student')->get();
+    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
-        return view('cashier.payment.other', compact('payments'));
-    }
+    return view('cashier.payment.other', compact('payments', 'activeSchoolYear'));
+}
 }

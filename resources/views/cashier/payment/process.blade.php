@@ -44,6 +44,8 @@
                                                 <th>Payment Date</th>
                                                 <th>Remarks</th>
                                                 <th>OR Number</th>
+                                                <th>Payment Period</th>
+                                                <th>Action</th> <!-- New column -->
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -54,9 +56,23 @@
                                                     <td>{{ number_format($payment->amount, 2) }}</td>
                                                     <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y h:i A') }}
                                                     </td>
-
                                                     <td>{{ $payment->remarks }}</td>
                                                     <td>{{ $payment->or_number }}</td>
+                                                    <td>{{ $payment->grading_period }}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-primary"
+                                                            onclick="reprintReceipt({
+                    name: '{{ $payment->student->full_name ?? 'No student found' }}',
+                    amount: '{{ $payment->amount }}',
+                    remarks: '{{ $payment->remarks }}',
+                    date: '{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}',
+                    schoolYear: '{{ $payment->school_year }}',
+                    semester: '{{ $payment->semester }}',
+                       balance: '{{ $payment->remaining_balance ?? 0 }}'  <!-- Use remaining_balance here -->
+                })">
+                                                            Reprint
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -66,6 +82,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <div class="modal fade" id="newPaymentModal" tabindex="-1" aria-labelledby="newPaymentModalLabel"
                     aria-hidden="true">
@@ -136,6 +153,7 @@
                     </div>
                 </div>
 
+
                 <div id="printableReceipt" style="display: none;">
                     <div
                         style="width: 100%; font-family: Arial, sans-serif; text-align: left; position: relative; font-size: larger; line-height: 1.8;">
@@ -160,18 +178,60 @@
                         <div style="text-align: left; font-size: 20px; margin-bottom: 50px;">
                             <span id="receiptRemarks"></span>
                         </div>
+                        <!-- Add this new div for remaining balance -->
+                        <div style="text-align: left; font-size: 20px; margin-bottom: 50px;">
+                            Remaining Balance: <span id="receiptBalanceDue"></span>
+                        </div>
                     </div>
                 </div>
 
 
+
+
                 <script>
                     function handlePrintAndSubmit(event) {
-                        event.preventDefault(); // Prevent form from submitting immediately
-                        printReceipt(); // Trigger printing
+                        event.preventDefault();
+
+                        const amount = parseFloat(document.getElementById('amount').value);
+                        const balanceDue = parseFloat(document.getElementById('balanceDue').value);
+
+                        if (amount > balanceDue) {
+                            showErrorMessage('The payment amount cannot be greater than the current balance due.');
+                            return false;
+                        }
+
+                        printReceipt();
                         setTimeout(() => {
-                            event.target.submit(); // Submit the form after printing
-                        }, 800); // Adjust delay as needed
+                            event.target.submit();
+                        }, 800);
+
                         return false;
+                    }
+
+                    function showErrorMessage(message) {
+                        const existing = document.getElementById('js-error-alert');
+                        if (existing) existing.remove();
+
+                        const alert = document.createElement('div');
+                        alert.className = 'popup-alert fadeDownIn shadow rounded-lg p-4';
+                        alert.id = 'js-error-alert';
+                        alert.style.backgroundColor = '#dc3545';
+                        alert.style.color = '#fff';
+                        alert.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-semibold fs-6">
+                    ${message}
+                    <i class="fas fa-exclamation-circle ms-1"></i>
+                </span>
+            </div>
+        `;
+                        document.body.appendChild(alert);
+
+                        setTimeout(() => {
+                            alert.classList.remove('fadeDownIn');
+                            alert.classList.add('fadeOut');
+                            setTimeout(() => alert.remove(), 400);
+                        }, 3000);
                     }
 
                     function printReceipt() {
@@ -198,21 +258,21 @@
                         }
 
                         const amount = parseFloat(document.getElementById('amount').value);
+                        const balanceDue = parseFloat(document.getElementById('balanceDue').value);
+                        const remainingBalance = balanceDue - amount;
                         const remarks = document.getElementById('remarks').value;
                         const amountWords = convertAmountToWords(amount).toUpperCase() + ' PESOS ONLY';
 
-             
                         function formatSemester(sem) {
                             sem = sem.toString().toUpperCase();
                             if (sem === '1' || sem === 'FIRST' || sem === '1ST') return '1ST';
                             if (sem === '2' || sem === 'SECOND' || sem === '2ND') return '2ND';
                             if (sem === '3' || sem === 'THIRD' || sem === '3RD') return '3RD';
-                            return sem; // fallback if unexpected input
+                            return sem;
                         }
 
                         const rawSchoolYear = document.getElementById('schoolYearInput')?.value || "N/A";
                         const rawSemester = document.getElementById('semesterInput')?.value || "N/A";
-
                         const formattedSemester = formatSemester(rawSemester);
                         const formattedSemesterAndSY = `${formattedSemester} SEMESTER SY ${rawSchoolYear}`;
 
@@ -221,12 +281,15 @@
                         const printContent = `
             <div>${getDateInWords(currentDate)}</div>
             <div>${formattedName}</div>
-          <div>${formattedSemesterAndSY}</div>
-
+            <div>${formattedSemesterAndSY}</div>
             <div>${remarks}</div>
             <div style="display: flex; justify-content: space-between; margin-top: 30px;">
                 <div>${amountWords}</div>
                 <div>₱${amount.toFixed(2)}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                <div>Remaining Balance:</div>
+                <div>₱${remainingBalance.toFixed(2)}</div>
             </div>
             <div style="text-align: right; margin-top: 60px;">${cashier}</div>
         `;
@@ -251,6 +314,68 @@
                         printWindow.print();
                     }
 
+                    function reprintReceipt(data) {
+                        const amount = parseFloat(data.amount);
+                        const remainingBalance = parseFloat(data.balance); // ✅ Use as-is
+                        const amountWords = convertAmountToWords(amount).toUpperCase() + ' PESOS ONLY';
+
+                        const nameParts = data.name.trim().split(' ');
+                        let formattedName = data.name;
+                        if (nameParts.length >= 3) {
+                            const lastName = nameParts.pop();
+                            const firstName = nameParts.shift();
+                            const middleInitial = nameParts.length > 0 ? nameParts[0].charAt(0).toUpperCase() + '.' : '';
+                            formattedName = `${lastName.toUpperCase()}, ${firstName.toUpperCase()} ${middleInitial}`;
+                        }
+
+                        const formattedSemester = (function(sem) {
+                            sem = sem.toString().toUpperCase();
+                            if (sem === '1' || sem === 'FIRST' || sem === '1ST') return '1ST';
+                            if (sem === '2' || sem === 'SECOND' || sem === '2ND') return '2ND';
+                            if (sem === '3' || sem === 'THIRD' || sem === '3RD') return '3RD';
+                            return sem;
+                        })(data.semester);
+
+                        const formattedSemesterAndSY = `${formattedSemester} SEMESTER SY ${data.schoolYear}`;
+                        const cashier = "EVELYN P.";
+
+                        const printContent = `
+        <div>${data.date}</div>
+        <div>${formattedName}</div>
+        <div>${formattedSemesterAndSY}</div>
+        <div>${data.remarks}</div>
+        <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+            <div>${amountWords}</div>
+            <div>₱${amount.toFixed(2)}</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <div>Remaining Balance:</div>
+            <div>₱${remainingBalance.toFixed(2)}</div>
+        </div>
+        <div style="text-align: right; margin-top: 60px;">${cashier}</div>
+    `;
+
+                        const printWindow = window.open('', '', 'width=600,height=600');
+                        printWindow.document.open();
+                        printWindow.document.write(`
+        <html>
+            <head>
+                <title>Reprint Receipt</title>
+                <style>
+                    body { font-family: Arial, sans-serif; font-size: 18px; padding: 20px; line-height: 1.8; }
+                    div { margin-bottom: 15px; }
+                </style>
+            </head>
+            <body>
+                ${printContent}
+            </body>
+        </html>
+    `);
+                        printWindow.document.close();
+                        printWindow.print();
+                    }
+
+
                     function convertAmountToWords(amount) {
                         const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
                         const teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen",
@@ -260,7 +385,6 @@
 
                         function numberToWords(num) {
                             let word = "";
-
                             if (num >= 100000) {
                                 word += ones[Math.floor(num / 100000)] + " Hundred ";
                                 num %= 100000;
@@ -431,6 +555,8 @@
         @include('layouts.footer')
 
     </div>
+    <div id="js-error-alert-container"></div>
+
     <!-- End of Content Wrapper -->
 @endsection
 
