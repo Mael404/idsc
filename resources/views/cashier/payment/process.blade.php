@@ -76,13 +76,13 @@
                             <div class="modal-content">
                                 <div class="modal-header bg-primary text-white">
                                     <h5 class="modal-title" id="newPaymentModalLabel">New Payment</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
+
                                 </div>
                                 <div class="modal-body">
 
-                                    <input id="schoolYearInput" name="school_year">
-                                    <input id="semesterInput" name="semester">
+                                    <input type="hidden" id="schoolYearInput" name="school_year">
+                                    <input type="hidden" id="semesterInput" name="semester">
+
                                     <div class="form-group position-relative">
                                         <label for="searchStudent">Search Student</label>
                                         <input type="text" class="form-control" id="searchStudent" name="student_id"
@@ -104,6 +104,17 @@
                                             step="0.01" required>
                                     </div>
                                     <div class="form-group">
+                                        <label for="gradingPeriod">Grading Period</label>
+                                        <select class="form-control" id="gradingPeriod" name="grading_period" required>
+                                            <option value="">Select Grading Period</option>
+                                            <option value="prelims">Prelims</option>
+                                            <option value="midterms">Midterms</option>
+                                            <option value="prefinals">Pre-finals</option>
+                                            <option value="finals">Finals</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
                                         <label for="remarks">Remarks</label>
                                         <textarea class="form-control" id="remarks" name="remarks"></textarea>
                                     </div>
@@ -117,7 +128,7 @@
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </div>
                             </div>
@@ -188,10 +199,9 @@
 
                         const amount = parseFloat(document.getElementById('amount').value);
                         const remarks = document.getElementById('remarks').value;
-                        const amountWords = convertAmountToWords(amount).toUpperCase() + ' ONLY';
+                        const amountWords = convertAmountToWords(amount).toUpperCase() + ' PESOS ONLY';
 
-                        // Get dynamic values from hidden inputs instead of hardcoded strings
-                        // Helper function to convert semester number to "1ST", "2ND", "3RD", etc.
+             
                         function formatSemester(sem) {
                             sem = sem.toString().toUpperCase();
                             if (sem === '1' || sem === 'FIRST' || sem === '1ST') return '1ST';

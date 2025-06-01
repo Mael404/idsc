@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAdminSideBarController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -10,7 +11,12 @@ Route::get('/', function () {
 
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    // Force logout and redirect with message
+    Auth::logout();
+    session()->invalidate();
+    session()->regenerateToken();
+
+    return redirect()->route('login')->with('message', 'Session expired or invalid role. Please log in again.');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

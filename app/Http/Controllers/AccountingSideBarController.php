@@ -110,6 +110,76 @@ class AccountingSideBarController extends Controller
         return view('student-ledger');
     }
 
+    public function pendingVoids()
+    {
+        // Get only payments marked as pending for voiding
+        $payments = Payment::where('status', 'pending_void')
+            ->with(['student', 'student.enrollment.programCourseMapping.program']) // adjust as per your actual relations
+            ->orderBy('payment_date', 'desc')
+            ->get();
+
+        return view('accountant.pending-voids', compact('payments'));
+    }
+
+    public function approveVoid(Payment $payment)
+    {
+        DB::transaction(function () use ($payment) {
+            // Mark payment as void approved
+            $payment->status = 'void_approved';
+            $payment->save();
+
+            // Get billing record for this student + school year + semester
+            $billing = Billing::where('student_id', $payment->student_id)
+                ->where('school_year', $payment->school_year)
+                ->where('semester', $payment->semester)
+                ->first();
+
+            if (!$billing) {
+                throw new \Exception('Billing record not found.');
+            }
+
+            // The grading period for the voided payment, e.g. 'prelims'
+            $gradingPeriod = $payment->grading_period;
+
+            // Validate the grading period matches a due column
+            $validPeriods = ['prelims', 'midterms', 'prefinals', 'finals'];
+            if (!in_array($gradingPeriod, $validPeriods)) {
+                throw new \Exception("Invalid grading period '{$gradingPeriod}' in payment.");
+            }
+
+            // Column to add amount back to
+            $dueColumn = $gradingPeriod . '_due';
+
+            // Add the voided amount back to the due column
+            $billing->$dueColumn += $payment->amount;
+
+            // Recalculate balance_due as sum of all dues
+            $billing->balance_due =
+                $billing->prelims_due +
+                $billing->midterms_due +
+                $billing->prefinals_due +
+                $billing->finals_due;
+
+            // Update is_full_payment flag
+            $billing->is_full_payment = $billing->balance_due <= 0;
+
+            $billing->save();
+        });
+
+        return redirect()->route('accountant.pending_voids')->with('success', 'Void approved and billing updated.');
+    }
+
+
+    /**
+     * Reject void request.
+     */
+    public function rejectVoid(Payment $payment)
+    {
+        $payment->status = 'void_rejected';
+        $payment->save();
+
+        return redirect()->route('accountant.pending_voids')->with('success', 'Void request rejected.');
+    }
     /**
      * Show the promisories page.
      */

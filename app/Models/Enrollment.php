@@ -54,6 +54,11 @@ class Enrollment extends Model
     {
         return $this->belongsTo(Scholarship::class, 'scholarship_id');
     }
+    public function programCourseMapping()
+{
+    return $this->belongsTo(ProgramCourseMapping::class, 'course_mapping_id', 'id');
+}
+
 
     
 }

@@ -42,8 +42,12 @@ class PaymentController extends Controller
             'student_id' => 'required|exists:billings,student_id',
             'payment_amount' => 'required|numeric|min:0.01',
             'or_number' => 'required|string|unique:payments,or_number',
+            'grading_period' => 'required|in:prelims,midterms,prefinals,finals',
             'remarks' => 'nullable|string',
         ]);
+
+        $gradingPeriod = $request->grading_period;
+
 
         $studentId = $request->student_id;
         $paymentAmount = $request->payment_amount;
@@ -106,14 +110,16 @@ class PaymentController extends Controller
 
         // Log the payment
         Payment::create([
-            'student_id'   => $studentId,
-            'school_year'  => $activeSchoolYear->name,
-            'semester'     => $activeSchoolYear->semester,
-            'amount'       => $request->payment_amount,
-            'or_number'    => $orNumber,
-            'remarks'      => $remarks,
-            'payment_date' => now(),
+            'student_id'     => $studentId,
+            'school_year'    => $activeSchoolYear->name,
+            'semester'       => $activeSchoolYear->semester,
+            'grading_period' => $gradingPeriod,
+            'amount'         => $request->payment_amount,
+            'or_number'      => $orNumber,
+            'remarks'        => $remarks,
+            'payment_date'   => now(),
         ]);
+
 
         return redirect()->back()->with('success', 'Payment processed successfully!');
     }
@@ -160,48 +166,38 @@ class PaymentController extends Controller
     {
         $request->validate([
             'payment_id' => 'required|exists:payments,id',
-            'student_id' => 'required',
-            'amount' => 'required|numeric',
-            'semester' => 'required',
-            'school_year' => 'required'
         ]);
 
-        DB::beginTransaction();
-
         try {
-            // Find the billing record with matching student_id, semester, and school_year
-            $billing = Billing::where('student_id', $request->student_id)
-                ->where('semester', $request->semester)
-                ->where('school_year', $request->school_year)
-                ->first();
+            $payment = Payment::findOrFail($request->payment_id);
 
-            if (!$billing) {
+            // Check if it's already pending or voided
+            if ($payment->status === 'pending_void') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Billing record not found for this student, semester, and school year'
+                    'message' => 'This payment is already pending for void approval.'
                 ]);
             }
 
-            // Add the amount back to balance_due
-            $billing->balance_due += $request->amount;
-            $billing->save();
+            if ($payment->is_void) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This payment has already been voided.'
+                ]);
+            }
 
-            // Mark the payment as voided (you might want to add a 'status' or 'is_void' column to your payments table)
-            $payment = Payment::find($request->payment_id);
-            $payment->is_void = true; // Assuming you have this column
+            // Update status to pending
+            $payment->status = 'pending_void';
             $payment->save();
-
-            DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Payment voided successfully'
+                'message' => 'Void request submitted. Awaiting approval from accounting.'
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Error voiding payment: ' . $e->getMessage()
+                'message' => 'Error submitting void request: ' . $e->getMessage()
             ]);
         }
     }

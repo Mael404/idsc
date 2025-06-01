@@ -100,4 +100,9 @@ class Admission extends Model
     {
         return $this->hasOne(MiscFee::class, 'program_course_mapping_id', 'course_mapping_id')->latest('created_at');
     }
+    public function enrollment()
+{
+    return $this->hasOne(Enrollment::class, 'student_id', 'student_id');
+}
+
 }

@@ -16,7 +16,9 @@ class Payment extends Model
         'semester',
         'payment_type',
         'is_void',
-        'voided_at'
+        'voided_at',
+        'grading_period',
+
     ];
 
     // Relationships
