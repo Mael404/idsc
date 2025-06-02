@@ -632,49 +632,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                                     <td>{{ ucfirst($admission->status) }}</td>
                                                     <td>{{ $admission->email }}</td>
-                                                    <td>
-                                                        <!-- Trigger modal -->
-                                                        <!-- View Button with Eye Icon -->
-                                                     @php
-    $initialPayment = $admission->billing->initial_payment ?? 0;
-@endphp
+                                           
+<td class="text-center align-middle">
+    @php
+        $initialPayment = $admission->billing->initial_payment ?? 0;
+    @endphp
 
-<div class="position-relative d-inline-block">
-    <button type="button" 
-            class="btn btn-info btn-sm position-relative"
-            data-bs-toggle="modal"
-            data-bs-target="#studentModal{{ $admission->student_id }}"
-            title="View Student">
-        <i class="fas fa-eye"></i>
+    <div class="d-flex justify-content-center align-items-center gap-1" style="min-width: 150px;">
+        <!-- View Button with Eye Icon -->
+        <button type="button" 
+                class="btn btn-info btn-sm position-relative"
+                data-bs-toggle="modal"
+                data-bs-target="#studentModal{{ $admission->student_id }}"
+                title="View Student">
+            <i class="fas fa-eye"></i>
 
-        @if($initialPayment <= 0)
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
-                  data-bs-toggle="tooltip"
-                  title="This student hasn't made an initial payment yet.">
-                Warning
-            </span>
-        @endif
-    </button>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-            new bootstrap.Tooltip(tooltipTriggerEl);
+            @if($initialPayment <= 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
+                      data-bs-toggle="tooltip"
+                      title="This student hasn't made an initial payment yet.">
+                    Warning
+                </span>
+            @endif
+        </button>
+
+        <!-- Edit Button -->
+        <a href="{{ route('admissions.edit', $admission->student_id) }}"
+           class="btn btn-warning btn-sm"
+           title="Edit Student">
+            <i class="fas fa-edit"></i>
+        </a>
+
+        <!-- Print COR Button -->
+        <a href="{{ route('admissions.printCOR', $admission->student_id) }}"
+           target="_blank" rel="noopener"
+           class="btn btn-primary btn-sm"
+           title="Print COR">
+            <i class="fas fa-print"></i>
+        </a>
+    </div>
+
+    <!-- Initialize Bootstrap tooltips -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
-    });
-</script>
+    </script>
+</td>
 
-
-                                                        <!-- Print COR Button with Print Icon -->
-                                                        <a href="{{ route('admissions.printCOR', $admission->student_id) }}"
-                                                            target="_blank" rel="noopener" class="btn btn-primary btn-sm"
-                                                            title="Print COR">
-                                                            <i class="fas fa-print"></i>
-                                                        </a>
-
-
-                                                    </td>
                                                 </tr>
 
                                           <!-- Student Information Modal - Larger Size -->

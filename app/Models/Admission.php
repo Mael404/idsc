@@ -104,5 +104,24 @@ class Admission extends Model
 {
     return $this->hasOne(Enrollment::class, 'student_id', 'student_id');
 }
+// In your Admission model
+public function region()
+{
+    return $this->belongsTo(RefRegion::class, 'region_code', 'regCode');
+}
 
+public function province()
+{
+    return $this->belongsTo(RefProvince::class, 'province_code', 'provCode');
+}
+
+public function cityMun()
+{
+    return $this->belongsTo(RefCityMun::class, 'city_code', 'citymunCode');
+}
+
+public function barangay()
+{
+    return $this->belongsTo(RefBrgy::class, 'barangay_code', 'brgyCode');
+}
 }

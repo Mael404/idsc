@@ -6,6 +6,11 @@ use App\Http\Controllers\ProgramCourseMappingController;
 use App\Http\Controllers\ReEnrollRegularController;
 use App\Http\Controllers\RegistrarSideBarController;
 use App\Http\Controllers\StudentSearchController;
+use App\Models\RefBrgy;
+use App\Models\RefCityMun;
+use App\Models\RefProvince;
+use App\Models\RefRegion;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Apply 'auth' middleware to the whole 'registrar' prefix group
@@ -66,7 +71,12 @@ Route::get('/barangays/{citymunCode}', [LocationController::class, 'getBarangays
 Route::post('/re-enroll-regular', [ReEnrollRegularController::class, 'submitForm'])
     ->name('re_enroll_regular.store');
 
-    Route::get('/search-student', [ReEnrollRegularController::class, 'search'])->name('search.student');
+Route::get('/search-student', [ReEnrollRegularController::class, 'search'])->name('search.student');
 Route::post('/calculate-tuition-fee', [ReEnrollRegularController::class, 'calculateTuitionFee'])
     ->name('calculate.tuition.fee');
-    
+
+
+Route::get('/admissions/{student_id}/edit', [RegistrarSideBarController::class, 'editStudent'])
+    ->name('admissions.edit');
+Route::put('/admissions/{student_id}', [AdmissionController::class, 'update'])->name('admissions.update');
+

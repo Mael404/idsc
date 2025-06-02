@@ -144,38 +144,38 @@ class RegistrarSideBarController extends Controller
         return view('registrar.enrollment.transferee_enrollment'); // View for transferees
     }
 
-   public function reEnrollRegular()
-{
-    // Fetch admissions data with enrollment_type = 'old'
-    $enrollments = $this->getEnrollmentsForActiveSchoolYear()->where('enrollment_type', 'old');
+    public function reEnrollRegular()
+    {
+        // Fetch admissions data with enrollment_type = 'old'
+        $enrollments = $this->getEnrollmentsForActiveSchoolYear()->where('enrollment_type', 'old');
 
-    // Fetch course mappings
-    $courseMappings = $this->getUniqueSortedCourseMappings();
+        // Fetch course mappings
+        $courseMappings = $this->getUniqueSortedCourseMappings();
 
-    // Fetch all courses
-    $allCourses = $this->getAllCourses();
+        // Fetch all courses
+        $allCourses = $this->getAllCourses();
 
-    // Fetch scholarships
-    $scholarships = $this->getActiveScholarships();
+        // Fetch scholarships
+        $scholarships = $this->getActiveScholarships();
 
-    // Calculate total units if a mapping is selected
-    $selectedMappingId = request('selected_mapping_id');
-    $totalUnits = $this->calculateTotalUnits($selectedMappingId);
+        // Calculate total units if a mapping is selected
+        $selectedMappingId = request('selected_mapping_id');
+        $totalUnits = $this->calculateTotalUnits($selectedMappingId);
 
-    // Fetch regions
-    $regions = $this->getRegions();
+        // Fetch regions
+        $regions = $this->getRegions();
 
-    // Pass all data to view
-    return view('registrar.enrollment.re_enroll_regular', compact(
-        'enrollments',
-        'courseMappings',
-        'allCourses',
-        'scholarships',
-        'selectedMappingId',
-        'regions',
-        'totalUnits'
-    ));
-}
+        // Pass all data to view
+        return view('registrar.enrollment.re_enroll_regular', compact(
+            'enrollments',
+            'courseMappings',
+            'allCourses',
+            'scholarships',
+            'selectedMappingId',
+            'regions',
+            'totalUnits'
+        ));
+    }
 
     public function reEnrollIrregular()
     {
@@ -217,4 +217,21 @@ class RegistrarSideBarController extends Controller
     {
         return view('registrar.archive.disposal_log');
     }
+
+   public function editStudent($student_id)
+{
+    $admission = Admission::where('student_id', $student_id)->firstOrFail();
+    $scholarships = Scholarship::all();
+    $courseMappings = ProgramCourseMapping::all();
+    
+    // Get all regions for the dropdown
+    $regions = RefRegion::all();
+    
+    return view('registrar.enrollment.edit-students', compact(
+        'admission',
+        'scholarships',
+        'courseMappings',
+        'regions'
+    ));
+}
 }

@@ -19,6 +19,15 @@ use Illuminate\Support\Facades\Log;
 
 class AdmissionController extends Controller
 {
+    public function update(Request $request, $student_id)
+    {
+        $admission = Admission::where('student_id', $student_id)->firstOrFail();
+        // validate and update the admission record
+        $admission->update($request->all());
+
+        return redirect()->route('admissions.index', $student_id)->with('success', 'Student updated successfully!');
+    }
+
     public function updateInitialPayment(Request $request, $id)
     {
         $billing = Billing::findOrFail($id);
@@ -499,50 +508,50 @@ class AdmissionController extends Controller
         ]);
     }
 
-  public function getMappingUnits(Request $request)
-{
-    $mappingId = $request->input('mapping_id');
-    $totalUnits = 0;
-    $tuitionFee = 0;
-    $unitPrice = 0;
-    $courses = []; // Array to store course info
+    public function getMappingUnits(Request $request)
+    {
+        $mappingId = $request->input('mapping_id');
+        $totalUnits = 0;
+        $tuitionFee = 0;
+        $unitPrice = 0;
+        $courses = []; // Array to store course info
 
-    if ($mappingId) {
-        $selectedMapping = ProgramCourseMapping::find($mappingId);
+        if ($mappingId) {
+            $selectedMapping = ProgramCourseMapping::find($mappingId);
 
-        if ($selectedMapping) {
-            $matchingMappings = ProgramCourseMapping::where('program_id', $selectedMapping->program_id)
-                ->where('year_level_id', $selectedMapping->year_level_id)
-                ->where('semester_id', $selectedMapping->semester_id)
-                ->where('effective_sy', $selectedMapping->effective_sy)
-                ->get();
+            if ($selectedMapping) {
+                $matchingMappings = ProgramCourseMapping::where('program_id', $selectedMapping->program_id)
+                    ->where('year_level_id', $selectedMapping->year_level_id)
+                    ->where('semester_id', $selectedMapping->semester_id)
+                    ->where('effective_sy', $selectedMapping->effective_sy)
+                    ->get();
 
-            $courseIds = $matchingMappings->pluck('course_id')->unique();
+                $courseIds = $matchingMappings->pluck('course_id')->unique();
 
-            // Get all courses with their names and units
-            $courses = \App\Models\Course::whereIn('id', $courseIds)
-                ->select('id', 'name', 'units')
-                ->get()
-                ->toArray();
+                // Get all courses with their names and units
+                $courses = \App\Models\Course::whereIn('id', $courseIds)
+                    ->select('id', 'name', 'units')
+                    ->get()
+                    ->toArray();
 
-            $totalUnits = array_sum(array_column($courses, 'units'));
+                $totalUnits = array_sum(array_column($courses, 'units'));
+            }
         }
+
+        $activeSchoolYear = \App\Models\SchoolYear::where('is_active', true)->first();
+
+        if ($activeSchoolYear) {
+            $unitPrice = $activeSchoolYear->default_unit_price ?? 0;
+            $tuitionFee = $totalUnits * $unitPrice;
+        }
+
+        return response()->json([
+            'total_units' => $totalUnits,
+            'tuition_fee' => $tuitionFee,
+            'unit_price' => $unitPrice,
+            'courses' => $courses, // Include course data in response
+        ]);
     }
-
-    $activeSchoolYear = \App\Models\SchoolYear::where('is_active', true)->first();
-
-    if ($activeSchoolYear) {
-        $unitPrice = $activeSchoolYear->default_unit_price ?? 0;
-        $tuitionFee = $totalUnits * $unitPrice;
-    }
-
-    return response()->json([
-        'total_units' => $totalUnits,
-        'tuition_fee' => $tuitionFee,
-        'unit_price' => $unitPrice,
-        'courses' => $courses, // Include course data in response
-    ]);
-}
 
 
     public function create()
