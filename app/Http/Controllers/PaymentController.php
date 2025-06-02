@@ -18,24 +18,40 @@ class PaymentController extends Controller
             'payment_id' => 'required|exists:payments,id',
         ]);
 
-        $payment = Payment::find($request->payment_id);
+        try {
+            $payment = Payment::findOrFail($request->payment_id);
 
-        if ($payment->is_void) {
+            // Check if it's already pending or voided
+            if ($payment->status === 'pending_void') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This payment is already pending for void approval.'
+                ]);
+            }
+
+            if ($payment->is_void) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This payment has already been voided.'
+                ]);
+            }
+
+            // Update status to pending
+            $payment->status = 'pending_void';
+            $payment->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Void request submitted. Awaiting approval from accounting.'
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Payment is already voided.',
+                'message' => 'Error submitting void request: ' . $e->getMessage()
             ]);
         }
-
-        $payment->is_void = true;
-        $payment->voided_at = Carbon::now();
-        $payment->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment voided successfully.',
-        ]);
     }
+
     public function store(Request $request)
     {
         $request->validate([

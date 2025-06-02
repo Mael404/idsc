@@ -45,7 +45,7 @@
                                                 <th>Semester</th>
                                                 <th>Amount</th>
                                                 <th>Status</th>
-                                                   <th>Action</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -67,20 +67,24 @@
                                                             action="{{ route('accounting.voids.approve', $payment->id) }}"
                                                             class="d-inline">
                                                             @csrf
-                                                            <button class="btn btn-success btn-sm">Approve</button>
+                                                            <button class="btn btn-success btn-sm" title="Approve">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
                                                         </form>
                                                         <form method="POST"
                                                             action="{{ route('accounting.voids.reject', $payment->id) }}"
                                                             class="d-inline">
                                                             @csrf
-                                                            <button class="btn btn-danger btn-sm">Reject</button>
+                                                            <button class="btn btn-danger btn-sm" title="Reject">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
                                                         </form>
                                                     </td>
                                                 </tr>
                                             @empty
-                                              
                                             @endforelse
                                         </tbody>
+
 
                                     </table>
                                 </div>

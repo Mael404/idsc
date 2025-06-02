@@ -121,53 +121,61 @@ class AccountingSideBarController extends Controller
         return view('accountant.pending-voids', compact('payments'));
     }
 
-    public function approveVoid(Payment $payment)
-    {
-        DB::transaction(function () use ($payment) {
-            // Mark payment as void approved
+  public function approveVoid(Payment $payment)
+{
+    DB::transaction(function () use ($payment) {
+        // Check payment_type first
+        if ($payment->payment_type === 'others') {
+            // If payment_type is "others", only update status
             $payment->status = 'void_approved';
             $payment->save();
+            return; // Exit the transaction early
+        }
 
-            // Get billing record for this student + school year + semester
-            $billing = Billing::where('student_id', $payment->student_id)
-                ->where('school_year', $payment->school_year)
-                ->where('semester', $payment->semester)
-                ->first();
+        // Proceed with the normal void approval logic
+        $payment->status = 'void_approved';
+        $payment->save();
 
-            if (!$billing) {
-                throw new \Exception('Billing record not found.');
-            }
+        // Get billing record for this student + school year + semester
+        $billing = Billing::where('student_id', $payment->student_id)
+            ->where('school_year', $payment->school_year)
+            ->where('semester', $payment->semester)
+            ->first();
 
-            // The grading period for the voided payment, e.g. 'prelims'
-            $gradingPeriod = $payment->grading_period;
+        if (!$billing) {
+            throw new \Exception('Billing record not found.');
+        }
 
-            // Validate the grading period matches a due column
-            $validPeriods = ['prelims', 'midterms', 'prefinals', 'finals'];
-            if (!in_array($gradingPeriod, $validPeriods)) {
-                throw new \Exception("Invalid grading period '{$gradingPeriod}' in payment.");
-            }
+        // The grading period for the voided payment, e.g. 'prelims'
+        $gradingPeriod = $payment->grading_period;
 
-            // Column to add amount back to
-            $dueColumn = $gradingPeriod . '_due';
+        // Validate the grading period matches a due column
+        $validPeriods = ['prelims', 'midterms', 'prefinals', 'finals'];
+        if (!in_array($gradingPeriod, $validPeriods)) {
+            throw new \Exception("Invalid grading period '{$gradingPeriod}' in payment.");
+        }
 
-            // Add the voided amount back to the due column
-            $billing->$dueColumn += $payment->amount;
+        // Column to add amount back to
+        $dueColumn = $gradingPeriod . '_due';
 
-            // Recalculate balance_due as sum of all dues
-            $billing->balance_due =
-                $billing->prelims_due +
-                $billing->midterms_due +
-                $billing->prefinals_due +
-                $billing->finals_due;
+        // Add the voided amount back to the due column
+        $billing->$dueColumn += $payment->amount;
 
-            // Update is_full_payment flag
-            $billing->is_full_payment = $billing->balance_due <= 0;
+        // Recalculate balance_due as sum of all dues
+        $billing->balance_due =
+            $billing->prelims_due +
+            $billing->midterms_due +
+            $billing->prefinals_due +
+            $billing->finals_due;
 
-            $billing->save();
-        });
+        // Update is_full_payment flag
+        $billing->is_full_payment = $billing->balance_due <= 0;
 
-        return redirect()->route('accountant.pending_voids')->with('success', 'Void approved and billing updated.');
-    }
+        $billing->save();
+    });
+
+    return redirect()->route('accountant.pending_voids')->with('success', 'Void approved and billing updated.');
+}
 
 
     /**

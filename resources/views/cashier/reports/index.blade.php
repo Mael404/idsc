@@ -10,7 +10,7 @@
                 @include('layouts.success-message')
 
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">Manage Student Billings</h1>
+                    <h1 class="h3 mb-0 text-gray-800">Payment History</h1>
 
                     <button class="btn btn-primary" onclick="printTable()">
                         <i class="fas fa-print mr-1"></i> Print
@@ -78,15 +78,13 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">Confirm Void</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span>&times;</span>
-                                </button>
+                            
                             </div>
                             <div class="modal-body">
                                 Are you sure you want to void this transaction? This action is not undoable.
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                             
                                 <button type="button" class="btn btn-danger" id="confirmVoid">Yes, Void Payment</button>
                             </div>
                         </div>

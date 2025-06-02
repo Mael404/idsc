@@ -23,12 +23,14 @@ class CashierSideBarController extends Controller
     public function reportOtherPayments()
     {
         $payments = Payment::where('payment_type', 'others')
-            ->where('is_void', 0)   // only not voided
+            ->where('is_void', 0)                   // only not voided
+            ->where('status', '!=', 'void_approved') // exclude those with status 'void_approved'
             ->with('student')
             ->get();
 
         return view('cashier.reports.other', compact('payments'));
     }
+
 
 
     public function processPayment()
@@ -58,10 +60,12 @@ class CashierSideBarController extends Controller
                     ->orWhere('payment_type', '');
             })
             ->where('is_void', false) // Only show non-voided payments
+            ->where('status', '!=', 'void_approved') // Exclude void_approved status
             ->get();
 
         return view('cashier.reports.index', compact('payments'));
     }
+
 
 
 
@@ -160,11 +164,11 @@ class CashierSideBarController extends Controller
         return back()->with('success', 'Student enrollment and payment recorded successfully!');
     }
 
-   public function otherPayments()
-{
-    $payments = Payment::where('payment_type', 'others')->with('student')->get();
-    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+    public function otherPayments()
+    {
+        $payments = Payment::where('payment_type', 'others')->with('student')->get();
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
-    return view('cashier.payment.other', compact('payments', 'activeSchoolYear'));
-}
+        return view('cashier.payment.other', compact('payments', 'activeSchoolYear'));
+    }
 }
