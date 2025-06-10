@@ -111,6 +111,24 @@
             width: 200%;
             margin-left: -10%;
         }
+
+    .name-uppercase {
+    font-weight: bold;
+    font-size: 1.3em;
+    text-transform: uppercase;
+    white-space: normal;     /* Allow wrapping */
+    overflow: visible;       /* No cutting */
+    text-overflow: unset;    /* Remove ellipsis */
+    display: inline;         /* Inline behaves better for text flow */
+}
+
+.left-side {
+    width: 65%; /* instead of 31% */
+}
+.right-side {
+    width: 33%; /* or adjust to balance */
+}
+
     </style>
 </head>
 
@@ -179,10 +197,15 @@
             <div class="left-side">
                 <div class="info-block">
                     <span class="info-label">Name:</span>
-                    {{ ucfirst(strtolower($enrollment->admission->first_name ?? '')) }}
-                    {{ ucfirst(strtolower($enrollment->admission->middle_name ?? '')) }}
-                    {{ ucfirst(strtolower($enrollment->admission->last_name ?? '')) }}
+                    <span class="name-uppercase">
+                        {{ $enrollment->admission->first_name ?? '' }}
+                        {{ $enrollment->admission->middle_name ?? '' }}
+                        {{ $enrollment->admission->last_name ?? '' }}
+                    </span>
+
                 </div>
+
+
 
                 <div class="info-block" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     <span class="info-label">Course:</span>
@@ -244,7 +267,7 @@
                     <td>{{ $course['subject'] }}</td>
                     <td>{{ $course['code'] }}</td>
                     <td>{{ $course['name'] }}</td>
-                    <td>{{ $course['units'] }}</td>
+                    <td style="text-align: center;">{{ $course['units'] }}</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -252,11 +275,12 @@
                 </tr>
             @endforeach
 
-            <tr class="fw-bold">
-                <td colspan="4">Total Units Enrolled:</td>
-                <td>{{ $totalUnits }}</td>
-                <td colspan="4"></td>
-            </tr>
+           <tr class="fw-bold">
+    <td colspan="4" style="text-align: right; padding-right: 10px;">Total Units Enrolled:</td>
+    <td style="font-weight: bold; font-size: 1.3em; text-align: center;">{{ $totalUnits }}</td>
+    <td colspan="4"></td>
+</tr>
+
         </tbody>
     </table>
 
@@ -287,7 +311,7 @@
 
         <!-- ASSESSMENT + SCHEDULE -->
         <div class="col-5">
-            <div class="section-title" style="text-align: center font-size: larger;">ASSESSMENT</div>
+            <div class="section-title" style="text-align: center; font-size: larger;">ASSESSMENT</div>
             <table>
                 <tr>
                     <td>Tuition Fee</td>
@@ -326,7 +350,7 @@
                 $installment = $billing->balance_due / 4;
             @endphp
 
-            <div class="section-title" style="margin-top: 15px; text-align: center font-size: larger;">SCHEDULE OF
+            <div class="section-title" style="margin-top: 15px; text-align: center; font-size: larger;">SCHEDULE OF
                 PAYMENT</div>
             <table>
                 <tr>

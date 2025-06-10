@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Admission;
 use App\Models\Billing;
+use App\Models\BillingHistory;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\MiscFee;
@@ -12,20 +14,350 @@ use App\Models\RefRegion;
 use App\Models\Scholarship;
 use App\Models\SchoolYear;
 use App\Models\StudentCourse;
-
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 
 class AdmissionController extends Controller
 {
+
+  public function search(Request $request)
+{
+    $query = $request->input('query');
+    
+    $courses = Course::with('prerequisites')
+        ->where('code', 'like', "%$query%")
+        ->orWhere('name', 'like', "%$query%")
+        ->select('id', 'code', 'name as title', 'units')
+        ->limit(10)
+        ->get()
+        ->map(function($course) {
+            $course->has_prerequisites = $course->prerequisites->isNotEmpty();
+            return $course;
+        });
+    
+    return response()->json($courses);
+}
     public function update(Request $request, $student_id)
     {
-        $admission = Admission::where('student_id', $student_id)->firstOrFail();
-        // validate and update the admission record
-        $admission->update($request->all());
+        // Validate the request data
+        $request->validate([
+            'last_name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'birthdate' => 'required|date',
+            'contact_number' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'course_mapping_id' => 'nullable|exists:program_course_mappings,id',
+            'scholarship' => 'nullable|string',
 
-        return redirect()->route('admissions.index', $student_id)->with('success', 'Student updated successfully!');
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $student_id) {
+                $user = Auth::user(); // This is the proper way to get the authenticated user
+
+                if (!$user) {
+                    throw new \Exception('No authenticated user found');
+                }
+
+                // 1. Update Admission Record
+                $admission = Admission::where('student_id', $student_id)->firstOrFail();
+
+                $updateData = $request->only([
+                    'last_name',
+                    'first_name',
+                    'middle_name',
+                    'address_line1',
+                    'address_line2',
+                    'region',
+                    'province',
+                    'city',
+                    'barangay',
+                    'zip_code',
+                    'contact_number',
+                    'email',
+                    'father_last_name',
+                    'father_first_name',
+                    'father_middle_name',
+                    'father_contact',
+                    'father_profession',
+                    'father_industry',
+                    'mother_last_name',
+                    'mother_first_name',
+                    'mother_middle_name',
+                    'mother_contact',
+                    'mother_profession',
+                    'mother_industry',
+                    'gender',
+                    'birthdate',
+                    'birthplace',
+                    'citizenship',
+                    'religion',
+                    'civil_status',
+                    'course_mapping_id',
+                    'major',
+                    'admission_status',
+                    'student_no',
+                    'admission_year',
+                    'previous_school',
+                    'previous_school_address',
+                    'elementary_school',
+                    'elementary_address',
+                    'secondary_school',
+                    'secondary_address',
+                    'honors',
+                    'lrn',
+                    'school_year',
+                    'semester'
+                ]);
+
+                $admission->update($updateData);
+
+                // 2. Update Enrollment Record
+                $enrollment = Enrollment::where('student_id', $student_id)
+                    ->where('school_year', $admission->school_year)
+                    ->where('semester', $admission->semester)
+                    ->first();
+
+                if ($enrollment) {
+                    $enrollment->update([
+                        'course_mapping_id' => $request->course_mapping_id,
+                        'scholarship_id' => ($request->scholarship && $request->scholarship !== 'none')
+                            ? $request->scholarship
+                            : null,
+                    ]);
+                }
+
+
+                // 3. Update Billing Information if course mapping or scholarship changed
+                if ($request->has('course_mapping_id') || $request->has('scholarship')) {
+                    $mapping = ProgramCourseMapping::find($request->course_mapping_id);
+                    $totalUnits = 0;
+
+                    if ($mapping) {
+                        $relatedCourseIds = ProgramCourseMapping::where('program_id', $mapping->program_id)
+                            ->where('year_level_id', $mapping->year_level_id)
+                            ->where('semester_id', $mapping->semester_id)
+                            ->where(function ($query) use ($mapping) {
+                                if ($mapping->effective_sy === null) {
+                                    $query->whereNull('effective_sy');
+                                } else {
+                                    $query->where('effective_sy', $mapping->effective_sy);
+                                }
+                            })
+                            ->pluck('course_id');
+
+                        $totalUnits = Course::whereIn('id', $relatedCourseIds)->sum('units');
+                    }
+
+                    $tuitionFee = $request->input('tuition_fee');
+                    $discountValue = 0;
+                    $tuitionFeeDiscount = $tuitionFee;
+                    $miscFee = 0;
+                    $balanceDue = null;
+
+                    if ($request->scholarship !== 'none' && $request->scholarship !== null) {
+                        $scholarship = Scholarship::find($request->scholarship);
+
+                        if ($scholarship) {
+                            if (stripos($scholarship->name, 'Top Notcher') !== false) {
+                                $discountValue = $tuitionFee;
+                                $tuitionFeeDiscount = 0;
+                                $miscFee = 0;
+                                $balanceDue = 0;
+                            } elseif ($scholarship->discount) {
+                                $discountValue = $tuitionFee * ($scholarship->discount / 100);
+                                $tuitionFeeDiscount = $tuitionFee - $discountValue;
+                            }
+                        }
+                    }
+
+                    if ($balanceDue === null && $request->course_mapping_id) {
+                        $miscFee = MiscFee::where('program_course_mapping_id', $request->course_mapping_id)->sum('amount');
+                    }
+
+                    $billing = Billing::where('student_id', $student_id)
+                        ->where('school_year', $admission->school_year)
+                        ->where('semester', $admission->semester)
+                        ->first();
+
+                    // Get the existing initial payment if billing exists
+                    $initialPayment = $billing ? $billing->initial_payment : 0;
+                    $oldAccounts = $billing ? $billing->old_accounts : 0;
+
+                    if ($balanceDue === null) {
+                        $totalAssessment = $tuitionFeeDiscount + $miscFee + $oldAccounts;
+                        $balanceDue = $totalAssessment - $initialPayment;
+
+                        // Ensure balance doesn't go negative
+                        if ($balanceDue < 0) {
+                            // Option 1: Set balance to 0 and adjust initial payment
+                            // $initialPayment = $totalAssessment;
+                            // $balanceDue = 0;
+
+                            // Option 2: Return with error (choose one approach)
+                            throw new \Exception('Initial payment exceeds new program assessment');
+                        }
+                    }
+
+                    if ($billing) {
+                        // Capture the old values before update
+                        $oldValues = $billing->only([
+                            'tuition_fee',
+                            'discount',
+                            'tuition_fee_discount',
+                            'misc_fee',
+                            'total_assessment',
+                            'balance_due',
+                            'initial_payment',
+                            'prelims_due',
+                            'midterms_due',
+                            'prefinals_due',
+                            'finals_due'
+                        ]);
+
+                        $updateData = [
+                            'tuition_fee' => $tuitionFee,
+                            'discount' => $discountValue,
+                            'tuition_fee_discount' => $tuitionFeeDiscount,
+                            'misc_fee' => $miscFee,
+                            'total_assessment' => $totalAssessment ?? 0,
+                            'balance_due' => $balanceDue,
+                            'initial_payment' => $initialPayment,
+                        ];
+
+                        // Recalculate installments if balance due changed
+                        if ($balanceDue > 0) {
+                            $installment = $balanceDue / 4;
+                            $updateData['prelims_due'] = $installment;
+                            $updateData['midterms_due'] = $installment;
+                            $updateData['prefinals_due'] = $installment;
+                            $updateData['finals_due'] = $installment;
+                        } else {
+                            $updateData['prelims_due'] = 0;
+                            $updateData['midterms_due'] = 0;
+                            $updateData['prefinals_due'] = 0;
+                            $updateData['finals_due'] = 0;
+                        }
+
+                        $billing->update($updateData);
+
+                        // Get the new values after update
+                        $newValues = $billing->fresh()->only([
+                            'tuition_fee',
+                            'discount',
+                            'tuition_fee_discount',
+                            'misc_fee',
+                            'total_assessment',
+                            'balance_due',
+                            'initial_payment',
+                            'prelims_due',
+                            'midterms_due',
+                            'prefinals_due',
+                            'finals_due'
+                        ]);
+
+                        // Calculate changes
+                        $changes = [];
+                        foreach ($oldValues as $key => $oldValue) {
+                            if ($oldValue != $newValues[$key]) {
+                                $changes[$key] = [
+                                    'old' => $oldValue,
+                                    'new' => $newValues[$key]
+                                ];
+                            }
+                        }
+
+                        // Log the billing update if there were changes
+                        if (!empty($changes)) {
+                            BillingHistory::create([
+                                'billing_id' => $billing->id,
+                                'user_id' => $user->id,
+                                'action' => 'update',
+                                'description' => 'Billing information updated (program change) by ' . $user->name,
+                                'old_amount' => $oldValues['balance_due'],
+                                'new_amount' => $newValues['balance_due'],
+                                'changes' => $changes
+                            ]);
+                        }
+                    } else {
+                        // Create new billing if none exists
+                        $billing = Billing::create([
+                            'student_id' => $student_id,
+                            'school_year' => $admission->school_year,
+                            'semester' => $admission->semester,
+                            'tuition_fee' => $tuitionFee,
+                            'discount' => $discountValue,
+                            'tuition_fee_discount' => $tuitionFeeDiscount,
+                            'misc_fee' => $miscFee,
+                            'total_assessment' => $totalAssessment ?? 0,
+                            'initial_payment' => $initialPayment,
+                            'balance_due' => $balanceDue,
+                            'prelims_due' => $balanceDue > 0 ? $balanceDue / 4 : 0,
+                            'midterms_due' => $balanceDue > 0 ? $balanceDue / 4 : 0,
+                            'prefinals_due' => $balanceDue > 0 ? $balanceDue / 4 : 0,
+                            'finals_due' => $balanceDue > 0 ? $balanceDue / 4 : 0,
+                        ]);
+                    }
+                }
+
+                // 4. Update Course Assignments if admission status or course mapping changed
+                if ($request->has('admission_status') || $request->has('course_mapping_id')) {
+                    // First delete existing course assignments for this semester
+                    StudentCourse::where('student_id', $student_id)
+                        ->where('school_year', $admission->school_year)
+                        ->where('semester', $admission->semester)
+                        ->delete();
+
+                    $isIrregular = in_array($request->admission_status, ['transferee', 'returnee']);
+
+                    if ($isIrregular && $request->has('course_ids')) {
+                        foreach ($request->course_ids as $courseId) {
+                            StudentCourse::create([
+                                'student_id' => $student_id,
+                                'course_id' => $courseId,
+                                'school_year' => $admission->school_year,
+                                'semester' => $admission->semester,
+                                'status' => 'Pending',
+                            ]);
+                        }
+                    } elseif ($request->course_mapping_id) {
+                        $mapping = ProgramCourseMapping::find($request->course_mapping_id);
+
+                        if ($mapping) {
+                            $relatedMappings = ProgramCourseMapping::where('program_id', $mapping->program_id)
+                                ->where('year_level_id', $mapping->year_level_id)
+                                ->where('semester_id', $mapping->semester_id)
+                                ->where(function ($query) use ($mapping) {
+                                    if ($mapping->effective_sy === null) {
+                                        $query->whereNull('effective_sy');
+                                    } else {
+                                        $query->where('effective_sy', $mapping->effective_sy);
+                                    }
+                                })
+                                ->get();
+
+                            foreach ($relatedMappings as $map) {
+                                StudentCourse::create([
+                                    'student_id' => $student_id,
+                                    'course_id' => $map->course_id,
+                                    'school_year' => $admission->school_year,
+                                    'semester' => $admission->semester,
+                                    'status' => 'Pending',
+                                ]);
+                            }
+                        }
+                    }
+                }
+            });
+
+            return redirect()->route('admissions.index')->with('success', 'Student updated successfully!');
+        } catch (\Exception $e) {
+            Log::error('Error updating student: ' . $e->getMessage());
+            return back()->with('error', 'Failed to update student. Please try again.');
+        }
     }
 
     public function updateInitialPayment(Request $request, $id)
@@ -36,24 +368,31 @@ class AdmissionController extends Controller
             'initial_payment' => 'required|numeric|min:0',
         ]);
 
+        $newInitialPayment = $request->input('initial_payment');
+
         // Check if initial payment exceeds total assessment
-        if ($request->input('initial_payment') > $billing->total_assessment) {
+        if ($newInitialPayment > $billing->total_assessment) {
             return back()->with('error', 'Initial payment cannot be greater than the total assessment.');
         }
 
-        // Check if initial payment exceeds remaining balance (if balance_due is already set)
-        if (isset($billing->balance_due) && $request->input('initial_payment') > $billing->balance_due + $billing->initial_payment) {
+        // Calculate the difference between new and old initial payment
+        $initialPaymentDifference = $newInitialPayment - $billing->initial_payment;
+
+        // Check if the change would make balance due negative
+        if ($billing->balance_due - $initialPaymentDifference < 0) {
             return back()->with('error', 'Initial payment cannot be greater than the remaining balance due.');
         }
 
-        // Store the previous initial payment in case we need to revert
-        $previousInitialPayment = $billing->initial_payment;
-
         try {
-            $billing->initial_payment = $request->input('initial_payment');
+            // Store previous values in case of error
+            $previousInitialPayment = $billing->initial_payment;
+            $previousBalanceDue = $billing->balance_due;
 
-            // Recalculate balance due
-            $billing->balance_due = $billing->total_assessment - $billing->initial_payment;
+            // Update the initial payment
+            $billing->initial_payment = $newInitialPayment;
+
+            // Recalculate balance due by applying the difference
+            $billing->balance_due = $previousBalanceDue - $initialPaymentDifference;
 
             // Only divide balance if there's still balance due
             if ($billing->balance_due > 0) {
@@ -74,11 +413,12 @@ class AdmissionController extends Controller
 
             $billing->save();
 
-            return back()->with('success', 'Initial payment, balance due, and schedule updated.');
+            return back()->with('success', 'Initial payment updated successfully. Balance and installments recalculated.');
         } catch (\Exception $e) {
-            // Revert to previous initial payment in case of error
+            // Revert to previous values in case of error
             $billing->initial_payment = $previousInitialPayment;
-            $billing->balance_due = $billing->total_assessment - $billing->initial_payment;
+            $billing->balance_due = $previousBalanceDue;
+            // Note: You might want to restore previous installment values too if needed
 
             return back()->with('error', 'An error occurred while updating the payment. Changes were not saved.');
         }
@@ -273,29 +613,32 @@ class AdmissionController extends Controller
 
         $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
-        // Generate student ID
         $yearPrefix = date('y');
 
         do {
-            // Get the latest student_id for the current year
             $latest = Admission::where('student_id', 'like', "$yearPrefix-%")
                 ->orderBy('student_id', 'desc')
                 ->first();
 
             if ($latest) {
-                $lastNumber = (int) substr($latest->student_id, -3); // Extract 'XXX'
+                $lastNumber = (int) substr($latest->student_id, -3);
                 $nextNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
             } else {
                 $nextNumber = '001';
             }
 
             $studentId = "$yearPrefix-$nextNumber";
-
-            // Loop continues only if there's a rare conflict
         } while (Admission::where('student_id', $studentId)->exists());
 
+        // Determine admission status based on scholarship
+        $status = 'Pending';
+        if ($request->scholarship !== 'none' && $request->scholarship !== null) {
+            $scholarship = Scholarship::find($request->scholarship);
+            if ($scholarship && stripos($scholarship->name, 'Top Notcher') !== false) {
+                $status = 'Enrolled';
+            }
+        }
 
-        // Create admission record
         $admission = Admission::create([
             'student_id' => $studentId,
             'last_name' => $request->last_name,
@@ -344,10 +687,9 @@ class AdmissionController extends Controller
             'lrn' => $request->lrn,
             'school_year' => $activeSchoolYear ? $activeSchoolYear->name : $request->school_year,
             'semester' => $activeSchoolYear ? $activeSchoolYear->semester : $request->semester,
-            'status' => 'Pending',
+            'status' => $status,
         ]);
 
-        // Create enrollment record immediately after admission creation
         Enrollment::create([
             'student_id' => $admission->student_id,
             'school_year' => $admission->school_year,
@@ -358,7 +700,6 @@ class AdmissionController extends Controller
             'enrollment_date' => now(),
             'scholarship_id' => ($request->scholarship && $request->scholarship !== 'none') ? $request->scholarship : null,
         ]);
-
 
         $mapping = ProgramCourseMapping::find($request->course_mapping_id);
         $totalUnits = 0;
@@ -469,6 +810,7 @@ class AdmissionController extends Controller
 
         return redirect()->route('admissions.index')->with('success', 'Admission, enrollment, and billing created successfully!');
     }
+
 
 
 

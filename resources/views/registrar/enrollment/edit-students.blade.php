@@ -38,7 +38,7 @@
     }
 </style>
 
-@section('tab_title', 'Dashboard')
+@section('tab_title', 'Edit')
 @section('registrar_sidebar')
     @include('registrar.registrar_sidebar')
 @endsection
@@ -76,7 +76,10 @@
                                     <a class="nav-link active" id="personal-tab" data-toggle="tab" href="#personal"
                                         role="tab">Personal Info</a>
                                 </li>
-                            
+                                <li class="nav-item">
+                                    <a class="nav-link" id="education-tab" data-toggle="tab" href="#academic"
+                                        role="tab">Acadamic</a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="education-tab" data-toggle="tab" href="#education"
                                         role="tab">Education</a>
@@ -205,8 +208,147 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="tab-pane fade" id="academic" role="tabpanel">
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0">Academic Information</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="course_mapping_id" class="font-weight-bold">Program
+                                                            Mapping</label>
+                                                        <select name="course_mapping_id" id="course_mapping_id"
+                                                            class="form-control">
+                                                            <option value="">Select Program Mapping</option>
+                                                            @foreach ($courseMappings as $groupKey => $mappings)
+                                                                @php
+                                                                    $firstMapping = $mappings->first();
+                                                                    $programName =
+                                                                        $firstMapping->program->name ?? 'N/A';
+                                                                    $yearLevel =
+                                                                        $firstMapping->yearLevel->name ?? 'N/A';
+                                                                    $semester = $firstMapping->semester->name ?? 'N/A';
+                                                                    $effectiveSy = $firstMapping->effective_sy;
+                                                                    $mappingId = $firstMapping->id;
+                                                                @endphp
 
-                    
+                                                                <option value="{{ $mappingId }}"
+                                                                    {{ $admission->course_mapping_id == $mappingId ? 'selected' : '' }}>
+                                                                    {{ $programName }} - Year {{ $yearLevel }} -
+                                                                    {{ $semester }} Semester ({{ $effectiveSy }})
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <!-- Hidden field for current tuition fee -->
+                                                        <input type="hidden" id="tuition_fee_input" name="tuition_fee"
+                                                            value="{{ $currentTuitionFee }}">
+                                                        <div class="form-group mt-3">
+                                                            <label for="scholarship_id"
+                                                                class="font-weight-bold">Scholarship</label>
+                                                            <select name="scholarship" id="scholarship"
+                                                                class="form-control">
+                                                                <option value="">No Scholarship</option>
+                                                                @foreach ($scholarships as $scholarship)
+                                                                    <option value="{{ $scholarship->id }}"
+                                                                        {{ $admission->scholarship_id == $scholarship->id ? 'selected' : '' }}>
+                                                                        {{ $scholarship->name }}
+                                                                        ({{ $scholarship->discount }}%)
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        <div id="totalUnitsContainer" class="alert alert-info mt-3"
+                                                            style="display:none;">
+                                                            Total Units for Selected Mapping: <strong
+                                                                id="totalUnitsValue"></strong>
+                                                        </div>
+                                                        <div id="tuitionFeeContainer" class="alert alert-success mt-2"
+                                                            style="display:none;"></div>
+                                               
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script>
+                                    $('#course_mapping_id').on('change', function() {
+                                        let mappingId = $(this).val();
+
+                                        if (!mappingId) {
+                                            $('#totalUnitsContainer').hide();
+                                            $('#tuitionFeeContainer').hide();
+                                            return;
+                                        }
+
+                                        $.ajax({
+                                            url: '{{ route('getMappingUnits') }}',
+                                            type: 'POST',
+                                            data: {
+                                                mapping_id: mappingId,
+                                                _token: '{{ csrf_token() }}'
+                                            },
+                                            success: function(response) {
+                                                let originalTotalUnits = response.total_units;
+                                                let tuitionFee = response.tuition_fee;
+                                                let totalUnits = originalTotalUnits;
+
+                                                // Check if response contains courses
+                                                if (response.courses && Array.isArray(response.courses)) {
+                                                    let nstpUnitsToDeduct = 0;
+
+                                                    response.courses.forEach(course => {
+                                                        let rawName = `${course.code} ${course.name} ${course.description}`
+                                                            .toLowerCase();
+
+                                                        // Remove suffixes like '- IT', '- HM & tm', etc.
+                                                        rawName = rawName.replace(/- ?[a-z0-9 &()]+/g, '').trim();
+
+                                                        // Check for NSTP-related keywords
+                                                        const isNSTP = (
+                                                            rawName.includes('national service training program') ||
+                                                            rawName.includes('civic welfare training service') ||
+                                                            rawName.includes('lts/cwts/rotc') ||
+                                                            rawName.includes('lts/rotc')
+                                                        );
+
+                                                        if (isNSTP) {
+                                                            let units = parseFloat(course.units);
+                                                            if (!isNaN(units)) {
+                                                                nstpUnitsToDeduct += units / 2;
+                                                            }
+                                                        }
+                                                    });
+
+                                                    // Adjust total units
+                                                    totalUnits = totalUnits - nstpUnitsToDeduct;
+
+                                                    // Recalculate tuition fee
+                                                    let tuitionPerUnit = tuitionFee / originalTotalUnits;
+                                                    tuitionFee = totalUnits * tuitionPerUnit;
+                                                }
+
+                                                // Update UI
+                                                $('#totalUnitsValue').text(totalUnits.toFixed(2));
+                                                $('#totalUnitsContainer').show();
+
+                                                $('#tuitionFeeContainer').html('Tuition Fee: <strong>₱' + tuitionFee.toFixed(2) +
+                                                    '</strong>').show();
+
+                                                // Set the hidden input's value to the tuition fee
+                                                $('#tuition_fee_input').val(tuitionFee);
+                                            },
+                                            error: function() {
+                                                $('#totalUnitsContainer').hide();
+                                                $('#tuitionFeeContainer').hide();
+                                            }
+                                        });
+                                    });
+                                </script>
+
                                 <!-- Education Information Tab -->
                                 <div class="tab-pane fade" id="education" role="tabpanel">
                                     <div class="card mb-4">
@@ -257,27 +399,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="school_year" class="font-weight-bold">School Year
-                                                            <span class="text-danger">*</span></label>
-                                                        <input value="{{ $admission->school_year }}" type="text"
-                                                            name="school_year" id="school_year" class="form-control"
-                                                            required>
-                                                        <div class="invalid-feedback">Please provide school year.</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="semester" class="font-weight-bold">Semester <span
-                                                                class="text-danger">*</span></label>
-                                                        <input value="{{ $admission->semester }}" type="text"
-                                                            name="semester" id="semester" class="form-control" required>
-                                                        <div class="invalid-feedback">Please provide semester.</div>
-                                                    </div>
-                                                </div>
-                                            </div>
+
 
                                             <div class="row">
                                                 <div class="col-md-6">

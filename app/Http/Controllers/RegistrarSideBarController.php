@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admission;
+use App\Models\Billing;
 use App\Models\ProgramCourseMapping;
 use App\Models\RefRegion;
 use App\Models\Scholarship;
+use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 
 class RegistrarSideBarController extends Controller
@@ -141,7 +143,35 @@ class RegistrarSideBarController extends Controller
 
     public function transfereeEnrollment()
     {
-        return view('registrar.enrollment.transferee_enrollment'); // View for transferees
+        // Fetch admissions data
+        $admissions = $this->getAdmissionsForActiveSchoolYear();
+
+        // Fetch course mappings
+        $courseMappings = $this->getUniqueSortedCourseMappings();
+
+        // Fetch all courses
+        $allCourses = $this->getAllCourses();
+
+        // Fetch scholarships
+        $scholarships = $this->getActiveScholarships();
+
+        // Calculate total units if a mapping is selected
+        $selectedMappingId = request('selected_mapping_id');
+        $totalUnits = $this->calculateTotalUnits($selectedMappingId);
+
+        // Fetch regions
+        $regions = $this->getRegions();
+
+        // Pass all data to view
+        return view('registrar.enrollment.transferee_enrollment', compact(
+            'admissions',
+            'courseMappings',
+            'allCourses',
+            'scholarships',
+            'selectedMappingId',
+            'regions',
+            'totalUnits'
+        ));
     }
 
     public function reEnrollRegular()
@@ -217,21 +247,57 @@ class RegistrarSideBarController extends Controller
     {
         return view('registrar.archive.disposal_log');
     }
-
    public function editStudent($student_id)
 {
-    $admission = Admission::where('student_id', $student_id)->firstOrFail();
-    $scholarships = Scholarship::all();
-    $courseMappings = ProgramCourseMapping::all();
+    // Get the currently active school year and semester
+    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
     
+    if (!$activeSchoolYear) {
+        abort(404, 'No active school year found');
+    }
+
+    $currentSchoolYear = $activeSchoolYear->name;
+    $currentSemester = $activeSchoolYear->semester;
+
+    // Get admission with scholarship relationship (filtered by current SY/semester)
+    $admission = Admission::with('scholarship')
+        ->where('student_id', $student_id)
+        ->where('school_year', $currentSchoolYear)
+        ->where('semester', $currentSemester)
+        ->firstOrFail();
+
+    $scholarships = Scholarship::all();
+
+    // Get the latest billing record for this student matching current SY and semester
+    $currentTuitionFee = 0;
+    $billing = Billing::where('student_id', $student_id)
+        ->where('school_year', $currentSchoolYear)
+        ->where('semester', $currentSemester)
+        ->latest()
+        ->first();
+    
+    if ($billing) {
+        $currentTuitionFee = $billing->tuition_fee;
+    }
+
+    // Get all course mappings with relationships (without school year/semester filter)
+    $courseMappings = ProgramCourseMapping::with(['program', 'yearLevel', 'semester'])
+        ->get()
+        ->groupBy(function ($item) {
+            return $item->program_id . '-' . $item->year_level_id . '-' . $item->semester_id . '-' . $item->effective_sy;
+        });
+
     // Get all regions for the dropdown
     $regions = RefRegion::all();
-    
+
     return view('registrar.enrollment.edit-students', compact(
         'admission',
         'scholarships',
         'courseMappings',
-        'regions'
+        'regions',
+        'currentTuitionFee',
+        'currentSchoolYear',
+        'currentSemester'
     ));
 }
 }

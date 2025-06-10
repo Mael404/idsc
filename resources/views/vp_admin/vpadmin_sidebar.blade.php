@@ -14,7 +14,7 @@
     <!-- Divider -->
     <hr class="sidebar-divider my-1">
 
-    <!-- Nav Item - Dashboard -->
+    <!-- Nav Item - Dsashboard -->
     <li class="nav-item {{ request()->is('vpadmin_dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="{{ url('vpadmin_dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>

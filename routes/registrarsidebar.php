@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\AdmissionIrregularController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProgramCourseMappingController;
 use App\Http\Controllers\ReEnrollRegularController;
@@ -80,3 +81,11 @@ Route::get('/admissions/{student_id}/edit', [RegistrarSideBarController::class, 
     ->name('admissions.edit');
 Route::put('/admissions/{student_id}', [AdmissionController::class, 'update'])->name('admissions.update');
 
+Route::post('/admissions/transferee', [AdmissionController::class, 'storeTransferee'])->name('admissions.store.transferee');
+Route::post('/admissions/irregular', [AdmissionController::class, 'storeIrregular'])->name('admissions.store.irregular');
+Route::get('/courses/search', [AdmissionController::class, 'search'])->name('courses.search');
+
+Route::post('/admissions/store/irregular', [AdmissionIrregularController::class, 'store'])
+    ->name('admissions.store.irregular');
+
+    Route::post('/calculate-irregular-tuition', [AdmissionIrregularController::class, 'calculateIrregularTuition'])->name('calculate.irregular.tuition');

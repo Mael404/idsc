@@ -64,10 +64,13 @@
                                                     </td>
                                                     <td>{{ $scholarshipName }}</td>
                                                     <td>
-                                                        <button class="btn btn-primary btn-sm" title="View"
-                                                            data-toggle="modal" data-target="#admissionDetailsModal">
+                                                        <button class="btn btn-primary btn-sm view-billing-btn"
+                                                            title="View Billing"
+                                                            data-student-id="{{ $admission->student_id }}"
+                                                            data-bs-toggle="modal" data-bs-target="#paymentDetailsModal">
                                                             <i class="fas fa-eye"></i>
                                                         </button>
+
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -82,114 +85,101 @@
 
                 <div class="modal fade" id="paymentDetailsModal" tabindex="-1" aria-labelledby="paymentDetailsModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-fullscreen-lg-down modal-dialog-centered modal-dialog-scrollable">
-                        <div class="modal-content" style="min-width: 1200px;"> <!-- Adjust width as needed -->
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="paymentDetailsModalLabel">Student Account Summary</h5>
-
+                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title fs-5 fw-bold" id="paymentDetailsModalLabel">Student Account Summary
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
-                            <div class="modal-body p-0"> <!-- Remove padding to maximize space -->
-                                <div class="table-responsive"> <!-- Add responsive wrapper -->
-                                    <table class="table table-bordered table-striped mb-0">
-                                        <thead>
-                                            <tr class="border-b border-b-slate-100 last:border-b-0">
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    School Year</th>
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Semester</th>
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    No. of Units</th>
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Tuition Fee</th>
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Discount</th>
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Total Tuition Fee</th>
-                                                <th colspan="5"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Assessment of Fees</th>
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    4 Exams</th>
-                                                <th colspan="4"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Less Payment</th>
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Total Balance</th>
-                                                <th rowspan="2"
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Remarks</th>
+                            <div class="modal-body p-2">
+                                <div class="table-responsive" style="max-height: 70vh;">
+                                    <table class="table table-bordered table-hover align-middle mb-0">
+                                        <thead class="sticky-top bg-light">
+                                            <tr>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">School Year</span>
+                                                </th>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">Semester</span>
+                                                </th>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">No. of Units</span>
+                                                </th>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">Tuition Fee</span>
+                                                </th>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">Discount</span>
+                                                </th>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">Total Tuition Fee</span>
+                                                </th>
+                                                <th colspan="5" class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Assessment of Fees</span>
+                                                </th>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">4 Exams</span>
+                                                </th>
+                                                <th colspan="4" class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Less Payment</span>
+                                                </th>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">Total Balance</span>
+                                                </th>
+                                                <th rowspan="2" class="text-center align-middle bg-white">
+                                                    <span class="d-block text-nowrap">Remarks</span>
+                                                </th>
                                             </tr>
-                                            <tr class="border-b border-b-slate-100 last:border-b-0">
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Misc</th>
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Old Bal</th>
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Total</th>
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Initial Payment</th>
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Balance</th>
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Prelim</th>
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Midterm</th>
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Pre-final</th>
-                                                <th
-                                                    class="text-[12px] text-muted text-center font-semibold uppercase bg-white border border-slate-200 px-6 py-4">
-                                                    Final</th>
+                                            <tr>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Misc</span>
+                                                </th>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Old Bal</span>
+                                                </th>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Total</span>
+                                                </th>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Initial Payment</span>
+                                                </th>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Balance</span>
+                                                </th>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Prelim</span>
+                                                </th>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Midterm</span>
+                                                </th>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Pre-final</span>
+                                                </th>
+                                                <th class="text-center bg-white">
+                                                    <span class="d-block text-nowrap">Final</span>
+                                                </th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr class="border-b border-b-slate-100 last:border-b-0">
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">2024-2025</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">Second
-                                                    Semester
-                                                </td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">20</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">11,980.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">0.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">11,980.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">2,000.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">0.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">13,980.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">0.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">13,980.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">3,495.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">0.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">0.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">0.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">0.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4">13,980.00</td>
-                                                <td class="text-xs text-black text-center bg-white px-6 py-4"></td>
+                                        <tbody id="billingData" class="border-top-0">
+                                            <!-- Billing rows will be dynamically inserted here by JS -->
+                                            <tr>
+                                                <td colspan="18" class="text-center py-4">Loading data...</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Print Summary</button>
+                            </div>
                         </div>
                     </div>
-
                 </div>
-                <!-- End Page Content -->
 
+                <!-- End Pasge Content -->
 
 
 
@@ -220,5 +210,77 @@
             let paymentId = $(this).data('payment-id');
             // Populate the modal content with details corresponding to paymentId
             $('#paymentDetailsModal').modal('show');
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('paymentDetailsModal');
+            const billingTableBody = modal.querySelector('#billingData');
+
+            modal.addEventListener('show.bs.modal', function(event) {
+                // Button that triggered the modal
+                const button = event.relatedTarget;
+                const studentId = button.getAttribute('data-student-id');
+
+                if (!studentId) return;
+
+                // Clear old data
+                billingTableBody.innerHTML =
+                    '<tr><td colspan="18" class="text-center">Loading...</td></tr>';
+
+                // Fetch billing data from your controller via AJAX
+                fetch(`/billing/${studentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            billingTableBody.innerHTML =
+                                `<tr><td colspan="18" class="text-center text-danger">${data.error}</td></tr>`;
+                            return;
+                        }
+
+                        if (data.length === 0) {
+                            billingTableBody.innerHTML =
+                                '<tr><td colspan="18" class="text-center">No billing data found.</td></tr>';
+                            return;
+                        }
+
+                        // Build rows
+                        let rows = '';
+                        data.forEach(billing => {
+                            const balanceDue = parseFloat(billing.balance_due).toFixed(2);
+                            const fourExams = (balanceDue / 4).toFixed(2);
+
+                            rows += `
+        <tr>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${billing.school_year}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${billing.semester}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${billing.no_of_units ?? '-'}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.tuition_fee).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.discount || 0).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.tuition_fee_discount).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.misc_fee).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.old_accounts || 0).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.total_assessment).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.initial_payment).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${balanceDue}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${fourExams}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.prelims_due || 0).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.midterms_due || 0).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.prefinals_due || 0).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${parseFloat(billing.finals_due || 0).toFixed(2)}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${balanceDue}</td>
+            <td class="text-xs text-black text-center bg-white px-6 py-4">${billing.remarks || ''}</td>
+        </tr>
+    `;
+                        });
+
+
+                        billingTableBody.innerHTML = rows;
+                    })
+                    .catch(() => {
+                        billingTableBody.innerHTML =
+                            '<tr><td colspan="18" class="text-center text-danger">Failed to load billing data.</td></tr>';
+                    });
+            });
         });
     </script>

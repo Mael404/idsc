@@ -13,41 +13,45 @@
     <!-- Divider -->
     <hr class="sidebar-divider my-1">
 
-    <li class="nav-item {{ request()->is('president/dashboard') ? 'active' : '' }}">
+    <!-- Dashboard -->
+    <li class="nav-item {{ request()->routeIs('president.dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('president.dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
     </li>
 
-    <li class="nav-item {{ request()->is('president/revenue-trends') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('president.revenue-trends') }}">
-            <i class="fas fa-fw fa-chart-line"></i>
-            <span>Revenue Trends</span>
+    <!-- Analytics Submenu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAnalytics"
+            aria-expanded="false" aria-controls="collapseAnalytics">
+            <i class="fas fa-fw fa-chart-bar"></i>
+            <span>Analytics</span>
         </a>
+        <div id="collapseAnalytics" class="collapse" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item {{ request()->routeIs('president.revenue-trends') ? 'active' : '' }}" href="{{ route('president.revenue-trends') }}">Revenue Trends</a>
+                <a class="collapse-item {{ request()->routeIs('president.scholarships-discounts') ? 'active' : '' }}" href="{{ route('president.scholarships-discounts') }}">Scholarships & Discounts</a>
+                <a class="collapse-item {{ request()->routeIs('president.enrollment-heatmap') ? 'active' : '' }}" href="{{ route('president.enrollment-heatmap') }}">Enrollment Heatmap</a>
+                <a class="collapse-item {{ request()->routeIs('president.financial-alerts') ? 'active' : '' }}" href="{{ route('president.financial-alerts') }}">Financial Alerts</a>
+            </div>
+        </div>
     </li>
 
-    <li class="nav-item {{ request()->is('president/scholarships-discounts') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('president.scholarships-discounts') }}">
-            <i class="fas fa-fw fa-pie-chart"></i>
-            <span>Scholarships & Discounts</span>
+    <!-- Reports Dropdown/Submenu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReports"
+            aria-expanded="false" aria-controls="collapseReports">
+            <i class="fas fa-fw fa-folder-open"></i>
+            <span>Reports</span>
         </a>
+        <div id="collapseReports" class="collapse" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" href="#">Monthly</a>
+                <a class="collapse-item" href="#">Annual</a>
+            </div>
+        </div>
     </li>
-
-    <li class="nav-item {{ request()->is('president/enrollment-heatmap') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('president.enrollment-heatmap') }}">
-            <i class="fas fa-fw fa-table"></i>
-            <span>Enrollment Heatmap</span>
-        </a>
-    </li>
-
-    <li class="nav-item {{ request()->is('president/financial-alerts') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('president.financial-alerts') }}">
-            <i class="fas fa-fw fa-exclamation-triangle"></i>
-            <span>Financial Alerts</span>
-        </a>
-    </li>
-
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

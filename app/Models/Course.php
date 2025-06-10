@@ -32,7 +32,7 @@ class Course extends Model
     {
         return $this->belongsToMany(Course::class, 'course_prerequisite', 'prerequisite_id', 'course_id');
     }
-    
+
     /**
      * Get all the courses that have this course as a prerequisite.
      */
@@ -44,5 +44,11 @@ class Course extends Model
     public function mappings()
     {
         return $this->hasMany(ProgramCourseMapping::class);
+    }
+
+    // In App\Models\Course.php
+    public function hasPrerequisites()
+    {
+        return $this->prerequisites()->exists();
     }
 }

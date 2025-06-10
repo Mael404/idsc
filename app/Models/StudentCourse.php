@@ -23,9 +23,10 @@ class StudentCourse extends Model
         'final',
         'final_grade',
         'grade_status',
+        'force_prerequisite',
     ];
 
-    public $timestamps = true; // Only if you added created_at and updated_at fields
+    public $timestamps = true; 
 
     // Relationships
     public function student()

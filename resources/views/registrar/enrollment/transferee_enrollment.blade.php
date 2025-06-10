@@ -1,5 +1,41 @@
 @extends('layouts.main')
+<style>
+    /* Style for the multi-select dropdown */
+    #course_ids {
+        min-height: 150px;
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
 
+    #course_ids option {
+        padding: 8px;
+        margin: 2px 0;
+        border-radius: 3px;
+    }
+
+    #course_ids option:hover {
+        background-color: #f8f9fa;
+    }
+
+    #course_ids option:checked {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Style for the selected courses list */
+    #selectedCoursesList li {
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
+
+    .remove-course {
+        padding: 0 5px;
+        line-height: 1;
+    }
+</style>
 @section('tab_title', 'Dashboard')
 @section('registrar_sidebar')
     @include('registrar.registrar_sidebar')
@@ -19,7 +55,7 @@
                 @include('layouts.success-message')
 
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">New Enrollment</h1>
+                    <h1 class="h3 mb-0 text-gray-800">Transferee Enrollment</h1>
 
 
                     <button class="btn btn-primary" data-toggle="modal" data-target="#admissionFormModal">
@@ -46,7 +82,7 @@
                                     <input type="hidden" name="semester"
                                         value="{{ $activeSchoolYear ? $activeSchoolYear->semester : '' }}">
 
-                                    <!-- Progsress Indicator -->
+                                    <!-- Progress Indicator -->
                                     <div class="progress mb-4">
                                         <div class="progress-bar" role="progressbar" style="width: 20%;" aria-valuenow="20"
                                             aria-valuemin="0" aria-valuemax="100">Step 1 of 5</div>
@@ -330,352 +366,173 @@ document.addEventListener('DOMContentLoaded', () => {
                                             </div>
                                         </div>
 
-                                    <!-- Step 4: Admission Info -->
-<div class="tab-pane fade" id="step4" role="tabpanel" aria-labelledby="step4-tab">
-    <div class="row g-3">
-        <!-- Admission Status Radio Buttons -->
-        <div class="col-12">
-            <label class="form-label">Admission Status <span class="text-danger">*</span></label>
-            <div class="form-check">
-                <input class="form-check-input admission-status" type="radio" name="admission_status" value="highschool" id="highschool" required checked>
-                <label class="form-check-label" for="highschool">High School Graduate</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input admission-status" type="radio" name="admission_status" value="transferee" id="transferee">
-                <label class="form-check-label" for="transferee">Transferee</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input admission-status" type="radio" name="admission_status" value="irregular" id="irregular">
-                <label class="form-check-label" for="irregular">Irregular</label>
-            </div>
-        </div>
+                                        <!-- Step 4: Admission Info -->
+                                        <div class="tab-pane fade" id="step4" role="tabpanel"
+                                            aria-labelledby="step4-tab">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="course_mapping_id">Course Mapping <span
+                                                            class="text-danger">*</span></label>
+                                                    <select id="course_mapping_id" name="course_mapping_id"
+                                                        class="form-control">
+                                                        <option value="" selected disabled>Choose Mapping</option>
+                                                        @foreach ($courseMappings as $mapping)
+                                                            @if ($mapping->program && $mapping->yearLevel)
+                                                                <option value="{{ $mapping->id }}">
+                                                                    {{ $mapping->program->name }} -
+                                                                    {{ $mapping->yearLevel->name }}
+                                                                    ({{ $mapping->effective_sy }})
+                                                                </option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
 
-        <!-- LRN Field (for high school graduates) -->
-        <div class="col-md-6" id="lrnField">
-            <label for="lrn">LRN:</label>
-            <input type="text" id="lrn" name="lrn" class="form-control" placeholder="e.g., 2025-12345">
-        </div>
+                                                    <div id="totalUnitsContainer" class="alert alert-info mt-3"
+                                                        style="display:none;">
+                                                        Total Units for Selected Mapping: <strong
+                                                            id="totalUnitsValue"></strong>
+                                                    </div>
+                                                    <!-- Tuition Fee will appear here dynamically -->
+                                                    <div id="tuitionFeeContainer" class="alert alert-success mt-2"
+                                                        style="display:none;"></div>
 
-        <!-- Transferee Fields (hidden by default) -->
-        <div class="row g-3 mt-2" id="transfereeFields" style="display: none;">
-            <div class="col-md-6">
-                <label for="student_no">Student No. (if transferee)</label>
-                <input type="text" id="student_no" name="student_no" class="form-control" placeholder="e.g., 2020-12345">
-            </div>
-            <div class="col-md-6">
-                <label for="admission_year">Year When Admitted</label>
-                <input type="text" id="admission_year" name="admission_year" class="form-control" placeholder="e.g., 2023">
-            </div>
-        </div>
+                                                    <input type="hidden" name="tuition_fee" id="tuition_fee_input" />
 
-        <!-- Regular Student Course Mapping (shown by default) -->
-        <div class="col-md-6" id="regularCourseMapping">
-            <label for="course_mapping_id">Course Mapping <span class="text-danger">*</span></label>
-            <select id="course_mapping_id" name="course_mapping_id" class="form-control">
-                <option value="" selected disabled>Choose Mapping</option>
-                @foreach ($courseMappings as $mapping)
-                    @if ($mapping->program && $mapping->yearLevel)
-                        <option value="{{ $mapping->id }}">
-                            {{ $mapping->program->name }} -
-                            {{ $mapping->yearLevel->name }}
-                            ({{ $mapping->effective_sy }})
-                        </option>
-                    @endif
-                @endforeach
-            </select>
 
-            <div id="totalUnitsContainer" class="alert alert-info mt-3" style="display:none;">
-                Total Units for Selected Mapping: <strong id="totalUnitsValue"></strong>
-            </div>
-            <div id="tuitionFeeContainer" class="alert alert-success mt-2" style="display:none;"></div>
-            <input type="hidden" name="tuition_fee" id="tuition_fee_input" />
-        </div>
 
-        <!-- Irregular/Transferee Course Selection (hidden by default) -->
-        <div class="col-md-12" id="irregularCourseSelection" style="display: none;">
-            <div class="row">
-                <div class="col-md-6">
-                    <label for="courseSearch">Search Courses</label>
-                    <input type="text" id="courseSearch" class="form-control" placeholder="Start typing to search courses...">
-                    <div id="courseSearchResults" class="list-group mt-2" style="display: none; max-height: 200px; overflow-y: auto;"></div>
-                </div>
-            </div>
+                                                    <script>
+                                                  $('#course_mapping_id').on('change', function() {
+    let mappingId = $(this).val();
 
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <h5>Selected Courses:</h5>
-                    <div id="selectedCoursesContainer">
-                        <ul id="selectedCoursesList" class="list-group"></ul>
-                        <input type="hidden" id="selected_courses_input" name="selected_courses">
-                    </div>
-                </div>
-            </div>
-        </div>
-<div class="mt-3" id="irregularTuitionDisplay" style="display: none;">
-    <p>Total Units: <span id="total_units_display">0</span></p>
-    <p>Total Tuition Fee: ₱<span id="tuition_fee_display">0.00</span></p>
-</div>
-
-        <!-- Common Fields -->
-        <div class="col-md-6">
-            <label for="major">Major</label>
-            <input type="text" id="major" name="major" class="form-control" placeholder="e.g., N/A if None">
-        </div>
-
-        <div class="col-md-6">
-            <label for="scholarship">Scholarship</label>
-            <select id="scholarship" name="scholarship" class="form-control">
-                <option value="" selected disabled>Select Scholarship</option>
-                @foreach ($scholarships as $scholarship)
-                    <option value="{{ $scholarship->id }}">{{ $scholarship->name }}</option>
-                @endforeach
-                <option value="none">None</option>
-            </select>
-        </div>
-
-        <div class="col-md-6">
-            <label for="previous_school">Previous School (if any)</label>
-            <input type="text" id="previous_school" name="previous_school" class="form-control" placeholder="e.g., ABC University">
-        </div>
-        <div class="col-12">
-            <label for="previous_school_address">School Address (if any)</label>
-            <input type="text" id="previous_school_address" name="previous_school_address" class="form-control" placeholder="e.g., 123 College Ave, City">
-        </div>
-    </div>
-</div>
-<script>
-$(document).ready(function() {
-    // Handle admission status change
-    $('.admission-status').change(function() {
-        const status = $(this).val();
-        
-        if (status === 'highschool') {
-            $('#regularCourseMapping').show();
-            $('#irregularCourseSelection').hide();
-            $('#transfereeFields').hide();
-            $('#lrnField').show();
-            $('#irregularTuitionDisplay').hide();
-            $('#admissionForm').attr('action', '{{ route("admissions.store") }}');
-        } else if (status === 'transferee') {
-            $('#regularCourseMapping').hide();
-            $('#irregularCourseSelection').show();
-            $('#transfereeFields').show();
-            $('#lrnField').hide();
-            $('#irregularTuitionDisplay').show();
-            $('#admissionForm').attr('action', '{{ route("admissions.store.transferee") }}');
-        } else if (status === 'irregular') {
-            $('#regularCourseMapping').hide();
-            $('#irregularCourseSelection').show();
-            $('#transfereeFields').hide();
-            $('#lrnField').hide();
-            $('#irregularTuitionDisplay').show();
-            $('#admissionForm').attr('action', '{{ route("admissions.store.irregular") }}');
-        }
-    });
-
-    $('#courseSearch').on('input', function() {
-        const searchTerm = $(this).val().trim();
-        if (searchTerm.length >= 1) {
-            $.ajax({
-                url: '{{ route("courses.search") }}',
-                method: 'GET',
-                data: { 
-                    query: searchTerm,
-                    with_prerequisites: true
-                },
-                success: function(response) {
-                    const resultsContainer = $('#courseSearchResults');
-                    resultsContainer.empty();
-                    if (response.length > 0) {
-                        response.forEach(course => {
-                            const prereqBadge = course.has_prerequisites 
-                                ? '<span class="badge bg-warning float-end">Has Prereq</span>' 
-                                : '';
-                            resultsContainer.append(`
-                                <a href="#" class="list-group-item list-group-item-action course-item" 
-                                   data-id="${course.id}" 
-                                   data-code="${course.code}" 
-                                   data-title="${course.title}" 
-                                   data-units="${course.units}"
-                                   data-has-prereq="${course.has_prerequisites}">
-                                    ${course.code} - ${course.title} (${course.units} units)
-                                    ${prereqBadge}
-                                </a>
-                            `);
-                        });
-                        resultsContainer.show();
-                    } else {
-                        resultsContainer.hide();
-                    }
-                }
-            });
-        } else {
-            $('#courseSearchResults').hide();
-        }
-    });
-
-    $(document).on('click', '.course-item', function(e) {
-        e.preventDefault();
-        const courseId = $(this).data('id');
-        const courseCode = $(this).data('code');
-        const courseTitle = $(this).data('title');
-        const courseUnits = $(this).data('units');
-        const hasPrereq = $(this).data('has-prereq') === 'true';
-        
-        if ($(`#selectedCourse_${courseId}`).length > 0) return;
-
-        if (hasPrereq) {
-            Swal.fire({
-                title: 'Prerequisite Required',
-                html: `<p>${courseCode} has prerequisite requirements.</p>
-                       <p>Allow enrollment anyway?</p>`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, enroll',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    confirmButton: 'btn btn-primary',
-                    cancelButton: 'btn btn-secondary'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    addCourseWithOverride(courseId, courseCode, courseTitle, courseUnits, true);
-                }
-            });
-        } else {
-            addCourseWithOverride(courseId, courseCode, courseTitle, courseUnits, false);
-        }
-    });
-
-    function addCourseWithOverride(courseId, code, title, units, isOverridden) {
-        $('#selectedCoursesList').append(`
-            <li class="list-group-item d-flex justify-content-between align-items-center selected-course" 
-                id="selectedCourse_${courseId}" 
-                data-id="${courseId}">
-                <div>
-                    ${code} - ${title} (${units} units)
-                    ${isOverridden ? '<div class="text-warning mt-1"><small>Prerequisite overridden</small></div>' : ''}
-                </div>
-                <button type="button" class="btn btn-sm btn-danger remove-course" data-id="${courseId}">
-                    <i class="fas fa-times"></i>
-                </button>
-                <input type="hidden" name="courses[${courseId}][course_id]" value="${courseId}">
-                <input type="hidden" name="courses[${courseId}][override_prereq]" value="${isOverridden ? 1 : 0}">
-            </li>
-        `);
-        updateSelectedCoursesInput();
-        $('#courseSearch').val('');
-        $('#courseSearchResults').hide();
-        recalculateIrregularTuition(); // 👈 trigger update
+    if (!mappingId) {
+        $('#totalUnitsContainer').hide();
+        $('#tuitionFeeContainer').hide();
+        return;
     }
 
-    $(document).on('click', '.remove-course', function() {
-        const courseId = $(this).data('id');
-        $(`#selectedCourse_${courseId}`).remove();
-        updateSelectedCoursesInput();
-        recalculateIrregularTuition(); // 👈 trigger update
-    });
+    $.ajax({
+        url: '{{ route('getMappingUnits') }}',
+        type: 'POST',
+        data: {
+            mapping_id: mappingId,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            let totalUnits = response.total_units;
+            let tuitionFee = response.tuition_fee;
+            
+            // Check if the mapping has NSTP course
+            if (response.courses && Array.isArray(response.courses)) {
+                let hasNSTP = response.courses.some(course => 
+                    course.name && course.name.toLowerCase().includes('nstp')
+                );
+                
+                if (hasNSTP) {
+                    totalUnits = totalUnits / 2;
+                    tuitionFee = tuitionFee / 2;
+                }
+            }
 
-    function updateSelectedCoursesInput() {
-        const selectedCourses = [];
-        $('#selectedCoursesList li').each(function() {
-            const courseId = $(this).find('input[name*="[course_id]"]').val();
-            const override = $(this).find('input[name*="[override_prereq]"]').val();
-            selectedCourses.push({ id: courseId, override_prereq: override });
-        });
-        $('#selected_courses_input').val(JSON.stringify(selectedCourses));
-    }
+            $('#totalUnitsValue').text(totalUnits);
+            $('#totalUnitsContainer').show();
 
-    $('#course_mapping_id').on('change', function() {
-        let mappingId = $(this).val();
-        if (!mappingId) {
+            $('#tuitionFeeContainer').html('Tuition Fee: <strong>₱' + tuitionFee.toFixed(2) + '</strong>').show();
+
+            // Set the hidden input's value to the tuition fee number (no formatting)
+            $('#tuition_fee_input').val(tuitionFee);
+        },
+        error: function() {
             $('#totalUnitsContainer').hide();
             $('#tuitionFeeContainer').hide();
-            return;
         }
-
-        $.ajax({
-            url: '{{ route('getMappingUnits') }}',
-            type: 'POST',
-            data: {
-                mapping_id: mappingId,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                let originalTotalUnits = response.total_units;
-                let tuitionFee = response.tuition_fee;
-                let totalUnits = originalTotalUnits;
-
-                if (response.courses && Array.isArray(response.courses)) {
-                    let nstpUnitsToDeduct = 0;
-
-                    response.courses.forEach(course => {
-                        let rawName = `${course.code} ${course.name} ${course.description}`.toLowerCase();
-                        rawName = rawName.replace(/- ?[a-z0-9 &()]+/g, '').trim();
-                        const isNSTP = (
-                            rawName.includes('national service training program') ||
-                            rawName.includes('civic welfare training service') ||
-                            rawName.includes('lts/cwts/rotc') ||
-                            rawName.includes('lts/rotc')
-                        );
-                        if (isNSTP) {
-                            let units = parseFloat(course.units);
-                            if (!isNaN(units)) {
-                                nstpUnitsToDeduct += units / 2;
-                            }
-                        }
-                    });
-
-                    totalUnits = totalUnits - nstpUnitsToDeduct;
-                    let tuitionPerUnit = tuitionFee / originalTotalUnits;
-                    tuitionFee = totalUnits * tuitionPerUnit;
-                }
-
-                $('#totalUnitsValue').text(totalUnits.toFixed(2));
-                $('#totalUnitsContainer').show();
-                $('#tuitionFeeContainer').html('Tuition Fee: <strong>₱' + tuitionFee.toFixed(2) + '</strong>').show();
-                $('#tuition_fee_input').val(tuitionFee);
-            },
-            error: function() {
-                $('#totalUnitsContainer').hide();
-                $('#tuitionFeeContainer').hide();
-            }
-        });
     });
-
-    // 👇 Tuition recalculation function
-    function recalculateIrregularTuition() {
-        const selectedCourses = [...document.querySelectorAll('.selected-course')];
-        const courseIds = selectedCourses.map(el => el.dataset.id);
-
-        if (courseIds.length === 0) {
-            document.getElementById('total_units_display').textContent = '0';
-            document.getElementById('tuition_fee_display').textContent = '0.00';
-            return;
-        }
-
-        fetch('{{ route("calculate.irregular.tuition") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                course_ids: courseIds
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('total_units_display').textContent = data.total_units;
-            document.getElementById('tuition_fee_display').textContent = data.tuition_fee.toFixed(2);
-        })
-        .catch(error => {
-            console.error('Error calculating tuition:', error);
-        });
-    }
 });
-</script>
+                                                    </script>
+
+
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label for="major">Major</label>
+                                                    <input type="text" id="major" name="major"
+                                                        class="form-control" placeholder="e.g., N/A if None">
+                                                </div>
+                                            </div>
+
+                                            <div id="manualCourseSelection" style="display: none;" class="mt-3">
+                                                <label for="course_ids">Select Courses (for
+                                                    irregular/transferee/returnee)</label>
+                                                <select id="course_ids" name="course_ids[]" class="form-control"
+                                                    multiple>
+                                                    @foreach ($allCourses as $course)
+                                                        <option value="{{ $course->id }}">{{ $course->code }} -
+                                                            {{ $course->title }}</option>
+                                                    @endforeach
+                                                </select>
+
+                                                <!-- Selected Courses List -->
+                                                <div id="selectedCoursesContainer" class="mt-3">
+                                                    <h5>Selected Courses:</h5>
+                                                    <ul id="selectedCoursesList"
+                                                        style="list-style-type:none; padding-left:0;"></ul>
+                                                </div>
+                                            </div>
+
+                                         <div class="mt-3">
+    <label class="form-label">Admission Status <span class="text-danger">*</span></label>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="admission_status" value="highschool" id="highschool" required checked>
+        <label class="form-check-label" for="highschool">High School Graduate</label>
+     <div class="col-md-6 mt-2">
+                                                    <label for="lrn">LRN:</label>
+                                                    <input type="text" id="lrn" name="lrn"
+                                                        class="form-control" placeholder="e.g., 2025-12345">
+                                                </div>
+    </div>
+</div>
+
+
+
+                                            <div class="row g-3 mt-2" id="transfereeFields" style="display: none;">
+                                                <div class="col-md-6">
+                                                    <label for="student_no">Student No. (if transferee)</label>
+                                                    <input type="text" id="student_no" name="student_no"
+                                                        class="form-control" placeholder="e.g., 2020-12345">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="admission_year">Year When Admitted</label>
+                                                    <input type="text" id="admission_year" name="admission_year"
+                                                        class="form-control" placeholder="e.g., 2023">
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mt-2">
+                                                <div class="col-md-6">
+                                                    <label for="scholarship">Scholarship</label>
+                                                    <select id="scholarship" name="scholarship" class="form-control">
+                                                        <option value="" selected disabled>Select Scholarship
+                                                        </option>
+                                                        @foreach ($scholarships as $scholarship)
+                                                            <option value="{{ $scholarship->id }}">
+                                                                {{ $scholarship->name }}</option>
+                                                        @endforeach
+                                                        <option value="none">None</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label for="previous_school">Previous School (if any)</label>
+                                                    <input type="text" id="previous_school" name="previous_school"
+                                                        class="form-control" placeholder="e.g., ABC University">
+                                                </div>
+                                                <div class="col-12">
+                                                    <label for="previous_school_address">School Address (if any)</label>
+                                                    <input type="text" id="previous_school_address"
+                                                        name="previous_school_address" class="form-control"
+                                                        placeholder="e.g., 123 College Ave, City">
+                                                </div>
+                                            </div>
+                                        </div>
 
                                         <!-- Step 5: Education History -->
                                         <div class="tab-pane fade" id="step5" role="tabpanel"
@@ -1064,10 +921,9 @@ $(document).ready(function() {
     });
 </script>
 
-
 <!-- Font Awesome for icons (include in your head tag) -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     // Tab navigation variables
     const formTabs = document.querySelectorAll('#formTabs .nav-link');
     const prevBtn = document.getElementById('prevBtn');
@@ -1083,29 +939,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Course selection elements
     const courseSelect = document.getElementById('course_ids');
+    const selectedCoursesList = document.getElementById('selectedCoursesList');
+
+    // Track selected courses
+    let selectedCourses = [];
 
     // Define required fields for each step (0-indexed)
-    const requiredFields = [
-        // Step 1: Personal Info
-        ['last_name', 'first_name', 'contact_number', 'email', 'region', 'province', 'city', 'barangay'],
-        
-        // Step 2: Parents Info (optional)
-        [],
-        
-        // Step 3: Other Personal Details
-        ['gender', 'birthdate', 'citizenship'],
-        
-        // Step 4: Admission Info
-        ['admission_status', 'major', 'previous_school'],
-        
-        // Step 5: Education History
-        ['secondary_school', 'secondary_address']
-    ];
+  const requiredFields = [
+    // Step 1: Personal Info
+    ['last_name', 'first_name', 'contact_number', 'email', 'region', 'province', 'city', 'barangay'],
+    
+    // Step 2: Parents Info (optional)
+    [],
+    
+    // Step 3: Other Personal Details
+    ['gender', 'birthdate', 'citizenship'],
+    
+    // Step 4: Admission Info
+    ['course_mapping_id', 'admission_status' ,'major' ,'previous_school'],
+    
+    // Step 5: Education History
+    ['secondary_school', 'secondary_address']
+];
 
     // Initialize UI
     updateTabs();
     if (manualCourseSelection) manualCourseSelection.style.display = 'none';
     if (transfereeFields) transfereeFields.style.display = 'none';
+    updateSelectedCoursesDisplay();
 
     // Tab navigation functions
     nextBtn.addEventListener('click', function() {
@@ -1142,30 +1003,123 @@ document.addEventListener('DOMContentLoaded', function() {
         progressBar.setAttribute('aria-valuenow', progress);
     }
 
-    // Admission status change handler
-    admissionStatusRadios.forEach(radio => {
-        if (radio.checked) {
-            handleAdmissionStatusChange(radio.value);
-        }
+  // Admission status change handler
+admissionStatusRadios.forEach(radio => {
+    // Check the default selected radio button on page load
+    if (radio.checked) {
+        handleAdmissionStatusChange(radio.value);
+    }
 
-        radio.addEventListener('change', function() {
-            handleAdmissionStatusChange(this.value);
-        });
+    radio.addEventListener('change', function() {
+        handleAdmissionStatusChange(this.value);
     });
+});
 
-    function handleAdmissionStatusChange(value) {
-        if (transfereeFields) {
-            transfereeFields.style.display = value === 'transferee' ? 'block' : 'none';
+// Function to handle admission status changes
+function handleAdmissionStatusChange(value) {
+    // Show/hide transferee fields
+    if (transfereeFields) {
+        transfereeFields.style.display = value === 'transferee' ? 'block' : 'none';
+    }
+
+    // Show/hide manual course selection
+    if (manualCourseSelection) {
+        const showCourseSelection = (value === 'transferee' || value === 'returnee');
+        manualCourseSelection.style.display = showCourseSelection ? 'block' : 'none';
+    }
+
+    // Clear selections when switching away from irregular status
+    if (!showCourseSelection) {
+        clearCourseSelections();
+    }
+}
+
+
+    // Course selection handling
+    if (courseSelect && selectedCoursesList) {
+        courseSelect.addEventListener('change', function() {
+            // Get newly selected options that aren't already tracked
+            const newSelections = Array.from(this.selectedOptions)
+                .filter(option => !selectedCourses.some(c => c.value === option.value));
+
+            // Add new selections to our array
+            selectedCourses = selectedCourses.concat(newSelections.map(option => ({
+                value: option.value,
+                text: option.text
+            })));
+
+            updateSelectedCoursesDisplay();
+        });
+    }
+
+    function updateSelectedCoursesDisplay() {
+        if (!selectedCoursesList) return;
+        
+        selectedCoursesList.innerHTML = '';
+
+        if (selectedCourses.length === 0) {
+            selectedCoursesList.innerHTML = '<li class="text-muted">No courses selected</li>';
+            return;
         }
 
-        if (manualCourseSelection) {
-            const showCourseSelection = (value === 'transferee' || value === 'returnee');
-            manualCourseSelection.style.display = showCourseSelection ? 'block' : 'none';
+        selectedCourses.forEach(course => {
+            const li = document.createElement('li');
+            li.className = 'd-flex justify-content-between align-items-center mb-2';
+            li.innerHTML = `
+                <span>${course.text}</span>
+                <button type="button" class="btn btn-sm btn-outline-danger remove-course" 
+                        data-value="${course.value}" title="Remove course">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            selectedCoursesList.appendChild(li);
+        });
+
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-course').forEach(button => {
+            button.addEventListener('click', function() {
+                const valueToRemove = this.getAttribute('data-value');
+
+                // Remove from our array
+                selectedCourses = selectedCourses.filter(c => c.value !== valueToRemove);
+
+                // Update the select element
+                const option = Array.from(courseSelect.options)
+                    .find(opt => opt.value === valueToRemove);
+                if (option) option.selected = false;
+
+                updateSelectedCoursesDisplay();
+            });
+        });
+    }
+
+    function clearCourseSelections() {
+        selectedCourses = [];
+        if (courseSelect) {
+            Array.from(courseSelect.options).forEach(opt => opt.selected = false);
         }
+        updateSelectedCoursesDisplay();
     }
 
     // Form submission handler
     document.getElementById('admissionForm').addEventListener('submit', function(e) {
+        // Verify courses are selected if manual selection is shown
+        if (manualCourseSelection && manualCourseSelection.style.display === 'block' && selectedCourses.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one course');
+            return;
+        }
+
+        // Sync selections with the select element before submission
+        if (courseSelect) {
+            Array.from(courseSelect.options).forEach(opt => opt.selected = false);
+            selectedCourses.forEach(course => {
+                const option = Array.from(courseSelect.options)
+                    .find(opt => opt.value === course.value);
+                if (option) option.selected = true;
+            });
+        }
+
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
         submitBtn.disabled = true;
     });
@@ -1174,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fields = requiredFields[step];
         let isValid = true;
         let firstInvalidField = null;
-
+        
         fields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
             if (field) {
@@ -1191,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Special validation for admission status in step 4
-        if (step === 3) {
+        if (step === 3) { // Step 4 is index 3
             const admissionStatusSelected = document.querySelector('input[name="admission_status"]:checked');
             if (!admissionStatusSelected && requiredFields[3].includes('admission_status')) {
                 isValid = false;
@@ -1229,7 +1183,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 
 
 <script>

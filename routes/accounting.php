@@ -26,3 +26,6 @@ Route::prefix('accountant')->name('accountant.')->group(function () {
 
 Route::post('/accounting/voids/{payment}/approve', [AccountingSideBarController::class, 'approveVoid'])->name('accounting.voids.approve');
 Route::post('/accounting/voids/{payment}/reject', [AccountingSideBarController::class, 'rejectVoid'])->name('accounting.voids.reject');
+Route::get('/billing/{studentId}', [AccountingSideBarController::class, 'getBillingByStudent']);
+Route::get('/billing/{studentId}', [AccountingSideBarController::class, 'getBillingByStudent']);
+Route::get('/accountant/ledger', [AccountingSideBarController::class, 'ledger'])->name('accountant.ledger');
