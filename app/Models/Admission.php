@@ -72,6 +72,11 @@ class Admission extends Model
     {
         return $this->hasOne(Billing::class, 'student_id', 'student_id')->latest('created_at');
     }
+public function billingForActiveSy()
+{
+    // These values will be injected dynamically from the controller
+    return $this->hasOne(Billing::class, 'student_id', 'student_id');
+}
 
     public function scholarship()
     {

@@ -83,133 +83,162 @@
                 <!-- New Payment Modal -->
 
 
-         <!-- PAYMENT MODAL -->
-<div class="modal fade" id="newPaymentModal" tabindex="-1" aria-labelledby="newPaymentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" action="{{ route('payment.input') }}" id="paymentForm">
-            @csrf
-            <div class="modal-content shadow-lg rounded-3">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold" id="newPaymentModalLabel">New Payment Entry</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+                <!-- PAYMENT MODAL -->
+                <div class="modal fade" id="newPaymentModal" tabindex="-1" aria-labelledby="newPaymentModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <form method="POST" action="{{ route('manualpayment.input') }}" id="paymentForm">
+                            @csrf
+                            <div class="modal-content shadow-lg rounded-3">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title fw-bold" id="newPaymentModalLabel">New Payment Entry</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
 
-                <div class="modal-body px-4 py-3">
-                    <!-- Hidden inputs -->
-                                <input type="hidden" id="schoolYearInput" name="school_year" value="{{ $activeSchoolYear->name ?? '' }}">
-                    <input type="hidden" id="semesterInput" name="semester" value="{{ $activeSchoolYear->semester ?? '' }}">
-                    <!-- Student Info Section -->
-                    <div class="border rounded p-3 mb-4">
-                        <h6 class="text-primary fw-semibold mb-3">Student Information</h6>
-                        <div class="mb-3 position-relative">
-                            <label for="searchStudent" class="form-label">Search Student</label>
-                            <input type="text" class="form-control" id="searchStudent" name="student_id" placeholder="Search by Student ID">
-                            <ul id="searchSuggestions" class="list-group position-absolute w-100 mt-1" style="z-index: 1050;"></ul>
-                        </div>
-                        <div>
-                            <label for="studentName" class="form-label">Student Name</label>
-                            <input type="text" class="form-control" id="studentName" readonly required>
-                        </div>
-                    </div>
+                                <div class="modal-body px-4 py-3">
+                                    <!-- Hidden inputs -->
+                                    <input type="hidden" id="schoolYearInput" name="school_year"
+                                        value="{{ $activeSchoolYear->name ?? '' }}">
+                                    <input type="hidden" id="semesterInput" name="semester"
+                                        value="{{ $activeSchoolYear->semester ?? '' }}">
+                                    <!-- Student Info Section -->
+                                    <div class="border rounded p-3 mb-4">
+                                        <h6 class="text-primary fw-semibold mb-3">Student Information</h6>
+                                        <div class="mb-3 position-relative">
+                                            <label for="searchStudent" class="form-label">Search Student</label>
+                                            <input type="text" class="form-control" id="searchStudent" name="student_id"
+                                                placeholder="Search by Student ID">
+                                            <ul id="searchSuggestions" class="list-group position-absolute w-100 mt-1"
+                                                style="z-index: 1050;"></ul>
+                                        </div>
+                                        <div>
+                                            <label for="studentName" class="form-label">Student Name</label>
+                                            <input type="text" class="form-control" id="studentName" readonly required>
+                                        </div>
+                                    </div>
 
-                    <!-- POS Fee Table (SELECT FEES) -->
-                    <div class="border rounded p-3 mb-4">
-                        <h6 class="text-info fw-semibold mb-3">Select Other Fees</h6>
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle text-center">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Fee Name</th>
-                                        <th>Amount (₱)</th>
-                                        <th>Quantity</th>
-                                        <th>Total (₱)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($otherFees as $fee)
-                                        <tr>
-                                            <td>{{ $fee->name }}</td>
-                                            <td>
-                                                <input type="hidden" name="fees[{{ $fee->id }}][name]" value="{{ $fee->name }}">
-                                                <input type="hidden" name="fees[{{ $fee->id }}][amount]" value="{{ $fee->amount }}">
-                                                <span class="fee-amount" data-fee-id="{{ $fee->id }}">{{ number_format($fee->amount, 2) }}</span>
-                                            </td>
-                                            <td>
-                                                <input type="number" min="0" name="fees[{{ $fee->id }}][quantity]" class="form-control quantity-input" data-fee-id="{{ $fee->id }}" value="0" style="width: 80px; margin: 0 auto;">
-                                            </td>
-                                            <td>
-                                                <span class="fee-total" id="fee-total-{{ $fee->id }}">₱0.00</span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                    <!-- POS Fee Table (SELECT FEES) -->
+                                    <div class="border rounded p-3 mb-4">
+                                        <h6 class="text-info fw-semibold mb-3">Select Other Fees</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered align-middle text-center">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Fee Name</th>
+                                                        <th>Amount (₱)</th>
+                                                        <th>Quantity</th>
+                                                        <th>Total (₱)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($otherFees as $fee)
+                                                        <tr>
+                                                            <td>{{ $fee->name }}</td>
+                                                            <td>
+                                                                <input type="hidden"
+                                                                    name="fees[{{ $fee->id }}][name]"
+                                                                    value="{{ $fee->name }}">
+                                                                <input type="hidden"
+                                                                    name="fees[{{ $fee->id }}][amount]"
+                                                                    value="{{ $fee->amount }}">
+                                                                <span class="fee-amount"
+                                                                    data-fee-id="{{ $fee->id }}">{{ number_format($fee->amount, 2) }}</span>
+                                                            </td>
+                                                            <td>
+                                                                <input type="number" min="0"
+                                                                    name="fees[{{ $fee->id }}][quantity]"
+                                                                    class="form-control quantity-input"
+                                                                    data-fee-id="{{ $fee->id }}" value="0"
+                                                                    style="width: 80px; margin: 0 auto;">
+                                                            </td>
+                                                            <td>
+                                                                <span class="fee-total"
+                                                                    id="fee-total-{{ $fee->id }}">₱0.00</span>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
 
-                        <div class="text-end mt-3">
-                            <h5 class="fw-bold">Grand Total: <span id="grand-total">₱0.00</span></h5>
-                        </div>
-                    </div>
+                                        <div class="text-end mt-3">
+                                            <h5 class="fw-bold">Grand Total: <span id="grand-total">₱0.00</span></h5>
+                                        </div>
+                                    </div>
 
-                    <!-- Payment Section -->
-                    <div class="border rounded p-3 mb-4">
-                        <h6 class="text-success fw-semibold mb-3">Payment Details</h6>
+                                    <!-- Payment Section -->
+                                    <div class="border rounded p-3 mb-4">
+                                        <h6 class="text-success fw-semibold mb-3">Payment Details</h6>
 
-                        <!-- Hidden amount field -->
-                        <input type="hidden" class="form-control" id="amount" name="payment_amount" required>
+                                        <!-- Hidden amount field -->
+                                        <input type="hidden" class="form-control" id="amount" name="payment_amount"
+                                            required>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="orNumber" class="form-label">OR Number</label>
-                                <input type="text" class="form-control @error('or_number') is-invalid @enderror" id="orNumber" name="or_number" placeholder="Enter OR Number" required>
-                                @error('or_number')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="orNumber" class="form-label">OR Number</label>
+                                                <input type="text"
+                                                    class="form-control @error('or_number') is-invalid @enderror"
+                                                    id="orNumber" name="or_number" placeholder="Enter OR Number"
+                                                    required>
+                                                @error('or_number')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="paymentDate" class="form-label">Payment Date</label>
+                                                <input type="date" class="form-control" id="paymentDate"
+                                                    name="payment_date" required>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <label for="remarks" class="form-label">Remarks</label>
+                                            <textarea class="form-control" id="remarks" name="remarks" rows="2" placeholder="Add any notes..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary fw-bold"
+                                        onclick="submitAndPrint(event)">Submit & Print</button>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <label for="remarks" class="form-label">Remarks</label>
-                            <textarea class="form-control" id="remarks" name="remarks" rows="2" placeholder="Add any notes..."></textarea>
-                        </div>
+                        </form>
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary fw-bold" onclick="submitAndPrint(event)">Submit & Print</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
+                <script>
+                    function updateTotals() {
+                        let grandTotal = 0;
 
-<script>
-    function updateTotals() {
-        let grandTotal = 0;
+                        document.querySelectorAll('.quantity-input').forEach(input => {
+                            const feeId = input.dataset.feeId;
+                            const quantity = parseFloat(input.value) || 0;
+                            const amount = parseFloat(document.querySelector(`.fee-amount[data-fee-id="${feeId}"]`).textContent
+                                .replace(/₱|,/g, '')) || 0;
+                            const total = quantity * amount;
+                            grandTotal += total;
 
-        document.querySelectorAll('.quantity-input').forEach(input => {
-            const feeId = input.dataset.feeId;
-            const quantity = parseFloat(input.value) || 0;
-            const amount = parseFloat(document.querySelector(`.fee-amount[data-fee-id="${feeId}"]`).textContent.replace(/₱|,/g, '')) || 0;
-            const total = quantity * amount;
-            grandTotal += total;
+                            document.getElementById(`fee-total-${feeId}`).textContent = `₱${total.toFixed(2)}`;
+                        });
 
-            document.getElementById(`fee-total-${feeId}`).textContent = `₱${total.toFixed(2)}`;
-        });
+                        document.getElementById('grand-total').textContent = `₱${grandTotal.toFixed(2)}`;
+                        document.getElementById('amount').value = grandTotal.toFixed(2); // update hidden input
+                    }
 
-        document.getElementById('grand-total').textContent = `₱${grandTotal.toFixed(2)}`;
-        document.getElementById('amount').value = grandTotal.toFixed(2); // update hidden input
-    }
-
-    // Listen for input changes
-    document.addEventListener('input', function (e) {
-        if (e.target.classList.contains('quantity-input')) {
-            updateTotals();
-        }
-    });
-</script>
+                    // Listen for input changes
+                    document.addEventListener('input', function(e) {
+                        if (e.target.classList.contains('quantity-input')) {
+                            updateTotals();
+                        }
+                    });
+                </script>
 
                 <script>
                     // Set school year and semester when modal opens
@@ -258,7 +287,14 @@
                             return `${month} ${day}, ${year}`;
                         }
 
-                        const currentDate = new Date();
+                        const paymentDateInput = document.getElementById('paymentDate').value;
+                        if (!paymentDateInput) {
+                            alert("Please enter the payment date.");
+                            return;
+                        }
+                        const currentDate = new Date(paymentDateInput);
+
+
 
                         // Format student name (LASTNAME, FIRSTNAME M.I.)
                         const nameParts = document.getElementById('studentName').value.trim().split(' ');
@@ -289,7 +325,7 @@
                         const formattedSemester = formatSemester(rawSemester);
                         const formattedSemesterAndSY = `${formattedSemester} SEMESTER SY ${rawSchoolYear}`;
 
-                          const cashier = @json(auth()->user()->name);
+                        const cashier = @json(auth()->user()->name);
 
                         const printContent = `
                     <div style="width: 100%; font-family: Arial, sans-serif; text-align: left; position: relative; font-size: larger; line-height: 1.8;">
@@ -501,6 +537,7 @@
                         });
                     });
                 </script>
+
                 <script>
                     function reprintReceipt(studentName, amount, remarks, paymentDate, orNumber, schoolYear, semester) {
                         const nameParts = studentName.trim().split(' ');

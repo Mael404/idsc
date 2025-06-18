@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\MiscFeeController;
+use App\Http\Controllers\NewUserController;
+use App\Http\Controllers\OtherFeeController;
 use App\Http\Controllers\ScholarshipController;
 use App\Http\Controllers\SchoolYearController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +30,8 @@ Route::prefix('user-management')->group(function () {
     Route::get('/manage', [VPAdminSideBarController::class, 'manageUsers']);
     Route::get('/activate', [VPAdminSideBarController::class, 'activateUsers']);
 });
+Route::get('fees/other-fees', [VPAdminSideBarController::class, 'otherFees'])->name('fees.other');
+
 
 
 Route::get('school-years', [SchoolYearController::class, 'index'])->name('school-years.index');
@@ -51,3 +55,15 @@ Route::patch('/scholarships/{id}/restore', [ScholarshipController::class, 'resto
 Route::delete('/scholarships/{id}/force-delete', [ScholarshipController::class, 'forceDelete'])->name('scholarships.forceDelete');
 
 Route::patch('/scholarships/{id}/toggle-status', [ScholarshipController::class, 'toggleStatus'])->name('scholarships.toggleStatus');
+Route::post('/users', [NewUserController::class, 'store'])->name('users.store');
+
+Route::prefix('fees')->group(function () {
+    Route::get('/', [OtherFeeController::class, 'index'])->name('fees.index');
+    Route::post('/', [OtherFeeController::class, 'store'])->name('fees.store');
+    Route::delete('/{fee}', [OtherFeeController::class, 'destroy'])->name('fees.destroy');
+    Route::patch('/{fee}/toggle-status', [OtherFeeController::class, 'toggleStatus'])->name('fees.toggleStatus');
+    Route::patch('/{id}/restore', [OtherFeeController::class, 'restore'])->name('fees.restore');
+    Route::delete('/{id}/force-delete', [OtherFeeController::class, 'forceDelete'])->name('fees.forceDelete');
+    Route::put('/fees/{fee}', [OtherFeeController::class, 'update'])->name('fees.update');
+
+});

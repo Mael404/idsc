@@ -45,6 +45,9 @@ class AuthenticatedSessionController extends Controller
         if (Auth::user()->role === 'cashier') {
             return redirect()->route('cashier.dashboard');
         }
+        if (Auth::user()->role === 'manual_cashier') {
+            return redirect()->route('manual_cashier.dashboard');
+        }
         if (Auth::user()->role === 'accounting') {
             return redirect()->route('accountant.accountant_db');
         }

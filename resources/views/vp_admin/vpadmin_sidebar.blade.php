@@ -44,9 +44,12 @@
                     href="{{ url('fees/edit-tuition') }}">Manage Scholarship Fees</a>
                 <a class="collapse-item {{ request()->is('fees/misc-fees') ? 'active' : '' }}"
                     href="{{ url('fees/misc-fees') }}">Misc. Fees Manager</a>
+                <a class="collapse-item {{ request()->is('fees/other-fees') ? 'active' : '' }}"
+                    href="{{ url('fees/other-fees') }}">Manage Other Fees</a>
             </div>
         </div>
     </li>
+
 
     <!-- Nav Item - Academic -->
     <li class="nav-item {{ request()->is('academic/*') ? 'active' : '' }}">

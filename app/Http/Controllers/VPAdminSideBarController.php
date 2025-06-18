@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Billing;
 use App\Models\Enrollment;
+use App\Models\OtherFee;
 use App\Models\Program;
 use App\Models\ProgramCourseMapping;
 use App\Models\Scholarship;
@@ -14,70 +15,77 @@ use Illuminate\Http\Request;
 class VPAdminSideBarController extends Controller
 {
     // Main dashboard
-   public function dashboard()
-{
-    // Get school years and trashed ones
-    $schoolYears = SchoolYear::all();
-    $trashedSchoolYears = SchoolYear::onlyTrashed()->get();
+    public function dashboard()
+    {
+        // Get school years and trashed ones
+        $schoolYears = SchoolYear::all();
+        $trashedSchoolYears = SchoolYear::onlyTrashed()->get();
 
-    // Get the current active school year
-    $activeSchoolYear = SchoolYear::where('is_active', true)->first();
+        // Get the current active school year
+        $activeSchoolYear = SchoolYear::where('is_active', true)->first();
 
-    // If no active school year, pass empty collections and nulls
-    if (!$activeSchoolYear) {
-        return view('vp_admin.vpadmin_db', [
-            'schoolYears' => $schoolYears,
-            'trashedSchoolYears' => $trashedSchoolYears,
-            'activeSchoolYear' => null,
-            'enrollmentData' => collect(),
-            'programs' => Program::all(),
-            'yearLevels' => YearLevel::orderBy('id')->get(),
-            'topUnpaid' => collect(),
-        ]);
+        // If no active school year, pass empty collections and nulls
+        if (!$activeSchoolYear) {
+            return view('vp_admin.vpadmin_db', [
+                'schoolYears' => $schoolYears,
+                'trashedSchoolYears' => $trashedSchoolYears,
+                'activeSchoolYear' => null,
+                'enrollmentData' => collect(),
+                'programs' => Program::all(),
+                'yearLevels' => YearLevel::orderBy('id')->get(),
+                'topUnpaid' => collect(),
+            ]);
+        }
+
+        // Enrollment Heatmap Data
+        $enrollmentData = Enrollment::with('courseMapping.program', 'courseMapping.yearLevel')
+            ->where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->get()
+            ->groupBy(function ($enrollment) {
+                return $enrollment->courseMapping->program->name ?? 'Unknown';
+            })
+            ->map(function ($group) {
+                return $group->groupBy(function ($enrollment) {
+                    return $enrollment->courseMapping->yearLevel->name ?? 'Unknown';
+                })->map->count();
+            });
+
+        // Top 10 Students with ₱10,000+ Unpaid Balances
+        $topUnpaid = Billing::with('student')
+            ->where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->where('balance_due', '>=', 10000)
+            ->orderByDesc('balance_due')
+            ->take(10)
+            ->get();
+
+        // Additional shared data
+        $programs = Program::all();
+        $yearLevels = YearLevel::orderBy('id')->get();
+
+        return view('vp_admin.vpadmin_db', compact(
+            'schoolYears',
+            'trashedSchoolYears',
+            'activeSchoolYear',
+            'enrollmentData',
+            'programs',
+            'yearLevels',
+            'topUnpaid'
+        ));
     }
-
-    // Enrollment Heatmap Data
-    $enrollmentData = Enrollment::with('courseMapping.program', 'courseMapping.yearLevel')
-        ->where('school_year', $activeSchoolYear->name)
-        ->where('semester', $activeSchoolYear->semester)
-        ->get()
-        ->groupBy(function ($enrollment) {
-            return $enrollment->courseMapping->program->name ?? 'Unknown';
-        })
-        ->map(function ($group) {
-            return $group->groupBy(function ($enrollment) {
-                return $enrollment->courseMapping->yearLevel->name ?? 'Unknown';
-            })->map->count();
-        });
-
-    // Top 10 Students with ₱10,000+ Unpaid Balances
-    $topUnpaid = Billing::with('student')
-        ->where('school_year', $activeSchoolYear->name)
-        ->where('semester', $activeSchoolYear->semester)
-        ->where('balance_due', '>=', 10000)
-        ->orderByDesc('balance_due')
-        ->take(10)
-        ->get();
-
-    // Additional shared data
-    $programs = Program::all();
-    $yearLevels = YearLevel::orderBy('id')->get();
-
-    return view('vp_admin.vpadmin_db', compact(
-        'schoolYears',
-        'trashedSchoolYears',
-        'activeSchoolYear',
-        'enrollmentData',
-        'programs',
-        'yearLevels',
-        'topUnpaid'
-    ));
-}
 
     // Blank page
     public function blankPage()
     {
         return view('vp_admin.vpadmin_blank');
+    }
+    public function otherFees()
+    {
+        $fees = OtherFee::all();
+        $trashedFees = OtherFee::onlyTrashed()->get();
+        return view('vp_admin.fees.other_fees', compact('fees', 'trashedFees'));
+      
     }
 
     // Fees

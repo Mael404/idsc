@@ -144,6 +144,93 @@ class PaymentController extends Controller
 
         return redirect()->back()->with('success', 'Payment processed successfully!');
     }
+
+    public function manualstore(Request $request)
+{
+    $request->validate([
+        'student_id'    => 'required|exists:billings,student_id',
+        'payment_amount'=> 'required|numeric|min:0.01',
+        'or_number'     => 'required|string|unique:payments,or_number',
+        'grading_period'=> 'required|in:prelims,midterms,prefinals,finals',
+       'payment_date' => 'required|date',
+
+        'remarks'       => 'nullable|string',
+    ]);
+
+    $gradingPeriod   = $request->grading_period;
+    $studentId       = $request->student_id;
+    $paymentAmount   = $request->payment_amount;
+    $orNumber        = $request->or_number;
+    $remarks         = $request->remarks;
+   $manualDate = $request->payment_date;
+
+
+    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+
+    if (!$activeSchoolYear) {
+        return redirect()->back()->withErrors(['error' => 'No active school year found.']);
+    }
+
+    $billing = Billing::where('student_id', $studentId)
+        ->where('school_year', $activeSchoolYear->name)
+        ->where('semester', $activeSchoolYear->semester)
+        ->first();
+
+    if (!$billing) {
+        return redirect()->back()->withErrors(['error' => 'Billing record not found for this student.']);
+    }
+
+    if ($paymentAmount > $billing->balance_due) {
+        return redirect()->back()->with('error', 'The payment amount cannot be greater than the current balance due.');
+    }
+
+    $dues = ['prelims_due', 'midterms_due', 'prefinals_due', 'finals_due'];
+    $remainingPayment = $paymentAmount;
+
+    foreach ($dues as $due) {
+        if ($remainingPayment <= 0) break;
+
+        if ($billing->$due > 0) {
+            if ($remainingPayment >= $billing->$due) {
+                $remainingPayment -= $billing->$due;
+                $billing->$due = 0;
+            } else {
+                $billing->$due -= $remainingPayment;
+                $remainingPayment = 0;
+            }
+        }
+    }
+
+    $billing->balance_due = $billing->prelims_due
+                            + $billing->midterms_due
+                            + $billing->prefinals_due
+                            + $billing->finals_due;
+    $billing->save();
+
+    $admission = Admission::where('student_id', $studentId)->first();
+
+    if ($admission) {
+        $admission->status = 'Enrolled';
+        $admission->save();
+    } else {
+        return redirect()->back()->withErrors(['error' => 'Admission record not found for this student.']);
+    }
+
+    Payment::create([
+        'student_id'        => $studentId,
+        'school_year'       => $activeSchoolYear->name,
+        'semester'          => $activeSchoolYear->semester,
+        'grading_period'    => $gradingPeriod,
+        'amount'            => $paymentAmount,
+        'or_number'         => $orNumber,
+        'remarks'           => $remarks,
+        'payment_date'      => $manualDate,  // ← uses manual date
+        'remaining_balance' => $billing->balance_due,
+    ]);
+
+    return redirect()->back()->with('success', 'Manual payment processed successfully!');
+}
+
     public function input(Request $request)
     {
         $request->validate([
@@ -181,6 +268,45 @@ class PaymentController extends Controller
 
         return redirect()->back()->with('success', 'Payment recorded successfully!');
     }
+public function manualinput(Request $request)
+{
+    $request->validate([
+        'student_id'     => 'required|exists:billings,student_id',
+        'payment_amount' => 'required|numeric|min:0.01',
+        'or_number'      => 'required|string|unique:payments,or_number',
+        'remarks'        => 'nullable|string',
+        'payment_type'   => 'nullable|string',
+        'payment_date'   => 'nullable|date', // Allow manual date input
+    ]);
+
+    $studentId     = $request->student_id;
+    $paymentAmount = $request->payment_amount;
+    $orNumber      = $request->or_number;
+    $remarks       = $request->remarks;
+    $paymentType   = $request->payment_type ?? 'others';
+    $paymentDate   = $request->payment_date ?? now(); // Use provided date or default to now
+
+    // Fetch the active school year
+    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+
+    if (!$activeSchoolYear) {
+        return redirect()->back()->withErrors(['error' => 'No active school year found.']);
+    }
+
+    // Log the payment
+    Payment::create([
+        'student_id'   => $studentId,
+        'school_year'  => $activeSchoolYear->name,
+        'semester'     => $activeSchoolYear->semester,
+        'amount'       => $paymentAmount,
+        'or_number'    => $orNumber,
+        'remarks'      => $remarks,
+        'payment_type' => $paymentType,
+        'payment_date' => $paymentDate,
+    ]);
+
+    return redirect()->back()->with('success', 'Payment recorded successfully!');
+}
 
     public function voidPayment(Request $request)
     {

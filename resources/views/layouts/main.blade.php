@@ -70,6 +70,9 @@
             @case('cashier')
                 @include('cashier.cashier_sidebar')
             @break
+             @case('manual_cashier')
+                @include('manual_cashier.cashier_sidebar')
+            @break
 
             @case('accounting')
                 @include('accountant.accountant_sidebar')

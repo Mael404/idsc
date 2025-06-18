@@ -19,7 +19,7 @@
 
 
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">Manage Student Billings</h1>
+                    <h1 class="h3 mb-0 text-gray-800">Manual Manage Student Billings</h1>
 
                     <!-- New Payment Button -->
                     <button class="btn btn-primary" data-toggle="modal" data-target="#newPaymentModal">
@@ -84,88 +84,103 @@
                 </div>
 
 
-               <div class="modal fade" id="newPaymentModal" tabindex="-1" aria-labelledby="newPaymentModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" action="{{ route('payment.store') }}" onsubmit="return handlePrintAndSubmit(event)">
-            @csrf
-            <div class="modal-content shadow-lg rounded-3">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold" id="newPaymentModalLabel">New Payment Entry</h5>
-                </div>
-                <div class="modal-body px-4 py-3">
-                    <input type="hidden" id="schoolYearInput" name="school_year">
-                    <input type="hidden" id="semesterInput" name="semester">
+                <div class="modal fade" id="newPaymentModal" tabindex="-1" aria-labelledby="newPaymentModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <form method="POST" action="{{ route('manualpayment.store') }}"
+                            onsubmit="return handlePrintAndSubmit(event)">
+                            @csrf
+                            <div class="modal-content shadow-lg rounded-3">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title fw-bold" id="newPaymentModalLabel">New Payment Entry</h5>
+                                </div>
+                                <div class="modal-body px-4 py-3">
+                                    <input type="hidden" id="schoolYearInput" name="school_year">
+                                    <input type="hidden" id="semesterInput" name="semester">
 
-                    <!-- Student Search Section -->
-                    <div class="border rounded p-3 mb-4">
-                        <h6 class="text-primary fw-semibold mb-3">Student Details</h6>
-                        <div class="mb-3 position-relative">
-                            <label for="searchStudent" class="form-label">Search Student</label>
-                            <input type="text" class="form-control" id="searchStudent" name="student_id"
-                                placeholder="Search by Student ID or Name">
-                            <ul id="searchSuggestions" class="list-group position-absolute w-100 mt-1"
-                                style="z-index: 1050;"></ul>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="studentName" class="form-label">Student Name</label>
-                                <input type="text" class="form-control" id="studentName" readonly required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="balanceDue" class="form-label">Balance Due</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" id="balanceDue" readonly required>
+                                    <!-- Student Search Section -->
+                                    <div class="border rounded p-3 mb-4">
+                                        <h6 class="text-primary fw-semibold mb-3">Student Details</h6>
+                                        <div class="mb-3 position-relative">
+                                            <label for="searchStudent" class="form-label">Search Student</label>
+                                            <input type="text" class="form-control" id="searchStudent" name="student_id"
+                                                placeholder="Search by Student ID or Name">
+                                            <ul id="searchSuggestions" class="list-group position-absolute w-100 mt-1"
+                                                style="z-index: 1050;"></ul>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="studentName" class="form-label">Student Name</label>
+                                                <input type="text" class="form-control" id="studentName" readonly
+                                                    required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="balanceDue" class="form-label">Balance Due</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">₱</span>
+                                                    <input type="number" class="form-control" id="balanceDue" readonly
+                                                        required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Info Section -->
+                                    <div class="border rounded p-3 mb-4">
+                                        <h6 class="text-success fw-semibold mb-3">Payment Details</h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="amount" class="form-label">Amount</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">₱</span>
+                                                    <input type="number" class="form-control" id="amount"
+                                                        name="payment_amount" step="0.01" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="gradingPeriod" class="form-label">Grading Period</label>
+                                                <select class="form-select" id="gradingPeriod" name="grading_period"
+                                                    required>
+                                                    <option value="">Select Grading Period</option>
+                                                    <option value="prelims">Prelims</option>
+                                                    <option value="midterms">Midterms</option>
+                                                    <option value="prefinals">Pre-finals</option>
+                                                    <option value="finals">Finals</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="paymentDate" class="form-label">Payment Date</label>
+                                                <input type="date" class="form-control" id="paymentDate"
+                                                    name="payment_date" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <label for="remarks" class="form-label">Remarks</label>
+                                            <textarea class="form-control" id="remarks" name="remarks" rows="2" placeholder="Add any notes..."></textarea>
+                                        </div>
+
+
+                                        <div class="mt-3">
+                                            <label for="orNumber" class="form-label">OR Number</label>
+                                            <input type="text"
+                                                class="form-control @error('or_number') is-invalid @enderror"
+                                                id="orNumber" name="or_number" placeholder="Enter OR Number" required>
+                                            @error('or_number')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer bg-light">
+                                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Submit
+                                        Payment</button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Info Section -->
-                    <div class="border rounded p-3 mb-4">
-                        <h6 class="text-success fw-semibold mb-3">Payment Details</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="amount" class="form-label">Amount</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" id="amount" name="payment_amount" step="0.01" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="gradingPeriod" class="form-label">Grading Period</label>
-                                <select class="form-select" id="gradingPeriod" name="grading_period" required>
-                                    <option value="">Select Grading Period</option>
-                                    <option value="prelims">Prelims</option>
-                                    <option value="midterms">Midterms</option>
-                                    <option value="prefinals">Pre-finals</option>
-                                    <option value="finals">Finals</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="remarks" class="form-label">Remarks</label>
-                            <textarea class="form-control" id="remarks" name="remarks" rows="2" placeholder="Add any notes..."></textarea>
-                        </div>
-                        <div class="mt-3">
-                            <label for="orNumber" class="form-label">OR Number</label>
-                            <input type="text" class="form-control @error('or_number') is-invalid @enderror"
-                                id="orNumber" name="or_number" placeholder="Enter OR Number" required>
-                            @error('or_number')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        </form>
                     </div>
                 </div>
-
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Submit Payment</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
 
 
@@ -210,6 +225,11 @@
                         const studentName = document.getElementById('studentName').value.trim();
                         const amount = parseFloat(document.getElementById('amount').value);
                         const balanceDue = parseFloat(document.getElementById('balanceDue').value);
+                        const dateInput = document.getElementById('paymentDate').value;
+                        if (!dateInput) {
+                            showErrorMessage('Please select a payment date.');
+                            return false;
+                        }
 
                         if (studentName === "") {
                             showErrorMessage('Student name cannot be blank.');
@@ -274,7 +294,9 @@
                             return `${month} ${day}, ${year}`;
                         }
 
-                        const currentDate = new Date();
+                        const userDateInput = document.getElementById('paymentDate').value;
+                        const currentDate = new Date(userDateInput);
+
 
                         const nameParts = document.getElementById('studentName').value.trim().split(' ');
                         let formattedName = document.getElementById('studentName').value;
