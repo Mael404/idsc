@@ -23,7 +23,7 @@
 
                   <!-- Example: Export for Daily Sales -->
                   <button class="btn btn-success btn-sm mb-2" onclick="exportTableToExcel('dailySalesTable', 'Daily_Sales')">
-                      Export Daily Sales
+                      Export Daily Collections
                   </button>
 
                   <!-- Example: Export for Enrollment Heatmap -->
@@ -54,7 +54,7 @@
                           <!-- Daily Sales Card -->
                           <div class="card shadow mb-4">
                               <div class="card-header py-3">
-                                  <h6 class="m-0 font-weight-bold text-primary">💵 Daily Sales (Current Semester)</h6>
+                                  <h6 class="m-0 font-weight-bold text-primary">💵 Daily Collections (Current Semester)</h6>
                               </div>
                               <div class="card-body">
                                   @php

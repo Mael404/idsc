@@ -10,7 +10,7 @@ use App\Models\OtherFee;
 use App\Models\SchoolYear;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 
 class CashierSideBarController extends Controller
 {
@@ -53,19 +53,20 @@ class CashierSideBarController extends Controller
     /**
      * Show the list of payment reports.
      */
-    public function reportsIndex()
-    {
-        $payments = Payment::with('student')
-            ->where(function ($query) {
-                $query->whereNull('payment_type')
-                    ->orWhere('payment_type', '');
-            })
-            ->where('is_void', false) // Only show non-voided payments
-            ->where('status', '!=', 'void_approved') // Exclude void_approved status
-            ->get();
+  public function reportsIndex()
+{
+    $payments = Payment::with('student')
+        ->where(function ($query) {
+            $query->whereNull('payment_type')
+                  ->orWhere('payment_type', '');
+        })
+        ->where('is_void', false) // Only show non-voided payments
+        ->where('status', '!=', 'void_approved') // Exclude void_approved status
+        ->where('processed_by', Auth::id()) // ✅ Filter to only show current user's entries
+        ->get();
 
-        return view('cashier.reports.index', compact('payments'));
-    }
+    return view('cashier.reports.index', compact('payments'));
+}
 
 
 
@@ -152,27 +153,82 @@ class CashierSideBarController extends Controller
             // Insert into payments table
             // Insert into payments table
             Payment::create([
-                'student_id'   => $enrollment->student_id,
-                'school_year'  => $activeSchoolYear->name,
-                'semester'     => $activeSchoolYear->semester,
-                'amount'       => $billing->initial_payment ?? 0,
-                'remarks'      => $request->input('remarks'),
-                'payment_date' => now(),
-                'or_number'    => $request->input('or_number'),
+                'student_id'    => $enrollment->student_id,
+                'school_year'   => $activeSchoolYear->name,
+                'semester'      => $activeSchoolYear->semester,
+                'amount'        => $billing->initial_payment ?? 0,
+                'remarks'       => $request->input('remarks'),
+                'payment_date'  => now(),
+                'or_number'     => $request->input('or_number'),
+                'processed_by'  => Auth::id(), // or auth()->id()
             ]);
         }
 
         return back()->with('success', 'Student enrollment and payment recorded successfully!');
     }
 
-  public function otherPayments()
-{
-    $payments = Payment::where('payment_type', 'others')->with('student')->get();
-    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+    public function manualconfirmPending(Request $request, $id)
+    {
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
-    // Get all other fees (no type column needed)
-    $otherFees = OtherFee::all();
+        if (!$activeSchoolYear) {
+            return back()->with('error', 'No active school year found.');
+        }
 
-    return view('cashier.payment.other', compact('payments', 'activeSchoolYear', 'otherFees'));
-}
+        // Find the enrollment record
+        $enrollment = Enrollment::where('id', $id)
+            ->where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->first();
+
+        if (!$enrollment) {
+            return back()->with('error', 'Enrollment not found or does not match active school year.');
+        }
+
+        // Update enrollment status
+        $enrollment->status = 'Enrolled';
+        $enrollment->save();
+
+        // Update admission status
+        $admission = Admission::where('student_id', $enrollment->student_id)->first();
+        if ($admission) {
+            $admission->status = 'Enrolled';
+            $admission->save();
+        }
+
+        // Fetch the initial payment from billing
+        $billing = Billing::where('student_id', $enrollment->student_id)
+            ->where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->first();
+
+        if ($billing) {
+            // Insert into payments table
+            // Insert into payments table
+            Payment::create([
+                'student_id'    => $enrollment->student_id,
+                'school_year'   => $activeSchoolYear->name,
+                'semester'      => $activeSchoolYear->semester,
+                'amount'        => $billing->initial_payment ?? 0,
+                'remarks'       => $request->input('remarks'),
+                'payment_date'  => $request->input('receipt_date'),
+                'or_number'     => $request->input('or_number'),
+                'processed_by'  => Auth::id(),
+            ]);
+        }
+
+        return back()->with('success', 'Student enrollment and payment recorded successfully!');
+    }
+
+
+    public function otherPayments()
+    {
+        $payments = Payment::where('payment_type', 'others')->with('student')->get();
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+
+        // Get all other fees (no type column needed)
+        $otherFees = OtherFee::all();
+
+        return view('cashier.payment.other', compact('payments', 'activeSchoolYear', 'otherFees'));
+    }
 }

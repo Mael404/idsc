@@ -24,16 +24,17 @@ class CourseController extends Controller
     public function store(Request $request)
     {
         // Validate input
-        $validated = $request->validate([
-            'code' => 'required|string|unique:courses,code',
-            'name' => 'required|string',
-            'description' => 'nullable|string',
-            'units' => 'required|numeric',
-            'lecture_hours' => 'nullable|numeric',
-            'lab_hours' => 'nullable|numeric',
-            'prerequisite_id' => 'nullable|array', 
-            'prerequisite_id.*' => 'exists:courses,id',
-        ]);
+      $validated = $request->validate([
+    'code' => 'required|string', 
+    'name' => 'required|string',
+    'description' => 'nullable|string',
+    'units' => 'required|numeric',
+    'lecture_hours' => 'nullable|numeric',
+    'lab_hours' => 'nullable|numeric',
+    'prerequisite_id' => 'nullable|array',
+    'prerequisite_id.*' => 'exists:courses,id',
+]);
+
 
         // Create the course
         $course = Course::create([

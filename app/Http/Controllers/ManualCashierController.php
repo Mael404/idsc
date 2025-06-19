@@ -10,6 +10,7 @@ use App\Models\OtherFee;
 use App\Models\SchoolYear;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ManualCashierController extends Controller
 {
@@ -18,16 +19,17 @@ class ManualCashierController extends Controller
         return view('manual_cashier.cashier_db');
     }
 
-    public function reportOtherPayments()
-    {
-        $payments = Payment::where('payment_type', 'others')
-            ->where('is_void', 0)
-            ->where('status', '!=', 'void_approved')
-            ->with('student')
-            ->get();
+   public function reportOtherPayments()
+{
+    $payments = Payment::where('payment_type', 'others')
+        ->where('is_void', 0)
+        ->where('status', '!=', 'void_approved')
+        ->where('processed_by', Auth::id()) 
+        ->with('student')
+        ->get();
 
-        return view('manual_cashier.reports.other', compact('payments'));
-    }
+    return view('manual_cashier.reports.other', compact('payments'));
+}
 
     public function processPayment()
     {
@@ -44,20 +46,20 @@ class ManualCashierController extends Controller
         return view('manual_cashier.payment.process', compact('billings', 'payments'));
     }
 
-    public function reportsIndex()
-    {
-        $payments = Payment::with('student')
-            ->where(function ($query) {
-                $query->whereNull('payment_type')
-                    ->orWhere('payment_type', '');
-            })
-            ->where('is_void', false)
-            ->where('status', '!=', 'void_approved')
-            ->get();
+  public function reportsIndex()
+{
+    $payments = Payment::with('student')
+        ->where(function ($query) {
+            $query->whereNull('payment_type')
+                  ->orWhere('payment_type', '');
+        })
+        ->where('is_void', false)
+        ->where('status', '!=', 'void_approved')
+        ->where('processed_by', Auth::id()) // ✅ Only show payments processed by current user
+        ->get();
 
-        return view('manual_cashier.reports.index', compact('payments'));
-    }
-
+    return view('manual_cashier.reports.index', compact('payments'));
+}
     public function pendingEnrollments()
     {
         $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
@@ -132,13 +134,14 @@ class ManualCashierController extends Controller
 
         if ($billing) {
             Payment::create([
-                'student_id'   => $enrollment->student_id,
-                'school_year'  => $activeSchoolYear->name,
-                'semester'     => $activeSchoolYear->semester,
-                'amount'       => $billing->initial_payment ?? 0,
-                'remarks'      => $request->input('remarks'),
-                'payment_date' => now(),
-                'or_number'    => $request->input('or_number'),
+                'student_id'    => $enrollment->student_id,
+                'school_year'   => $activeSchoolYear->name,
+                'semester'      => $activeSchoolYear->semester,
+                'amount'        => $billing->initial_payment ?? 0,
+                'remarks'       => $request->input('remarks'),
+                'payment_date'  => now(),
+                'or_number'     => $request->input('or_number'),
+                'processed_by'  => Auth::id(), 
             ]);
         }
 
@@ -150,7 +153,7 @@ class ManualCashierController extends Controller
         $payments = Payment::where('payment_type', 'others')->with('student')->get();
         $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
-         $otherFees = OtherFee::all();
+        $otherFees = OtherFee::all();
 
         return view('manual_cashier.payment.other', compact('payments', 'activeSchoolYear', 'otherFees'));
     }

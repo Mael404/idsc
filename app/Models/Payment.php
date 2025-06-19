@@ -19,6 +19,7 @@ class Payment extends Model
         'voided_at',
         'grading_period',
         'remaining_balance',
+        'processed_by',
     ];
 
 

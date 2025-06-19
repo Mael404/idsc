@@ -42,6 +42,7 @@ Route::post('/reports/generate', [ReportGenerationController::class, 'generate']
 Route::get('/cashier/payment/pending', [CashierSideBarController::class, 'pendingEnrollments'])->name('cashier.payment.pending');
 
 Route::post('/cashier/confirm/{id}', [CashierSideBarController::class, 'confirmPending'])->name('cashier.confirm');
+Route::post('/cashier/manualconfirm/{id}', [CashierSideBarController::class, 'manualconfirmPending'])->name('manualcashier.confirm');
 Route::get('/cashier/payment/other', [CashierSideBarController::class, 'otherPayments'])->name('cashier.payment.other');
 
 Route::post('/payments/input', [PaymentController::class, 'input'])->name('payment.input');

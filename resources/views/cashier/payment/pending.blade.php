@@ -71,77 +71,68 @@
                                                         </button>
 
                                                         <!-- Summary Modal -->
-                                                        <div class="modal fade" id="summaryModal{{ $enrollment->id }}"
-                                                            tabindex="-1"
-                                                            aria-labelledby="summaryModalLabel{{ $enrollment->id }}"
-                                                            aria-hidden="true">
-                                                            <div class="modal-dialog modal-dialog-centered">
-                                                                <div class="modal-content">
-                                                                    <form method="POST"
-                                                                        action="{{ route('cashier.confirm', $enrollment->id) }}"
-                                                                        onsubmit="return handleSubmitAndPrint(event, {{ $enrollment->id }})">
-                                                                        @csrf
-                                                                        <div class="modal-header bg-primary text-white">
-                                                                            <h5 class="modal-title"
-                                                                                id="summaryModalLabel{{ $enrollment->id }}">
-                                                                                Enrollment Summary</h5>
-                                                                            <button type="button" class="btn-close"
-                                                                                data-bs-dismiss="modal"
-                                                                                aria-label="Close"></button>
-                                                                        </div>
-                                                                        <div class="modal-body">
-                                                                            @php
-                                                                                $middleInitial = $enrollment->middle_name
-                                                                                    ? strtoupper(
-                                                                                            substr(
-                                                                                                $enrollment->middle_name,
-                                                                                                0,
-                                                                                                1,
-                                                                                            ),
-                                                                                        ) . '.'
-                                                                                    : '';
-                                                                                $formattedName = "{$enrollment->last_name}, {$enrollment->first_name} {$middleInitial}";
-                                                                            @endphp
-                                                                            <p><strong>Name:</strong> <span
-                                                                                    id="studentName{{ $enrollment->id }}">{{ $formattedName }}</span>
-                                                                            </p>
-                                                                            <p><strong>Semester:</strong>
-                                                                                {{ $formattedSem }}</p>
-                                                                            <p><strong>Initial Payment:</strong> ₱<span
-                                                                                    id="initialPayment{{ $enrollment->id }}">{{ number_format($enrollment->initial_payment, 2) }}</span>
-                                                                            </p>
+                                                    <div class="modal fade" id="summaryModal{{ $enrollment->id }}" tabindex="-1"
+    aria-labelledby="summaryModalLabel{{ $enrollment->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg rounded-3">
+            <form method="POST" action="{{ route('cashier.confirm', $enrollment->id) }}"
+                onsubmit="return handleSubmitAndPrint(event, {{ $enrollment->id }})">
+                @csrf
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="summaryModalLabel{{ $enrollment->id }}">Enrollment Summary</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
+                <div class="modal-body px-4 py-3">
+                    <!-- Student Info Section -->
+                    <div class="border rounded p-3 mb-4">
+                        <h6 class="text-primary fw-semibold mb-3">Student Information</h6>
+                        @php
+                            $middleInitial = $enrollment->middle_name
+                                ? strtoupper(substr($enrollment->middle_name, 0, 1)) . '.'
+                                : '';
+                            $formattedName = "{$enrollment->last_name}, {$enrollment->first_name} {$middleInitial}";
+                        @endphp
+                        <div class="mb-2">
+                            <strong>Name:</strong>
+                            <span id="studentName{{ $enrollment->id }}">{{ $formattedName }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Semester:</strong>
+                            <span>{{ $formattedSem }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Initial Payment:</strong>
+                            ₱<span id="initialPayment{{ $enrollment->id }}">{{ number_format($enrollment->initial_payment, 2) }}</span>
+                        </div>
+                    </div>
 
-                                                                            <div class="mb-3">
-                                                                                <label for="or_number{{ $enrollment->id }}"
-                                                                                    class="form-label">OR Number</label>
-                                                                                <input type="text" name="or_number"
-                                                                                    class="form-control"
-                                                                                    id="or_number{{ $enrollment->id }}"
-                                                                                    placeholder="Enter OR Number" required>
-                                                                            </div>
+                    <!-- Confirmation Input Section -->
+                    <div class="border rounded p-3 mb-4">
+                        <h6 class="text-success fw-semibold mb-3">Confirmation Details</h6>
+                        <div class="mb-3">
+                            <label for="or_number{{ $enrollment->id }}" class="form-label">OR Number</label>
+                            <input type="text" name="or_number" class="form-control" id="or_number{{ $enrollment->id }}"
+                                placeholder="Enter OR Number" required>
+                        </div>
 
-                                                                            <div class="mb-3">
-                                                                                <label for="remarks{{ $enrollment->id }}"
-                                                                                    class="form-label">Remarks</label>
-                                                                                <input type="text" name="remarks"
-                                                                                    class="form-control"
-                                                                                    id="remarks{{ $enrollment->id }}"
-                                                                                    placeholder="Enter any remarks">
-                                                                            </div>
+                        <div class="mb-3">
+                            <label for="remarks{{ $enrollment->id }}" class="form-label">Remarks</label>
+                            <textarea name="remarks" class="form-control" id="remarks{{ $enrollment->id }}"
+                                rows="2" placeholder="Enter any remarks"></textarea>
+                        </div>
+                    </div>
+                </div>
 
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="submit"
-                                                                                class="btn btn-success">Submit &
-                                                                                Confirm</button>
-                                                                            <button type="button" class="btn btn-secondary"
-                                                                                data-bs-dismiss="modal">Cancel</button>
-                                                                        </div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                <div class="modal-footer bg-light">
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold">Submit & Confirm</button>
+                    <button type="button" class="btn btn-secondary w-100 py-2 mt-2" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
                                                         <script>
                                                             function handleSubmitAndPrint(event, enrollmentId) {
