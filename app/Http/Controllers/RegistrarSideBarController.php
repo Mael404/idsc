@@ -9,6 +9,7 @@ use App\Models\RefRegion;
 use App\Models\Scholarship;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RegistrarSideBarController extends Controller
 {
@@ -177,7 +178,7 @@ class RegistrarSideBarController extends Controller
     public function reEnrollRegular()
     {
         // Fetch admissions data with enrollment_type = 'old'
-        $enrollments = $this->getEnrollmentsForActiveSchoolYear()->where('enrollment_type', 'old');
+        $admissions = $this->getEnrollmentsForActiveSchoolYear()->where('enrollment_type', 'old');
 
         // Fetch course mappings
         $courseMappings = $this->getUniqueSortedCourseMappings();
@@ -197,7 +198,7 @@ class RegistrarSideBarController extends Controller
 
         // Pass all data to view
         return view('registrar.enrollment.re_enroll_regular', compact(
-            'enrollments',
+            'admissions',
             'courseMappings',
             'allCourses',
             'scholarships',
@@ -247,47 +248,59 @@ class RegistrarSideBarController extends Controller
     {
         return view('registrar.archive.disposal_log');
     }
-   public function editStudent($student_id)
+ public function editStudent($student_id)
 {
     // Get the currently active school year and semester
     $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
-    
+
     if (!$activeSchoolYear) {
+        Log::error('No active school year found');
         abort(404, 'No active school year found');
     }
 
     $currentSchoolYear = $activeSchoolYear->name;
     $currentSemester = $activeSchoolYear->semester;
 
-    // Get admission with scholarship relationship (filtered by current SY/semester)
+    // Fetch ANY admission record (ignore school_year/semester)
     $admission = Admission::with('scholarship')
         ->where('student_id', $student_id)
-        ->where('school_year', $currentSchoolYear)
-        ->where('semester', $currentSemester)
-        ->firstOrFail();
+        ->latest() // Optional: Get the most recent admission
+        ->first();
 
-    $scholarships = Scholarship::all();
+    if (!$admission) {
+        Log::warning('No admission record found for student', ['student_id' => $student_id]);
+        abort(404, 'Student has no admission record.');
+    }
 
-    // Get the latest billing record for this student matching current SY and semester
+    // For other tables (billings, etc.), enforce current SY/semester
     $currentTuitionFee = 0;
     $billing = Billing::where('student_id', $student_id)
         ->where('school_year', $currentSchoolYear)
         ->where('semester', $currentSemester)
         ->latest()
         ->first();
-    
+
     if ($billing) {
         $currentTuitionFee = $billing->tuition_fee;
+        Log::debug('Billing record found', [
+            'billing_id' => $billing->id,
+            'tuition_fee' => $billing->tuition_fee
+        ]);
+    } else {
+        Log::debug('No billing record found for current SY/semester', [
+            'student_id' => $student_id
+        ]);
     }
 
-    // Get all course mappings with relationships (without school year/semester filter)
+    // Continue with the rest of your logic (scholarships, course mappings, etc.)
+    $scholarships = Scholarship::all();
+
     $courseMappings = ProgramCourseMapping::with(['program', 'yearLevel', 'semester'])
         ->get()
         ->groupBy(function ($item) {
             return $item->program_id . '-' . $item->year_level_id . '-' . $item->semester_id . '-' . $item->effective_sy;
         });
 
-    // Get all regions for the dropdown
     $regions = RefRegion::all();
 
     return view('registrar.enrollment.edit-students', compact(
@@ -300,4 +313,5 @@ class RegistrarSideBarController extends Controller
         'currentSemester'
     ));
 }
+
 }

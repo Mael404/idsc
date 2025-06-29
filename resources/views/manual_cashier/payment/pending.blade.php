@@ -78,7 +78,7 @@
                                                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                                                 <div class="modal-content shadow-lg rounded-3">
                                                                     <form method="POST"
-                                                                        action="{{ route('cashier.confirm', $enrollment->id) }}"
+                                                                        action="{{ route('manualcashier.confirm', $enrollment->id) }}"
                                                                         onsubmit="return handleSubmitAndPrint(event, {{ $enrollment->id }})">
                                                                         @csrf
                                                                         <div class="modal-header bg-primary text-white">

@@ -70,7 +70,7 @@
                                                             <i class="fas fa-check"></i>
                                                         </button>
 
-                                                        <!-- Summary Modal -->
+                                                        <!-- Sumsmary Modal -->
                                                     <div class="modal fade" id="summaryModal{{ $enrollment->id }}" tabindex="-1"
     aria-labelledby="summaryModalLabel{{ $enrollment->id }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">

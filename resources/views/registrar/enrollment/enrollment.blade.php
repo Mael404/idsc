@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
-                                        <!-- Step 2: Parents Info -->
+                                        <!-- Step 2s: Parents Info -->
                                         <div class="tab-pane fade" id="step2" role="tabpanel"
                                             aria-labelledby="step2-tab">
                                             <div class="alert alert-info mb-3">
@@ -414,6 +414,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="mt-3" id="irregularTuitionDisplay" style="display: none;">
     <p>Total Units: <span id="total_units_display">0</span></p>
     <p>Total Tuition Fee: ₱<span id="tuition_fee_display">0.00</span></p>
+    <!-- Add this hidden input -->
+
 </div>
 
         <!-- Common Fields -->
@@ -645,35 +647,38 @@ $(document).ready(function() {
     });
 
     // 👇 Tuition recalculation function
-    function recalculateIrregularTuition() {
-        const selectedCourses = [...document.querySelectorAll('.selected-course')];
-        const courseIds = selectedCourses.map(el => el.dataset.id);
+   function recalculateIrregularTuition() {
+    const selectedCourses = [...document.querySelectorAll('.selected-course')];
+    const courseIds = selectedCourses.map(el => el.dataset.id);
 
-        if (courseIds.length === 0) {
-            document.getElementById('total_units_display').textContent = '0';
-            document.getElementById('tuition_fee_display').textContent = '0.00';
-            return;
-        }
-
-        fetch('{{ route("calculate.irregular.tuition") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                course_ids: courseIds
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('total_units_display').textContent = data.total_units;
-            document.getElementById('tuition_fee_display').textContent = data.tuition_fee.toFixed(2);
-        })
-        .catch(error => {
-            console.error('Error calculating tuition:', error);
-        });
+    if (courseIds.length === 0) {
+        document.getElementById('total_units_display').textContent = '0';
+        document.getElementById('tuition_fee_display').textContent = '0.00';
+        document.getElementById('tuition_fee_input').value = 0; // Update single input
+        return;
     }
+
+    fetch('{{ route("calculate.irregular.tuition") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            course_ids: courseIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('total_units_display').textContent = data.total_units;
+        document.getElementById('tuition_fee_display').textContent = data.tuition_fee.toFixed(2);
+        // Update the single tuition fee input
+        document.getElementById('tuition_fee_input').value = data.tuition_fee;
+    })
+    .catch(error => {
+        console.error('Error calculating tuition:', error);
+    });
+}
 });
 </script>
 
@@ -1232,36 +1237,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<script>
-    document.getElementById('course_mapping_id').addEventListener('change', function() {
-        const mappingId = this.value;
-
-        if (!mappingId) {
-            document.getElementById('tuition_fee').value = '';
-            return;
-        }
-
-        fetch('{{ route('calculate.tuition.fee') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    course_mapping_id: mappingId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.tuition_fee !== undefined) {
-                    document.getElementById('tuition_fee').value = data.tuition_fee;
-                } else {
-                    document.getElementById('tuition_fee').value = '';
-                    console.error(data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching tuition fee:', error);
-            });
-    });
-</script>

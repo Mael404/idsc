@@ -68,7 +68,7 @@ Route::get('/cities/{provinceCode}', [LocationController::class, 'getCities']);
 Route::get('/barangays/{citymunCode}', [LocationController::class, 'getBarangays']);
 
 
-// In web.php, define this if your form uses 're_enroll_regular.store'
+// form uses 're_enroll_regular.store'
 Route::post('/re-enroll-regular', [ReEnrollRegularController::class, 'submitForm'])
     ->name('re_enroll_regular.store');
 
@@ -81,11 +81,10 @@ Route::get('/admissions/{student_id}/edit', [RegistrarSideBarController::class, 
     ->name('admissions.edit');
 Route::put('/admissions/{student_id}', [AdmissionController::class, 'update'])->name('admissions.update');
 
-Route::post('/admissions/transferee', [AdmissionController::class, 'storeTransferee'])->name('admissions.store.transferee');
-Route::post('/admissions/irregular', [AdmissionController::class, 'storeIrregular'])->name('admissions.store.irregular');
+Route::post('/admissions/transferee', [AdmissionController::class, 'storesTransferee'])->name('admissions.store.transferee');
+Route::post('/admissions/irregular', [AdmissionIrregularController::class, 'storeIrregular'])->name('admissions.store.irregular');
 Route::get('/courses/search', [AdmissionController::class, 'search'])->name('courses.search');
 
-Route::post('/admissions/store/irregular', [AdmissionIrregularController::class, 'store'])
-    ->name('admissions.store.irregular');
+
 
     Route::post('/calculate-irregular-tuition', [AdmissionIrregularController::class, 'calculateIrregularTuition'])->name('calculate.irregular.tuition');
