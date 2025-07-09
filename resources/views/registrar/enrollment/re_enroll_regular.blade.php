@@ -151,38 +151,38 @@
                                 <div class="col-md-6">
                                     <label for="course_mapping_id">Course Mapping <span
                                             class="text-danger">*</span></label>
-                                    <select id="course_mapping_id" name="course_mapping_id"
-                                        class="form-control" required>
-                                        <option value="" selected disabled>Choose Mapping</option>
-                                        @foreach ($courseMappings as $mapping)
-                                            @if ($mapping->program && $mapping->yearLevel)
-                                                <option value="{{ $mapping->id }}"
-                                                    data-program="{{ $mapping->program_id }}"
-                                                    data-year="{{ $mapping->year_level_id }}"
-                                                    data-semester="{{ $mapping->semester_id }}"
-                                                    data-sy="{{ $mapping->effective_sy }}">
-                                                    [ID: {{ $mapping->id }}] {{ $mapping->program->name }}
-                                                    -
-                                                    {{ $mapping->yearLevel->name }}
-                                                    ({{ $mapping->effective_sy }})
-                                                </option>
-                                            @endif
-                                        @endforeach
-                                    </select>
+                                   <select id="course_mapping_id" name="course_mapping_id"
+    class="form-control" required>
+    <option value="" selected disabled>Choose Mapping</option>
+    @foreach ($courseMappings as $mapping)
+        @if ($mapping->program && $mapping->yearLevel)
+            <option value="{{ $mapping->id }}"
+                data-program="{{ $mapping->program_id }}"
+                data-year="{{ $mapping->year_level_id }}"
+                data-semester="{{ $mapping->semester_id }}"
+                data-sy="{{ $mapping->effective_sy }}">
+                {{ $mapping->program->name }} -
+                {{ $mapping->yearLevel->name }}
+                ({{ $mapping->effective_sy }})
+            </option>
+        @endif
+    @endforeach
+</select>
 
-                                    <div class="mt-2">
-                                        <small class="text-muted">Selected Mapping ID: <span
-                                                id="displayMappingId">-</span></small>
-                                    </div>
 
-                                    <div id="totalUnitsContainer" class="alert alert-info mt-3"
-                                        style="display:none;">
-                                        Total Units: <strong id="totalUnitsValue"></strong>
-                                    </div>
-                                    <div id="tuitionFeeContainer" class="alert alert-success mt-2"
-                                        style="display:none;">
-                                        Tuition Fee: <strong id="tuitionFeeValue"></strong>
-                                    </div>
+                                   <div class="mt-2" style="display: none;">
+    <small class="text-muted">Selected Mapping ID: <span id="displayMappingId">-</span></small>
+</div>
+
+
+                                   <div id="totalUnitsContainer" class="alert alert-info mt-3 d-none" style="display: none;">
+    Total Units: <strong id="totalUnitsValue"></strong>
+</div>
+
+<div id="tuitionFeeContainer" class="alert alert-success mt-2 d-none" style="display: none;">
+    Tuition Fee: <strong id="tuitionFeeValue"></strong>
+</div>
+
                                     <div id="feeCalculationContainer" class="alert alert-secondary mt-2"
                                         style="display:none;">
                                         <small>Calculation: <span
@@ -206,7 +206,7 @@
                                             @foreach ($scholarships as $scholarship)
                                                 <option value="{{ $scholarship->id }}">
                                                     {{ $scholarship->name }}
-                                                    ({{ $scholarship->discount_percentage }}% Discount)
+                                                    ({{ $scholarship->discount }}% Discount)
                                                 </option>
                                             @endforeach
                                             <option value="none">None</option>

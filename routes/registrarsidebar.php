@@ -68,7 +68,7 @@ Route::get('/cities/{provinceCode}', [LocationController::class, 'getCities']);
 Route::get('/barangays/{citymunCode}', [LocationController::class, 'getBarangays']);
 
 
-// form uses 're_enroll_regular.store'
+
 Route::post('/re-enroll-regular', [ReEnrollRegularController::class, 'submitForm'])
     ->name('re_enroll_regular.store');
 

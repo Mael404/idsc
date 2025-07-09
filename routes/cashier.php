@@ -11,6 +11,7 @@ use App\Http\Controllers\CashierSideBarController;
 use App\Http\Controllers\ManualCashierController;
 use App\Http\Controllers\ReportGenerationController;
 use App\Http\Controllers\StudentSearchController;
+use Illuminate\Http\Request;
 
 Route::prefix('cashier')->name('cashier.')->group(function () {
     Route::get('/dashboard', [CashierSideBarController::class, 'dashboard'])->name('dashboard');
@@ -48,7 +49,15 @@ Route::get('/cashier/payment/other', [CashierSideBarController::class, 'otherPay
 Route::post('/payments/input', [PaymentController::class, 'input'])->name('payment.input');
 Route::post('/payments/manualinput', [PaymentController::class, 'manualinput'])->name('manualpayment.input');
 Route::get('/cashier/reports/other', [CashierSideBarController::class, 'reportOtherPayments'])->name('cashier.reports.other');
-
+Route::get('/check-or-number', function(Request $request) {
+    $exists = \App\Models\Payment::where('or_number', $request->or_number)->exists();
+    return response()->json(['exists' => $exists]);
+});
+Route::get('/check-or-number', function (Request $request) {
+    $orNumber = $request->query('or_number');
+    $exists = \App\Models\Payment::where('or_number', $orNumber)->exists();
+    return response()->json(['exists' => $exists]);
+});
 Route::post('/payments/void', [PaymentController::class, 'voidPayment'])->name('payments.void');
 
 Route::post('/payments/void-other', [PaymentController::class, 'voidOtherPayment'])

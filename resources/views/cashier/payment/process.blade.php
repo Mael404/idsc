@@ -97,7 +97,7 @@
                     <input type="hidden" id="schoolYearInput" name="school_year">
                     <input type="hidden" id="semesterInput" name="semester">
 
-                    <!-- Student Search Section -->
+                    <!-- Student Seasrch Section -->
                     <div class="border rounded p-3 mb-4">
                         <h6 class="text-primary fw-semibold mb-3">Student Details</h6>
                         <div class="mb-3 position-relative">
@@ -204,63 +204,84 @@
 
 
                 <script>
-                    function handlePrintAndSubmit(event) {
-                        event.preventDefault();
+                  function handlePrintAndSubmit(event) {
+    event.preventDefault();
 
-                        const studentName = document.getElementById('studentName').value.trim();
-                        const amount = parseFloat(document.getElementById('amount').value);
-                        const balanceDue = parseFloat(document.getElementById('balanceDue').value);
+    // Get form values
+    const studentName = document.getElementById('studentName').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    const balanceDue = parseFloat(document.getElementById('balanceDue').value);
+    const orNumber = document.getElementById('orNumber').value.trim();
 
-                        if (studentName === "") {
-                            showErrorMessage('Student name cannot be blank.');
-                            return false;
-                        }
+    // Clear any existing error messages
+    const existingError = document.getElementById('js-error-alert');
+    if (existingError) existingError.remove();
 
-                        if (isNaN(amount) || amount <= 0) {
-                            showErrorMessage('The payment amount must be greater than 0.');
-                            return false;
-                        }
+    // Basic validations
+    if (studentName === "") {
+        showErrorMessage('Student name cannot be blank.');
+        return false;
+    }
 
-                        if (amount > balanceDue) {
-                            showErrorMessage('The payment amount cannot be greater than the current balance due.');
-                            return false;
-                        }
+    if (isNaN(amount) || amount <= 0) {
+        showErrorMessage('The payment amount must be greater than 0.');
+        return false;
+    }
 
-                        printReceipt();
-                        setTimeout(() => {
-                            event.target.submit();
-                        }, 800);
+    if (amount > balanceDue) {
+        showErrorMessage('The payment amount cannot be greater than the current balance due.');
+        return false;
+    }
 
-                        return false;
-                    }
+    if (orNumber === "") {
+        showErrorMessage('OR Number cannot be blank.');
+        return false;
+    }
 
+    // Check for duplicate OR number
+    fetch(`/check-or-number?or_number=${encodeURIComponent(orNumber)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                showErrorMessage('This OR Number is already in use. Please enter a different number.');
+            } else {
+                printReceipt();
+                setTimeout(() => event.target.submit(), 800);
+            }
+        })
+        .catch(error => {
+            console.error('Error checking OR number:', error);
+            showErrorMessage('Error verifying OR number. Please try again.');
+        });
 
+    return false;
+}
 
-                    function showErrorMessage(message) {
-                        const existing = document.getElementById('js-error-alert');
-                        if (existing) existing.remove();
+function showErrorMessage(message) {
+    const existing = document.getElementById('js-error-alert');
+    if (existing) existing.remove();
 
-                        const alert = document.createElement('div');
-                        alert.className = 'popup-alert fadeDownIn shadow rounded-lg p-4';
-                        alert.id = 'js-error-alert';
-                        alert.style.backgroundColor = '#dc3545';
-                        alert.style.color = '#fff';
-                        alert.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-semibold fs-6">
-                    ${message}
-                    <i class="fas fa-exclamation-circle ms-1"></i>
-                </span>
-            </div>
-        `;
-                        document.body.appendChild(alert);
+    const alert = document.createElement('div');
+    alert.className = 'popup-alert fadeDownIn shadow rounded-lg p-4';
+    alert.id = 'js-error-alert';
+    alert.style.backgroundColor = '#dc3545';
+    alert.style.color = '#fff';
+    alert.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-semibold fs-6">
+                ${message}
+                <i class="fas fa-exclamation-circle ms-1"></i>
+            </span>
+        </div>
+    `;
+    document.body.appendChild(alert);
 
-                        setTimeout(() => {
-                            alert.classList.remove('fadeDownIn');
-                            alert.classList.add('fadeOut');
-                            setTimeout(() => alert.remove(), 400);
-                        }, 3000);
-                    }
+    setTimeout(() => {
+        alert.classList.remove('fadeDownIn');
+        alert.classList.add('fadeOut');
+        setTimeout(() => alert.remove(), 400);
+    }, 3000);
+}
 
                     function printReceipt() {
                         function getDateInWords(date) {

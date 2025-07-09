@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Admission;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StudentSearchController extends Controller
 {
@@ -21,7 +22,7 @@ class StudentSearchController extends Controller
         return response()->json([]);
     }
 
-    // Get matching students (no filtering by billing yet)
+    // Get matching students
     $students = Admission::where(function ($q) use ($query) {
             $q->where('student_id', 'like', "%$query%")
               ->orWhere('first_name', 'like', "%$query%")
@@ -31,18 +32,25 @@ class StudentSearchController extends Controller
             $q->where('school_year', $activeSY->name)
               ->where('semester', $activeSY->semester);
         }])
-        ->get()
-        ->map(function ($student) {
-            return [
-                'student_id'  => $student->student_id,
-                'full_name'   => $student->getFullNameAttribute(),
-                'balance_due' => optional($student->billing)->balance_due ?? 0,
-                'school_year' => optional($student->billing)->school_year ?? '',
-                'semester'    => optional($student->billing)->semester ?? '',
-            ];
-        });
+        ->get();
 
-    return response()->json($students);
+    // Log the raw student data
+    Log::info('Search triggered for query: '.$query, [
+        'students' => $students->toArray()
+    ]);
+
+    // Map simplified data for the response
+    $result = $students->map(function ($student) {
+        return [
+            'student_id'  => $student->student_id,
+            'full_name'   => $student->getFullNameAttribute(),
+            'balance_due' => optional($student->billing)->balance_due ?? 0,
+            'school_year' => optional($student->billing)->school_year ?? '',
+            'semester'    => optional($student->billing)->semester ?? '',
+        ];
+    });
+
+    return response()->json($result);
 }
 
 

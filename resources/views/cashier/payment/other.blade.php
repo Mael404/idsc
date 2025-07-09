@@ -157,16 +157,20 @@
 
                         <!-- Hidden amount field -->
                         <input type="hidden" class="form-control" id="amount" name="payment_amount" required>
+<div class="row g-3">
+    <div class="col-md-6">
+        <label for="orNumber" class="form-label">OR Number</label>
+        <input type="text" 
+               class="form-control @error('or_number') is-invalid @enderror" 
+               id="orNumber" 
+               name="or_number" 
+               placeholder="Enter OR Number" 
+               required>
+    </div>
+</div>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="orNumber" class="form-label">OR Number</label>
-                                <input type="text" class="form-control @error('or_number') is-invalid @enderror" id="orNumber" name="or_number" placeholder="Enter OR Number" required>
-                                @error('or_number')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
+
+
 
                         <div class="mt-3">
                             <label for="remarks" class="form-label">Remarks</label>

@@ -90,12 +90,32 @@ public function calculateTuitionFee(Request $request)
         // Get all course IDs from these mappings
         $courseIds = $mappings->pluck('course_id')->unique();
 
-        // Calculate total units
-        $totalUnits = Course::whereIn('id', $courseIds)->sum('units');
+        // Fetch course records
+        $courses = Course::whereIn('id', $courseIds)->get();
+
+        $totalUnits = 0;
+
+        foreach ($courses as $course) {
+            $rawName = strtolower($course->code . ' ' . $course->name . ' ' . $course->description);
+            $rawName = preg_replace('/- ?[a-z0-9 &()]+/', '', $rawName);
+            
+            $isNSTP = str_contains($rawName, 'national service training program') ||
+                      str_contains($rawName, 'civic welfare training service') ||
+                      str_contains($rawName, 'lts/cwts/rotc') ||
+                      str_contains($rawName, 'lts/rotc');
+
+            $units = floatval($course->units);
+
+            if ($isNSTP) {
+                $totalUnits += ($units / 2);  // divide NSTP units
+            } else {
+                $totalUnits += $units;
+            }
+        }
 
         // Get current active school year's unit price
         $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
-        
+
         if (!$activeSchoolYear) {
             return response()->json([
                 'success' => false,
@@ -121,16 +141,13 @@ public function calculateTuitionFee(Request $request)
     }
 }
 
-public function submitForm(Request $request)
+//store
+public function submitForm(Request $request) 
 {
-  
-
-  
     $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
     if (!$activeSchoolYear) {
         return redirect()->back()->with('error', 'No active school year found!');
     }
-
 
     $existingEnrollment = Enrollment::where('student_id', $request->student_id)
         ->where('school_year', $activeSchoolYear->name)
@@ -141,6 +158,13 @@ public function submitForm(Request $request)
         return redirect()->back()->with('error', 'Student is already enrolled in the active school year and semester.');
     }
 
+    // 🔥 ADD THIS: Insert/Update course_mapping_id in admissions
+    $admission = Admission::where('student_id', $request->student_id)->first();
+    if ($admission) {
+        $admission->update([
+            'course_mapping_id' => $request->course_mapping_id,
+        ]);
+    }
 
     $enrollment = Enrollment::create([
         'student_id' => $request->student_id,
@@ -154,9 +178,7 @@ public function submitForm(Request $request)
         'scholarship_id' => $request->scholarship !== 'none' ? $request->scholarship : null,
     ]);
 
-
     $mapping = ProgramCourseMapping::findOrFail($request->course_mapping_id);
-    
     $relatedCourseIds = ProgramCourseMapping::where('program_id', $mapping->program_id)
         ->where('year_level_id', $mapping->year_level_id)
         ->where('semester_id', $mapping->semester_id)
@@ -169,52 +191,59 @@ public function submitForm(Request $request)
     $courses = Course::whereIn('id', $relatedCourseIds)->get();
     $totalUnits = $courses->sum('units');
 
-    // 3. Calculate tuition fee with scholarship discount
+    // Tuition fee base
     $unitPrice = $activeSchoolYear->default_unit_price;
-    $baseTuitionFee = $totalUnits * $unitPrice;
+    $tuitionFee = $totalUnits * $unitPrice;
+
+    // Default values
     $discountValue = 0;
-    $tuitionFeeDiscount = $baseTuitionFee;
+    $tuitionFeeDiscount = $tuitionFee;
+    $miscFee = 0;
+    $balanceDue = null;
     $scholarshipId = null;
 
     if ($request->scholarship !== 'none' && $request->scholarship) {
         $scholarship = Scholarship::find($request->scholarship);
         if ($scholarship) {
             $scholarshipId = $scholarship->id;
-            if (stripos($scholarship->name, 'Full Scholarship') !== false) {
-                $discountValue = $baseTuitionFee;
+
+            if (stripos($scholarship->name, 'Top Notcher') !== false) {
+                $discountValue = $tuitionFee;
                 $tuitionFeeDiscount = 0;
-            } elseif ($scholarship->discount_percentage) {
-                $discountValue = $baseTuitionFee * ($scholarship->discount_percentage / 100);
-                $tuitionFeeDiscount = $baseTuitionFee - $discountValue;
+                $miscFee = 0;
+                $balanceDue = 0;
+            } elseif ($scholarship->discount) {
+                $discountValue = $tuitionFee * ($scholarship->discount / 100);
+                $tuitionFeeDiscount = $tuitionFee - $discountValue;
             }
         }
     }
 
-    // 4. Calculate misc fees
-    $miscFee = MiscFee::where('program_course_mapping_id', $request->course_mapping_id)
-                      ->sum('amount');
+    if ($balanceDue === null) {
+        $miscFee = MiscFee::where('program_course_mapping_id', $request->course_mapping_id)->sum('amount');
+        $totalAssessment = $tuitionFeeDiscount + $miscFee;
+        $balanceDue = $totalAssessment;
+    } else {
+        $totalAssessment = $tuitionFeeDiscount + $miscFee;
+    }
 
-    $totalAssessment = $tuitionFeeDiscount + $miscFee;
-    $balanceDue = $totalAssessment; // Initial balance is full amount
-
-    // 5. Create Billing Record
-    $billing = Billing::create([
+    Billing::create([
         'student_id' => $request->student_id,
         'enrollment_id' => $enrollment->id,
         'school_year' => $activeSchoolYear->name,
         'semester' => $activeSchoolYear->semester,
-        'tuition_fee' => $baseTuitionFee,
+        'tuition_fee' => $tuitionFee,
         'discount' => $discountValue,
         'tuition_fee_discount' => $tuitionFeeDiscount,
         'misc_fee' => $miscFee,
         'total_assessment' => $totalAssessment,
-        'initial_payment' => 0, // Can be updated when payment is made
+        'initial_payment' => 0,
         'balance_due' => $balanceDue,
         'is_full_payment' => false,
         'scholarship_id' => $scholarshipId,
     ]);
+    
 
-    // 6. Enroll student in all courses for this mapping
     foreach ($courses as $course) {
         StudentCourse::create([
             'student_id' => $request->student_id,
@@ -229,6 +258,8 @@ public function submitForm(Request $request)
 
     return redirect()->back()->with('success', 'Student enrolled successfully! Billing and course records created.');
 }
+
+
 
 
 public function reprintCor($studentId)

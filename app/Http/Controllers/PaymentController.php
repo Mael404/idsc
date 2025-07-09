@@ -10,7 +10,7 @@ use App\Models\SchoolYear;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Validation\ValidationException;
 class PaymentController extends Controller
 {
     public function voidOtherPayment(Request $request)
@@ -233,8 +233,9 @@ class PaymentController extends Controller
         return redirect()->back()->with('success', 'Manual payment processed successfully!');
     }
 
-    public function input(Request $request)
-    {
+   public function input(Request $request)
+{
+    try {
         $request->validate([
             'student_id' => 'required|exists:billings,student_id',
             'payment_amount' => 'required|numeric|min:0.01',
@@ -242,35 +243,48 @@ class PaymentController extends Controller
             'remarks' => 'nullable|string',
             'payment_type' => 'nullable|string', // Optional since it defaults
         ]);
-
-        $studentId = $request->student_id;
-        $paymentAmount = $request->payment_amount;
-        $orNumber = $request->or_number;
-        $remarks = $request->remarks;
-        $paymentType = $request->payment_type ?? 'others';
-
-        // Fetch the active school year
-        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
-
-        if (!$activeSchoolYear) {
-            return redirect()->back()->withErrors(['error' => 'No active school year found.']);
+    } catch (ValidationException $e) {
+        // If OR number is duplicate, show popup
+        if ($e->validator->errors()->has('or_number')) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->validator->errors()->first('or_number'));
         }
 
-        // Log the payment (no billing update logic here)
-        Payment::create([
-            'student_id'    => $studentId,
-            'school_year'   => $activeSchoolYear->name,
-            'semester'      => $activeSchoolYear->semester,
-            'amount'        => $paymentAmount,
-            'or_number'     => $orNumber,
-            'remarks'       => $remarks,
-            'payment_type'  => $paymentType,
-            'payment_date'  => now(),
-            'processed_by'  => Auth::id(), // Current user ID
-        ]);
-
-        return redirect()->back()->with('success', 'Payment recorded successfully!');
+        // For other validation errors, fallback
+        return redirect()->back()
+            ->withInput()
+            ->withErrors($e->errors());
     }
+
+    $studentId = $request->student_id;
+    $paymentAmount = $request->payment_amount;
+    $orNumber = $request->or_number;
+    $remarks = $request->remarks;
+    $paymentType = $request->payment_type ?? 'others';
+
+    // Fetch the active school year
+    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+
+    if (!$activeSchoolYear) {
+        return redirect()->back()->with('error', 'No active school year found.');
+    }
+
+    // Log the payment
+    Payment::create([
+        'student_id'    => $studentId,
+        'school_year'   => $activeSchoolYear->name,
+        'semester'      => $activeSchoolYear->semester,
+        'amount'        => $paymentAmount,
+        'or_number'     => $orNumber,
+        'remarks'       => $remarks,
+        'payment_type'  => $paymentType,
+        'payment_date'  => now(),
+        'processed_by'  => Auth::id(),
+    ]);
+
+    return redirect()->back()->with('success', 'Payment recorded successfully!');
+}
     public function manualinput(Request $request)
     {
         $request->validate([
