@@ -14,7 +14,7 @@
     <!-- Divider -->
     <hr class="sidebar-divider my-1">
 
-    <!-- Nav Item - Dashboard -->
+    <!-- Nav Item - Dsashboard -->
     <li class="nav-item {{ request()->is('vpadmin_dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="{{ url('vpadmin_dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -41,12 +41,15 @@
             aria-labelledby="headingFees" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <a class="collapse-item {{ request()->is('fees/edit-tuition') ? 'active' : '' }}"
-                    href="{{ url('fees/edit-tuition') }}">Edit Tuition Rates</a>
+                    href="{{ url('fees/edit-tuition') }}">Manage Scholarship Fees</a>
                 <a class="collapse-item {{ request()->is('fees/misc-fees') ? 'active' : '' }}"
                     href="{{ url('fees/misc-fees') }}">Misc. Fees Manager</a>
+                <a class="collapse-item {{ request()->is('fees/other-fees') ? 'active' : '' }}"
+                    href="{{ url('fees/other-fees') }}">Manage Other Fees</a>
             </div>
         </div>
     </li>
+
 
     <!-- Nav Item - Academic -->
     <li class="nav-item {{ request()->is('academic/*') ? 'active' : '' }}">
