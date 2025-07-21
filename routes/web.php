@@ -1,46 +1,38 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VPAdminSideBarController;
+use Illuminate\Support\Facades\Auth;
 
-// Dashboard Routes for VP ADMIN
 Route::get('/', function () {
-    return view('vp_admin.vpadmin_db');
+    return view('auth.login');
 });
 
-Route::get('/vpadmin_dashboard', function () {
-    return view('vp_admin.vpadmin_db');
+
+Route::get('/dashboard', function () {
+    // Force logout and redirect with message
+    Auth::logout();
+    session()->invalidate();
+    session()->regenerateToken();
+
+    return redirect()->route('login')->with('message', 'Session expired or invalid role. Please log in again.');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/blank_page', function () {
-    return view('vp_admin.vpadmin_blank');
-});
 
-// Fees Routes
-Route::prefix('fees')->group(function () {
-    Route::get('/edit-tuition', function () {
-        return view('vp_admin.fees.edit_tuition');
-    });
-    Route::get('/misc-fees', function () {
-        return view('vp_admin.fees.misc_fees');
-    });
-});
 
-// Academic Routes
-Route::prefix('academic')->group(function () {
-    Route::get('/term-configuration', function () {
-        return view('vp_admin.academic.term_configuration');
-    });
-});
-
-// User Management Routes
-Route::prefix('user-management')->group(function () {
-    Route::get('/add-new', function () {
-        return view('vp_admin.user_management.add_new');
-    });
-    Route::get('/manage', function () {
-        return view('vp_admin.user_management.manage');
-    });
-    Route::get('/activate', function () {
-        return view('vp_admin.user_management.activate');
-    });
-});
+require __DIR__ . '/auth.php';
+require __DIR__ . '/vpadminsidebar.php';
+require __DIR__ . '/registrarsidebar.php';
+require __DIR__ . '/vpacademicssidebar.php';
+require __DIR__ . '/cashier.php';
+require __DIR__ . '/accounting.php';
+require __DIR__ . '/president.php';
+require __DIR__ . '/all.php';
