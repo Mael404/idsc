@@ -17,7 +17,7 @@
     <li class="nav-item {{ request()->is('cashier/dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('cashier.dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span>
+            <span>Queueing</span>
         </a>
     </li>
 
@@ -36,17 +36,33 @@
         </a>
         <div id="collapsePayments" class="collapse {{ request()->is('cashier/payment/*') ? 'show' : '' }}">
             <div class="bg-white py-2 collapse-inner rounded">
-                <a class="collapse-item {{ request()->routeIs('cashier.payment.process') ? 'active' : '' }}"
-                    href="{{ route('cashier.payment.process') }}">
-                    New Payments
-                </a>
                 <a class="collapse-item {{ request()->routeIs('cashier.payment.pending') ? 'active' : '' }}"
                     href="{{ route('cashier.payment.pending') }}">
-                    Pending Enrollments
+                    Pending College
+                </a>
+                <a class="collapse-item {{ request()->routeIs('cashier.payment.shspending') ? 'active' : '' }}"
+                    href="{{ route('cashier.payment.shspending') }}">
+                    Pending SHS
+                </a>
+                <a class="collapse-item {{ request()->routeIs('cashier.payment.process') ? 'active' : '' }}"
+                    href="{{ route('cashier.payment.process') }}">
+                    Tuition fee college
+                </a>
+                <a class="collapse-item {{ request()->routeIs('cashier.payment.shs_pyment') ? 'active' : '' }}"
+                    href="{{ route('cashier.payment.shs_pyment') }}">
+                    Tuition fee SHS
                 </a>
                 <a class="collapse-item {{ request()->routeIs('cashier.payment.other') ? 'active' : '' }}"
                     href="{{ route('cashier.payment.other') }}">
                     Other Payments
+                </a>
+                <a class="collapse-item {{ request()->routeIs('cashier.payment.uniform') ? 'active' : '' }}"
+                    href="{{ route('cashier.payment.uniform') }}">
+                    Uniform Payments
+                </a>
+                <a class="collapse-item {{ request()->routeIs('cashier.payment.old') ? 'active' : '' }}"
+                    href="{{ route('cashier.payment.old') }}">
+                    Old Accounts
                 </a>
             </div>
 
@@ -75,16 +91,34 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Reports</h6>
 
-                {{-- Tuition Fee Payments --}}
+                {{-- College Tuition Fee Payments --}}
                 <a class="collapse-item {{ request()->routeIs('cashier.reports.index') ? 'active' : '' }}"
                     href="{{ route('cashier.reports.index') }}">
-                    Tuition Fee Payments
+                    College Tuition Fee Payments
+                </a>
+
+                {{-- SHS Tuition Fee Payments --}}
+                <a class="collapse-item {{ request()->routeIs('cashier.reports.shs') ? 'active' : '' }}"
+                    href="{{ route('cashier.reports.shs') }}">
+                    SHS Tuition Fee Payments
                 </a>
 
                 {{-- Other Payments --}}
                 <a class="collapse-item {{ request()->routeIs('cashier.reports.other') ? 'active' : '' }}"
                     href="{{ route('cashier.reports.other') }}">
                     Other Payments
+                </a>
+
+                {{-- Uniform Payments --}}
+                <a class="collapse-item {{ request()->routeIs('cashier.reports.uniform') ? 'active' : '' }}"
+                    href="{{ route('cashier.reports.uniform') }}">
+                    Uniform Payments
+                </a>
+
+                  {{-- Old Accounts Payments --}}
+                <a class="collapse-item {{ request()->routeIs('cashier.reports.old') ? 'active' : '' }}"
+                    href="{{ route('cashier.reports.old') }}">
+                    Old Accounts Payments
                 </a>
             </div>
         </div>

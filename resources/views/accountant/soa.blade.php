@@ -24,6 +24,7 @@
                             class="fas fa-download fa-sm text-white-50"></i> Download Report</a>
                 </div>
 
+                <!-- Admissions Table inside container -->
                 <div class="row justify-content-center mt-4">
                     <div class="col-md-12">
                         <div class="card shadow mb-4">
@@ -70,7 +71,6 @@
                                                             data-bs-toggle="modal" data-bs-target="#paymentDetailsModal">
                                                             <i class="fas fa-eye"></i>
                                                         </button>
-
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -82,83 +82,183 @@
                     </div>
                 </div>
 
+                <!-- Summary Table OUTSIDE of the row container -->
+                <div class="card shadow mb-4 mt-4">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center">
+                                <thead>
+                                    <tr>
+                                        <th>TOTAL UNITS</th>
+                                        <th>TOTAL TUITION FEES</th>
+                                        <th>TOTAL ENROLLED</th>
+                                        <th>TOTAL FULLY PAID</th>
+                                        <th>STOPPED</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <strong class="text-success">{{ $totalUnits }}</strong>
+                                        </td>
+
+                                        <td><strong class="text-success">{{ number_format($totalTuitionFees, 2) }}</strong>
+                                        </td>
+
+                                      <td><strong class="text-success">{{ $totalEnrolled }}</strong></td>
+
+                                        <td><strong class="text-success">{{ $totalFullyPaid }}</strong></td>
+
+                                        <td><strong class="text-success">0</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <table class="table table-bordered text-center mt-3">
+                                <thead>
+                                    <tr>
+                                        <th colspan="3" style="background-color: #e6d7fa;">ASSESSMENT OF FEES</th>
+                                        <th rowspan="2" style="background-color: #ffe0b2; vertical-align: middle;">
+                                            DIVIDED BY 4 EXAMS</th>
+                                        <th colspan="4" style="background-color: #fff3cd;">LESS PAYMENTS</th>
+                                        <th rowspan="2" style="background-color: #f0f8e2; vertical-align: middle;">TOTAL
+                                            BALANCE</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="background-color: #f0f8e2;">TOTAL</th>
+                                        <th style="background-color: #f0f8e2;">INITIAL PAYMENT</th>
+                                        <th style="background-color: #f0f8e2;">BALANCE</th>
+                                        <th style="background-color: #fffbe5;">PRELIM</th>
+                                        <th style="background-color: #fffbe5;">MIDTERM</th>
+                                        <th style="background-color: #fffbe5;">PRE-FINAL</th>
+                                        <th style="background-color: #fffbe5;">FINAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+        <td><strong>{{ number_format($assessmentTotal, 2) }}</strong></td>
+        <td><strong>{{ number_format($initialPayment, 2) }}</strong></td>
+        <td><strong>{{ number_format($balanceTotal, 2) }}</strong></td>
+        <td><strong>{{ number_format($dividedBy4, 2) }}</strong></td>
+        <td><strong>{{ number_format($prelim, 2) }}</strong></td>
+        <td><strong>{{ number_format($midterm, 2) }}</strong></td>
+        <td><strong>{{ number_format($preFinal, 2) }}</strong></td>
+        <td><strong>{{ number_format($final, 2) }}</strong></td>
+        <td><strong>{{ number_format($balanceTotal, 2) }}</strong></td>
+    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                <style>
+                    /* Additional CSS for perfect centsering */
+                    @media (min-width: 992px) {
+                        #paymentDetailsModal .modal-dialog {
+                            display: flex;
+                            align-items: center;
+                            min-height: calc(100% - 1rem);
+                        }
+                    }
+
+                    /* Ensures modal doesn't jump when content loads */
+                    .modal-content {
+                        transition: none;
+                    }
+                </style>
 
                 <div class="modal fade" id="paymentDetailsModal" tabindex="-1" aria-labelledby="paymentDetailsModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                        <div class="modal-content">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+                        style="max-width: 95vw; margin: auto;">
+                        <div class="modal-content" style="max-height: 90vh;">
                             <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title fs-5 fw-bold" id="paymentDetailsModalLabel">Student Account Summary
+                                <h5 class="modal-title fs-4 fw-bold" id="paymentDetailsModalLabel">Student Account Summary
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body p-2">
-                                <div class="table-responsive" style="max-height: 70vh;">
-                                    <table class="table table-bordered table-hover align-middle mb-0">
+                            <div class="modal-body p-3" style="overflow-y: auto;">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover align-middle mb-0"
+                                        style="font-size: 0.95rem;">
                                         <thead class="sticky-top bg-light">
                                             <tr>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">School Year</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 100px;">
+                                                    <span class="d-block">School Year</span>
                                                 </th>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">Semester</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 80px;">
+                                                    <span class="d-block">Semester</span>
                                                 </th>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">No. of Units</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 80px;">
+                                                    <span class="d-block">No. of Units</span>
                                                 </th>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">Tuition Fee</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 100px;">
+                                                    <span class="d-block">Tuition Fee</span>
                                                 </th>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">Discount</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 100px;">
+                                                    <span class="d-block">Discount</span>
                                                 </th>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">Total Tuition Fee</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 100px;">
+                                                    <span class="d-block">Total Tuition Fee</span>
                                                 </th>
                                                 <th colspan="5" class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Assessment of Fees</span>
+                                                    <span class="d-block">Assessment of Fees</span>
                                                 </th>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">4 Exams</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 80px;">
+                                                    <span class="d-block">4 Exams</span>
                                                 </th>
                                                 <th colspan="4" class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Less Payment</span>
+                                                    <span class="d-block">Less Payment</span>
                                                 </th>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">Total Balance</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 100px;">
+                                                    <span class="d-block">Total Balance</span>
                                                 </th>
-                                                <th rowspan="2" class="text-center align-middle bg-white">
-                                                    <span class="d-block text-nowrap">Remarks</span>
+                                                <th rowspan="2" class="text-center align-middle bg-white"
+                                                    style="min-width: 120px;">
+                                                    <span class="d-block">Remarks</span>
                                                 </th>
                                             </tr>
                                             <tr>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Misc</span>
+                                                <th class="text-center bg-white" style="min-width: 80px;">
+                                                    <span class="d-block">Misc</span>
                                                 </th>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Old Bal</span>
+                                                <th class="text-center bg-white" style="min-width: 80px;">
+                                                    <span class="d-block">Old Bal</span>
                                                 </th>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Total</span>
+                                                <th class="text-center bg-white" style="min-width: 80px;">
+                                                    <span class="d-block">Total</span>
                                                 </th>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Initial Payment</span>
+                                                <th class="text-center bg-white" style="min-width: 100px;">
+                                                    <span class="d-block">Initial Payment</span>
                                                 </th>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Balance</span>
+                                                <th class="text-center bg-white" style="min-width: 100px;">
+                                                    <span class="d-block">Balance</span>
                                                 </th>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Prelim</span>
+                                                <th class="text-center bg-white" style="min-width: 80px;">
+                                                    <span class="d-block">Prelim</span>
                                                 </th>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Midterm</span>
+                                                <th class="text-center bg-white" style="min-width: 80px;">
+                                                    <span class="d-block">Midterm</span>
                                                 </th>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Pre-final</span>
+                                                <th class="text-center bg-white" style="min-width: 80px;">
+                                                    <span class="d-block">Pre-final</span>
                                                 </th>
-                                                <th class="text-center bg-white">
-                                                    <span class="d-block text-nowrap">Final</span>
+                                                <th class="text-center bg-white" style="min-width: 80px;">
+                                                    <span class="d-block">Final</span>
                                                 </th>
                                             </tr>
                                         </thead>
@@ -172,8 +272,9 @@
                                 </div>
                             </div>
                             <div class="modal-footer bg-light">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Print Summary</button>
+                                <button type="button" class="btn btn-secondary px-4 py-2"
+                                    data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary px-4 py-2">Print Summary</button>
                             </div>
                         </div>
                     </div>

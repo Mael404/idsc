@@ -47,7 +47,10 @@ class ProgramCourseMapping extends Model
         return "{$this->program->name} - {$this->yearLevel->name} - {$this->semester->name} - SY: {$this->effective_sy}";
     }
 
-
+public function miscFeess()
+{
+    return $this->hasMany(MiscFee::class, 'program_course_mapping_id');
+}
     public function programCourseMapping()
     {
         return $this->belongsTo(\App\Models\ProgramCourseMapping::class, 'course_mapping_id', 'id');

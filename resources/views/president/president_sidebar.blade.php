@@ -7,17 +7,24 @@
             <img src="{{ asset('img/idslogo.png') }}" alt="Logo"
                 style="width: 55px; height: auto; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));">
         </div>
-        <div class="sidebar-brand-text mx-3">IDSC</div>
+        <div class="mx-3 sidebar-brand-text">IDSC</div>
     </a>
 
     <!-- Divider -->
-    <hr class="sidebar-divider my-1">
+    <hr class="my-1 sidebar-divider">
 
     <!-- Dashboard -->
     <li class="nav-item {{ request()->routeIs('president.dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('president.dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
+        </a>
+    </li>
+
+    <li class="nav-item {{ request()->routeIs('president.accounting-dashboard') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('president.accounting-dashboard') }}">
+            <i class="fas fa-fw fa-calculator"></i>
+            <span>Accounting</span>
         </a>
     </li>
 
@@ -29,11 +36,15 @@
             <span>Analytics</span>
         </a>
         <div id="collapseAnalytics" class="collapse" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
-                <a class="collapse-item {{ request()->routeIs('president.revenue-trends') ? 'active' : '' }}" href="{{ route('president.revenue-trends') }}">Revenue Trends</a>
-                <a class="collapse-item {{ request()->routeIs('president.scholarships-discounts') ? 'active' : '' }}" href="{{ route('president.scholarships-discounts') }}">Scholarships & Discounts</a>
-                <a class="collapse-item {{ request()->routeIs('president.enrollment-heatmap') ? 'active' : '' }}" href="{{ route('president.enrollment-heatmap') }}">Enrollment Heatmap</a>
-                <a class="collapse-item {{ request()->routeIs('president.financial-alerts') ? 'active' : '' }}" href="{{ route('president.financial-alerts') }}">Financial Alerts</a>
+            <div class="py-2 bg-white rounded collapse-inner">
+                <a class="collapse-item {{ request()->routeIs('president.revenue-trends') ? 'active' : '' }}"
+                    href="{{ route('president.revenue-trends') }}">Revenue Trends</a>
+                <a class="collapse-item {{ request()->routeIs('president.scholarships-discounts') ? 'active' : '' }}"
+                    href="{{ route('president.scholarships-discounts') }}">Scholarships & Discounts</a>
+                <a class="collapse-item {{ request()->routeIs('president.enrollment-heatmap') ? 'active' : '' }}"
+                    href="{{ route('president.enrollment-heatmap') }}">Enrollment Heatmap</a>
+                <a class="collapse-item {{ request()->routeIs('president.financial-alerts') ? 'active' : '' }}"
+                    href="{{ route('president.financial-alerts') }}">Financial Alerts</a>
             </div>
         </div>
     </li>
@@ -46,7 +57,7 @@
             <span>Reports</span>
         </a>
         <div id="collapseReports" class="collapse" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
+            <div class="py-2 bg-white rounded collapse-inner">
                 <a class="collapse-item" href="#">Monthly</a>
                 <a class="collapse-item" href="#">Annual</a>
             </div>
@@ -58,7 +69,7 @@
 
     <!-- Sidebar Toggler -->
     <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        <button class="border-0 rounded-circle" id="sidebarToggle"></button>
     </div>
 
 </ul>

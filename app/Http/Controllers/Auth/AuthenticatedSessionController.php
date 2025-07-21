@@ -54,7 +54,12 @@ class AuthenticatedSessionController extends Controller
         if (Auth::user()->role === 'president') {
             return redirect()->route('president.dashboard');
         }
-        
+
+        if (Auth::user()->role === 'all') {
+            return redirect()->route('all.dashboard');
+        }
+
+
         // If no matching role, logout user and clear session
         $this->destroy($request);
 

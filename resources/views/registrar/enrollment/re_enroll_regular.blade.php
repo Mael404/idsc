@@ -151,38 +151,38 @@
                                 <div class="col-md-6">
                                     <label for="course_mapping_id">Course Mapping <span
                                             class="text-danger">*</span></label>
-                                    <select id="course_mapping_id" name="course_mapping_id"
-                                        class="form-control" required>
-                                        <option value="" selected disabled>Choose Mapping</option>
-                                        @foreach ($courseMappings as $mapping)
-                                            @if ($mapping->program && $mapping->yearLevel)
-                                                <option value="{{ $mapping->id }}"
-                                                    data-program="{{ $mapping->program_id }}"
-                                                    data-year="{{ $mapping->year_level_id }}"
-                                                    data-semester="{{ $mapping->semester_id }}"
-                                                    data-sy="{{ $mapping->effective_sy }}">
-                                                    [ID: {{ $mapping->id }}] {{ $mapping->program->name }}
-                                                    -
-                                                    {{ $mapping->yearLevel->name }}
-                                                    ({{ $mapping->effective_sy }})
-                                                </option>
-                                            @endif
-                                        @endforeach
-                                    </select>
+                                   <select id="course_mapping_id" name="course_mapping_id"
+    class="form-control" required>
+    <option value="" selected disabled>Choose Mapping</option>
+    @foreach ($courseMappings as $mapping)
+        @if ($mapping->program && $mapping->yearLevel)
+            <option value="{{ $mapping->id }}"
+                data-program="{{ $mapping->program_id }}"
+                data-year="{{ $mapping->year_level_id }}"
+                data-semester="{{ $mapping->semester_id }}"
+                data-sy="{{ $mapping->effective_sy }}">
+                {{ $mapping->program->name }} -
+                {{ $mapping->yearLevel->name }}
+                ({{ $mapping->effective_sy }})
+            </option>
+        @endif
+    @endforeach
+</select>
 
-                                    <div class="mt-2">
-                                        <small class="text-muted">Selected Mapping ID: <span
-                                                id="displayMappingId">-</span></small>
-                                    </div>
 
-                                    <div id="totalUnitsContainer" class="alert alert-info mt-3"
-                                        style="display:none;">
-                                        Total Units: <strong id="totalUnitsValue"></strong>
-                                    </div>
-                                    <div id="tuitionFeeContainer" class="alert alert-success mt-2"
-                                        style="display:none;">
-                                        Tuition Fee: <strong id="tuitionFeeValue"></strong>
-                                    </div>
+                                   <div class="mt-2" style="display: none;">
+    <small class="text-muted">Selected Mapping ID: <span id="displayMappingId">-</span></small>
+</div>
+
+
+                                   <div id="totalUnitsContainer" class="alert alert-info mt-3 d-none" style="display: none;">
+    Total Units: <strong id="totalUnitsValue"></strong>
+</div>
+
+<div id="tuitionFeeContainer" class="alert alert-success mt-2 d-none" style="display: none;">
+    Tuition Fee: <strong id="tuitionFeeValue"></strong>
+</div>
+
                                     <div id="feeCalculationContainer" class="alert alert-secondary mt-2"
                                         style="display:none;">
                                         <small>Calculation: <span
@@ -206,7 +206,7 @@
                                             @foreach ($scholarships as $scholarship)
                                                 <option value="{{ $scholarship->id }}">
                                                     {{ $scholarship->name }}
-                                                    ({{ $scholarship->discount_percentage }}% Discount)
+                                                    ({{ $scholarship->discount }}% Discount)
                                                 </option>
                                             @endforeach
                                             <option value="none">None</option>
@@ -513,7 +513,29 @@
                         </h6>
                         
                         <div class="row g-3">
-                            <!-- Initial Payment Input -->
+                            <!-- Manual Old Balance Input -->
+<div class="col-12">
+    <div class="mb-3">
+        <label for="manual_old_balance{{ $admission->student_id }}" class="form-label">
+            <strong>Manual Old Balance</strong> 
+            <small class="text-muted">(Optional)</small>
+        </label>
+        <input 
+            placeholder="0.00" 
+            type="number" 
+            name="manual_old_balance" 
+            step="0.01" 
+            min="0"
+            class="form-control"
+            id="manual_old_balance{{ $admission->student_id }}"
+            value="{{ old('manual_old_balance') }}">
+        <small class="text-muted">Enter a value to manually set old balance. Leave empty for no change.</small>
+    </div>
+</div>
+<input type="hidden" name="current_old_accounts" value="{{ $billing->old_accounts }}">
+
+
+                            <!-- Initial Paysment Input -->
                             <div class="col-12">
                                 <div class="mb-3">
                                     <label for="initial_payment{{ $admission->student_id }}" class="form-label"><strong>Initial Payment</strong></label>
@@ -844,7 +866,7 @@ $(document).ready(function() {
 
 
     </div>
-    <!-- End of Content Wrapper -->
+    <!-- End of Constent Wrapper -->
 @endsection
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- REQUIRED for DataTables -->

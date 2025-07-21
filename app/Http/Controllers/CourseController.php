@@ -120,4 +120,24 @@ class CourseController extends Controller
         $course->delete();
         return redirect()->route('courses.index')->with('success', 'Course deleted successfully.');
     }
+
+    public function prerequisites(Request $request)
+{
+    $course = Course::with('prerequisites')->find($request->course_id);
+
+    if (!$course) {
+        return response()->json(['prerequisites' => []]);
+    }
+
+    return response()->json([
+        'prerequisites' => $course->prerequisites->map(function ($prereq) {
+            return [
+                'id' => $prereq->id,
+                'code' => $prereq->code,
+                'name' => $prereq->name,
+            ];
+        })
+    ]);
+}
+
 }

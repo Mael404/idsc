@@ -19,6 +19,10 @@
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
+        <a class="nav-link" href="{{ route('registrar.queueing') }}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Queueing</span>
+        </a>
     </li>
 
     <!-- Divider -->
@@ -40,7 +44,9 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Enrollment Actions:</h6>
                 <a class="collapse-item {{ request()->routeIs('registrar.enrollment.new') ? 'active' : '' }}"
-                    href="{{ route('registrar.enrollment.new') }}">New Enrollment</a>
+                    href="{{ route('registrar.enrollment.new') }}">College New Enrollment</a>
+                <a class="collapse-item {{ request()->routeIs('registrar.enrollment.new.shs') ? 'active' : '' }}"
+                    href="{{ route('registrar.enrollment.new.shs') }}">SHS New Enrollment</a>
                 <a class="collapse-item {{ request()->routeIs('registrar.enrollment.transferee') ? 'active' : '' }}"
                     href="{{ route('registrar.enrollment.transferee') }}">Transferee Enrollment</a>
                 <a class="collapse-item {{ request()->routeIs('registrar.enrollment.reenroll.regular') ? 'active' : '' }}"

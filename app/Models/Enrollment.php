@@ -22,10 +22,14 @@ class Enrollment extends Model
         'enrollment_type',
         'scholarship_id',
         'enrollment_date',
+        'enrollment_id',
     ];
 
     // If your primary key is not 'id' or not incrementing, define here (not necessary if default)
-
+    public function enrollment()
+    {
+        return $this->belongsTo(Enrollment::class, 'enrollment_id');
+    }
     // Define relationship to Admission (student)
     public function admission()
     {
@@ -55,10 +59,7 @@ class Enrollment extends Model
         return $this->belongsTo(Scholarship::class, 'scholarship_id');
     }
     public function programCourseMapping()
-{
-    return $this->belongsTo(ProgramCourseMapping::class, 'course_mapping_id', 'id');
-}
-
-
-    
+    {
+        return $this->belongsTo(ProgramCourseMapping::class, 'course_mapping_id', 'id');
+    }
 }

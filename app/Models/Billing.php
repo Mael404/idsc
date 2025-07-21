@@ -30,11 +30,10 @@ class Billing extends Model
     {
         return $this->belongsTo(Admission::class, 'student_id', 'student_id');
     }
+   
     public function details($id)
     {
         $billing = Billing::findOrFail($id);
         return response()->json($billing);
     }
-
-    
 }

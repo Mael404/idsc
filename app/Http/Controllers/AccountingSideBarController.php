@@ -78,10 +78,10 @@ class AccountingSideBarController extends Controller
     public function transactions()
     {
         // Fetch payments and admissions
-        $payments = \App\Models\Payment::all();
+        $payments = Payment::all();
 
         // Fetch all necessary admissions and related data
-        $admissions = \App\Models\Admission::with(['programCourseMapping.program'])->get();
+        $admissions = Admission::with(['programCourseMapping.program'])->get();
 
         return view('accountant.transactions', compact('payments', 'admissions'));
     }
@@ -89,7 +89,7 @@ class AccountingSideBarController extends Controller
 
     public function getBillingByStudent($studentId)
     {
-        $activeSchoolYear = \App\Models\SchoolYear::where('is_active', 1)->first();
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
         if (!$activeSchoolYear) {
             return response()->json(['error' => 'No active school year found'], 404);
@@ -106,28 +106,134 @@ class AccountingSideBarController extends Controller
     /**
      * Show the Statement of Account (SOA) page.
      */
-    public function soa()
-    {
-        // Fetch admissions and scholarships
-        $admissions = Admission::with(['programCourseMapping.program'])->orderBy('created_at')->get();
-        $scholarships = Scholarship::all();
+public function soa()
+{
+    // Fetch admissions and scholarships
+    $admissions = Admission::with(['programCourseMapping.program'])
+        ->orderBy('created_at')
+        ->get();
+    $scholarships = Scholarship::all();
 
-        // Get active school year
-        $activeSchoolYear = \App\Models\SchoolYear::where('is_active', 1)->first();
+    // Get active school year
+    $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
-        if (!$activeSchoolYear) {
-            // Handle no active school year case, e.g., empty billing or error message
-            $billingData = collect(); // empty collection
-        } else {
-            // Fetch billing data for active school year and semester
-            $billingData = Billing::where('school_year', $activeSchoolYear->name)
-                ->where('semester', $activeSchoolYear->semester)
-                ->get();
-        }
+    if (!$activeSchoolYear) {
+        // Handle no active school year case
+        $billingData = collect(); // empty collection
+        $totalUnits = 0;
+        $totalTuitionFees = 0;
+        $totalEnrolled = 0;
+        $totalFullyPaid = 0;
 
-        // Pass all data to the view
-        return view('accountant.soa', compact('admissions', 'scholarships', 'billingData', 'activeSchoolYear'));
+        // Initialize assessment and payments values
+        $assessmentTotal = 0;
+        $initialPayment = 0;
+        $balanceTotal = 0;
+        $dividedBy4 = 0;
+        $prelim = 0;
+        $midterm = 0;
+        $preFinal = 0;
+        $final = 0;
+
+    } else {
+        // Fetch billing data for active school year and semester
+        $billingData = Billing::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->get();
+
+        // Fetch student courses for active school year and semester
+       $studentCourses = \App\Models\StudentCourse::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->get();
+
+        // Sum up the units from related courses
+        $totalUnits = $studentCourses->sum(function ($studentCourse) {
+            return $studentCourse->course->units ?? 0;
+        });
+
+        // Fetch total tuition fees from payments for active school year and semester
+        $totalTuitionFees = Payment::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->sum('amount');
+
+        // Fetch total number of enrolled students
+        $totalEnrolled = Enrollment::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->where('status', '!=', 'Pending') // exclude Pending
+            ->count();
+
+        // Fetch total number of fully paid students
+        $totalFullyPaid = Billing::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->where('is_full_payment', 1)
+            ->count();
+
+        // ASSESSMENT OF FEES
+        $assessmentTotal = Billing::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->sum('total_assessment');
+
+        // INITIAL PAYMENT
+        $initialPayment = Payment::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->where('grading_period', 'Initial Payment')
+            ->sum('amount');
+
+        // BALANCE
+        $balanceTotal = Billing::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->sum('balance_due');
+
+        // DIVIDED BY 4 EXAMS
+        $dividedBy4 = $assessmentTotal / 4;
+
+        // LESS PAYMENTS: Prelim, Midterm, Pre-Final, Final
+        $prelim = Payment::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->where('grading_period', 'Prelims')
+            ->sum('amount');
+
+        $midterm = Payment::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->where('grading_period', 'Midterms')
+            ->sum('amount');
+
+        $preFinal = Payment::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->where('grading_period', 'prefinals')
+            ->sum('amount');
+
+        $final = Payment::where('school_year', $activeSchoolYear->name)
+            ->where('semester', $activeSchoolYear->semester)
+            ->where('grading_period', 'Finals')
+            ->sum('amount');
     }
+
+    // Pass all data to the view
+    return view('accountant.soa', compact(
+        'admissions',
+        'scholarships',
+        'billingData',
+        'activeSchoolYear',
+        'totalUnits',
+        'totalTuitionFees',
+        'totalEnrolled',
+        'totalFullyPaid',
+        'assessmentTotal',
+        'initialPayment',
+        'balanceTotal',
+        'dividedBy4',
+        'prelim',
+        'midterm',
+        'preFinal',
+        'final'
+    ));
+}
+
+
+
+
+
 
 
 
@@ -142,7 +248,7 @@ class AccountingSideBarController extends Controller
         $scholarships = Scholarship::all();
 
         // Get active school year
-        $activeSchoolYear = \App\Models\SchoolYear::where('is_active', 1)->first();
+        $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
         if (!$activeSchoolYear) {
             $billingData = collect(); // empty collection

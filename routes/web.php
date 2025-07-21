@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VPAdminSideBarController;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
+
 require __DIR__ . '/auth.php';
 require __DIR__ . '/vpadminsidebar.php';
 require __DIR__ . '/registrarsidebar.php';
@@ -33,3 +35,4 @@ require __DIR__ . '/vpacademicssidebar.php';
 require __DIR__ . '/cashier.php';
 require __DIR__ . '/accounting.php';
 require __DIR__ . '/president.php';
+require __DIR__ . '/all.php';

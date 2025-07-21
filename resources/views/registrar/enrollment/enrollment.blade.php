@@ -418,6 +418,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </div>
 
+<!-- Add this below the irregular tuition display -->
+<div class="mt-3" id="miscFeesSection" style="display: none;">
+    <h5>Miscellaneous Fees</h5>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fee Name</th>
+                <th>Amount</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="miscFeesList">
+            <!-- Misc fees will be added here dynamically -->
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Total Misc Fees</th>
+                <th id="misc_fees_total">0.00</th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <!-- Add new misc fee -->
+    <div class="row mt-3">
+        <div class="col-md-5">
+            <input type="text" id="newMiscFeeName" class="form-control" placeholder="Fee Name">
+        </div>
+        <div class="col-md-5">
+            <input type="number" id="newMiscFeeAmount" class="form-control" placeholder="Amount">
+        </div>
+        <div class="col-md-2">
+            <button type="button" id="addMiscFeeBtn" class="btn btn-primary">Add</button>
+        </div>
+    </div>
+    
+    <input type="hidden" name="misc_fees_total" id="misc_fees_input" value="0">
+</div>
+
+
         <!-- Common Fields -->
         <div class="col-md-6">
             <label for="major">Major</label>
@@ -447,7 +487,10 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 <script>
 $(document).ready(function() {
-    // Handle admission status change
+    // ========== GLOBAL VARIABLES ==========
+    let selectedCourses = [];
+
+    // ========== ADMISSION STATUS HANDLING ==========
     $('.admission-status').change(function() {
         const status = $(this).val();
         
@@ -457,24 +500,151 @@ $(document).ready(function() {
             $('#transfereeFields').hide();
             $('#lrnField').show();
             $('#irregularTuitionDisplay').hide();
+            $('#miscFeesSection').hide();
             $('#admissionForm').attr('action', '{{ route("admissions.store") }}');
+            $('#selectedCoursesList').empty();
         } else if (status === 'transferee') {
-            $('#regularCourseMapping').hide();
+            $('#regularCourseMapping').show();
             $('#irregularCourseSelection').show();
             $('#transfereeFields').show();
             $('#lrnField').hide();
             $('#irregularTuitionDisplay').show();
+            $('#miscFeesSection').show();
             $('#admissionForm').attr('action', '{{ route("admissions.store.transferee") }}');
+            $('#selectedCoursesList').empty();
         } else if (status === 'irregular') {
-            $('#regularCourseMapping').hide();
+            $('#regularCourseMapping').show();
             $('#irregularCourseSelection').show();
             $('#transfereeFields').hide();
             $('#lrnField').hide();
             $('#irregularTuitionDisplay').show();
+            $('#miscFeesSection').show();
             $('#admissionForm').attr('action', '{{ route("admissions.store.irregular") }}');
+            $('#selectedCoursesList').empty();
+
+            if ($('#course_mapping_id').val()) {
+                loadMappingCourses($('#course_mapping_id').val());
+            }
         }
     });
 
+    // ========== COURSE MAPPING HANDLING ==========
+    $('#course_mapping_id').on('change', function() {
+        const status = $('.admission-status:checked').val();
+        const mappingId = $(this).val();
+        
+        if (status === 'irregular' && mappingId) {
+            loadMappingCourses(mappingId);
+        } else {
+            calculateRegularTuition(mappingId);
+        }
+    });
+
+    // ========== COURSE LOADING ==========
+    function loadMappingCourses(mappingId) {
+        $.ajax({
+            url: '{{ route("getMappingCourses") }}',
+            type: 'POST',
+            data: {
+                mapping_id: mappingId,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                $('#selectedCoursesList').empty();
+                $('#miscFeesList').empty();
+                
+                if (response.courses && response.courses.length > 0) {
+                    response.courses.forEach(course => {
+                        addCourseToSelection(
+                            course.id, 
+                            course.code, 
+                            course.name, 
+                            course.units,
+                            false
+                        );
+                    });
+                }
+                
+                if (response.misc_fees && response.misc_fees.length > 0) {
+                    response.misc_fees.forEach(fee => {
+                        addMiscFee(fee.id, fee.name, fee.amount, fee.is_required);
+                    });
+                }
+                
+                updateSelectedCoursesInput();
+                recalculateIrregularTuition();
+            }
+        });
+    }
+
+    // ========== MISCELLANEOUS FEES HANDLING ==========
+    function addMiscFee(id, name, amount, isRequired) {
+        const rowId = 'misc_fee_row_' + id;
+        
+        if ($('#' + rowId).length > 0) return;
+        
+        const row = `
+        <tr id="${rowId}">
+            <td>${name}</td>
+            <td>
+                <input type="number" class="form-control misc-fee-amount" 
+                       name="misc_fees[${id}][amount]" 
+                       value="${amount}" ${isRequired ? 'readonly' : ''}>
+                <input type="hidden" name="misc_fees[${id}][name]" value="${name}">
+                <input type="hidden" name="misc_fees[${id}][is_required]" value="${isRequired ? 1 : 0}">
+            </td>
+            <td>
+                ${isRequired ? 
+                    '<span class="badge bg-primary">Required</span>' : 
+                    '<button type="button" class="btn btn-sm btn-danger remove-misc-fee">Remove</button>'}
+            </td>
+        </tr>
+        `;
+        
+        $('#miscFeesList').append(row);
+        updateMiscFeesTotal();
+    }
+
+    // Add new misc fee
+    $('#addMiscFeeBtn').click(function() {
+        const name = $('#newMiscFeeName').val().trim();
+        const amount = parseFloat($('#newMiscFeeAmount').val());
+        
+        if (!name || isNaN(amount)) {
+            Swal.fire('Error', 'Please enter both name and amount', 'error');
+            return;
+        }
+        
+        const tempId = 'new_' + Date.now();
+        addMiscFee(tempId, name, amount, false);
+        
+        $('#newMiscFeeName').val('');
+        $('#newMiscFeeAmount').val('');
+    });
+
+    // Remove misc fee (FIXED VERSION)
+    $(document).on('click', '.remove-misc-fee', function() {
+        $(this).closest('tr').remove();
+        updateMiscFeesTotal();
+    });
+
+    // Update misc fees total
+    function updateMiscFeesTotal() {
+        let total = 0;
+        $('.misc-fee-amount').each(function() {
+            total += parseFloat($(this).val()) || 0;
+        });
+        $('#misc_fees_total').text(total.toFixed(2));
+        $('#misc_fees_input').val(total);
+        recalculateIrregularTuition();
+    }
+
+    // Misc fee amount change handler
+    $(document).on('change', '.misc-fee-amount', function() {
+        updateMiscFeesTotal();
+    });
+
+    // ========== COURSE SEARCH AND SELECTION ==========
     $('#courseSearch').on('input', function() {
         const searchTerm = $(this).val().trim();
         if (searchTerm.length >= 1) {
@@ -488,6 +658,7 @@ $(document).ready(function() {
                 success: function(response) {
                     const resultsContainer = $('#courseSearchResults');
                     resultsContainer.empty();
+
                     if (response.length > 0) {
                         response.forEach(course => {
                             const prereqBadge = course.has_prerequisites 
@@ -516,41 +687,73 @@ $(document).ready(function() {
         }
     });
 
+    // Add course handler
     $(document).on('click', '.course-item', function(e) {
         e.preventDefault();
         const courseId = $(this).data('id');
         const courseCode = $(this).data('code');
-        const courseTitle = $(this).data('title');
+        const courseName = $(this).data('title');  // Changed from 'name' to 'title' to match your response
         const courseUnits = $(this).data('units');
-        const hasPrereq = $(this).data('has-prereq') === 'true';
-        
-        if ($(`#selectedCourse_${courseId}`).length > 0) return;
+        const hasPrereq = $(this).data('has-prereq') == 1;
+
+        if ($(`#selectedCourse_${courseId}`).length > 0) {
+            Swal.fire({
+                title: 'Course Already Added',
+                text: 'This course is already in the selection list.',
+                icon: 'info'
+            });
+            return;
+        }
 
         if (hasPrereq) {
-            Swal.fire({
-                title: 'Prerequisite Required',
-                html: `<p>${courseCode} has prerequisite requirements.</p>
-                       <p>Allow enrollment anyway?</p>`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, enroll',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    confirmButton: 'btn btn-primary',
-                    cancelButton: 'btn btn-secondary'
+            $.ajax({
+                url: '{{ route("courses.prerequisites") }}',
+                method: 'POST',
+                data: {
+                    course_id: courseId,
+                    _token: '{{ csrf_token() }}'
                 },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    addCourseWithOverride(courseId, courseCode, courseTitle, courseUnits, true);
+                success: function(response) {
+                    const prereqIds = response.prerequisites.map(pr => pr.id);
+                    const selectedIds = $('#selectedCoursesList li').map(function() {
+                        return $(this).data('id');
+                    }).get();
+
+                    const missingPrereqs = response.prerequisites.filter(pr => !selectedIds.includes(pr.id));
+
+                    if (missingPrereqs.length === 0) {
+                        addCourseToSelection(courseId, courseCode, courseName, courseUnits, false);
+                    } else {
+                        const missingList = missingPrereqs.map(pr => `<li>${pr.code} - ${pr.name}</li>`).join('');
+                        Swal.fire({
+                            title: 'Missing Prerequisites',
+                            html: `<p><strong>${courseCode}</strong> requires the following prerequisites:</p>
+                                   <ul>${missingList}</ul>
+                                   <p>Do you want to override and add this course anyway?</p>`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, override',
+                            cancelButtonText: 'Cancel',
+                            customClass: {
+                                confirmButton: 'btn btn-primary',
+                                cancelButton: 'btn btn-secondary'
+                            },
+                            buttonsStyling: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                addCourseToSelection(courseId, courseCode, courseName, courseUnits, true);
+                            }
+                        });
+                    }
                 }
             });
         } else {
-            addCourseWithOverride(courseId, courseCode, courseTitle, courseUnits, false);
+            addCourseToSelection(courseId, courseCode, courseName, courseUnits, false);
         }
     });
 
-    function addCourseWithOverride(courseId, code, title, units, isOverridden) {
+    // Add course to selection list
+    function addCourseToSelection(courseId, code, title, units, isOverridden) {
         $('#selectedCoursesList').append(`
             <li class="list-group-item d-flex justify-content-between align-items-center selected-course" 
                 id="selectedCourse_${courseId}" 
@@ -569,16 +772,18 @@ $(document).ready(function() {
         updateSelectedCoursesInput();
         $('#courseSearch').val('');
         $('#courseSearchResults').hide();
-        recalculateIrregularTuition(); // 👈 trigger update
+        recalculateIrregularTuition();
     }
 
+    // Remove course handler
     $(document).on('click', '.remove-course', function() {
         const courseId = $(this).data('id');
         $(`#selectedCourse_${courseId}`).remove();
         updateSelectedCoursesInput();
-        recalculateIrregularTuition(); // 👈 trigger update
+        recalculateIrregularTuition();
     });
 
+    // Update selected courses input
     function updateSelectedCoursesInput() {
         const selectedCourses = [];
         $('#selectedCoursesList li').each(function() {
@@ -589,8 +794,9 @@ $(document).ready(function() {
         $('#selected_courses_input').val(JSON.stringify(selectedCourses));
     }
 
-    $('#course_mapping_id').on('change', function() {
-        let mappingId = $(this).val();
+    // ========== TUITION CALCULATION ==========
+    // Regular tuition calculation
+    function calculateRegularTuition(mappingId) {
         if (!mappingId) {
             $('#totalUnitsContainer').hide();
             $('#tuitionFeeContainer').hide();
@@ -598,29 +804,28 @@ $(document).ready(function() {
         }
 
         $.ajax({
-            url: '{{ route('getMappingUnits') }}',
+            url: '{{ route("getMappingUnits") }}',
             type: 'POST',
             data: {
                 mapping_id: mappingId,
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
-                let originalTotalUnits = response.total_units;
+                let totalUnits = response.total_units;
                 let tuitionFee = response.tuition_fee;
-                let totalUnits = originalTotalUnits;
 
+                // Adjust for NSTP deductions
                 if (response.courses && Array.isArray(response.courses)) {
                     let nstpUnitsToDeduct = 0;
 
                     response.courses.forEach(course => {
                         let rawName = `${course.code} ${course.name} ${course.description}`.toLowerCase();
                         rawName = rawName.replace(/- ?[a-z0-9 &()]+/g, '').trim();
-                        const isNSTP = (
-                            rawName.includes('national service training program') ||
-                            rawName.includes('civic welfare training service') ||
-                            rawName.includes('lts/cwts/rotc') ||
-                            rawName.includes('lts/rotc')
-                        );
+                        const isNSTP = rawName.includes('national service training program') ||
+                                       rawName.includes('civic welfare training service') ||
+                                       rawName.includes('lts/cwts/rotc') ||
+                                       rawName.includes('lts/rotc');
+
                         if (isNSTP) {
                             let units = parseFloat(course.units);
                             if (!isNaN(units)) {
@@ -629,8 +834,8 @@ $(document).ready(function() {
                         }
                     });
 
-                    totalUnits = totalUnits - nstpUnitsToDeduct;
-                    let tuitionPerUnit = tuitionFee / originalTotalUnits;
+                    totalUnits -= nstpUnitsToDeduct;
+                    let tuitionPerUnit = tuitionFee / response.total_units;
                     tuitionFee = totalUnits * tuitionPerUnit;
                 }
 
@@ -644,43 +849,46 @@ $(document).ready(function() {
                 $('#tuitionFeeContainer').hide();
             }
         });
-    });
-
-    // 👇 Tuition recalculation function
-   function recalculateIrregularTuition() {
-    const selectedCourses = [...document.querySelectorAll('.selected-course')];
-    const courseIds = selectedCourses.map(el => el.dataset.id);
-
-    if (courseIds.length === 0) {
-        document.getElementById('total_units_display').textContent = '0';
-        document.getElementById('tuition_fee_display').textContent = '0.00';
-        document.getElementById('tuition_fee_input').value = 0; // Update single input
-        return;
     }
 
-    fetch('{{ route("calculate.irregular.tuition") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            course_ids: courseIds
+    // Irregular tuition calculation
+    function recalculateIrregularTuition() {
+        const selectedCourses = [...document.querySelectorAll('.selected-course')];
+        const courseIds = selectedCourses.map(el => el.dataset.id);
+        const miscFeesTotal = parseFloat($('#misc_fees_input').val()) || 0;
+
+        if (courseIds.length === 0) {
+            $('#total_units_display').text('0');
+            $('#tuition_fee_display').text(miscFeesTotal.toFixed(2));
+            $('#tuition_fee_input').val(miscFeesTotal);
+            return;
+        }
+
+        fetch('{{ route("calculate.irregular.tuition") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ 
+                course_ids: courseIds,
+                misc_fees: miscFeesTotal
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('total_units_display').textContent = data.total_units;
-        document.getElementById('tuition_fee_display').textContent = data.tuition_fee.toFixed(2);
-        // Update the single tuition fee input
-        document.getElementById('tuition_fee_input').value = data.tuition_fee;
-    })
-    .catch(error => {
-        console.error('Error calculating tuition:', error);
-    });
-}
+        .then(response => response.json())
+        .then(data => {
+            $('#total_units_display').text(data.total_units);
+            $('#tuition_fee_display').text((parseFloat(data.tuition_fee) + miscFeesTotal).toFixed(2));
+            $('#tuition_fee_input').val(parseFloat(data.tuition_fee) + miscFeesTotal);
+        })
+        .catch(error => {
+            console.error('Error calculating tuition:', error);
+        });
+    }
 });
 </script>
+
+
 
                                         <!-- Step 5: Education History -->
                                         <div class="tab-pane fade" id="step5" role="tabpanel"
@@ -1234,6 +1442,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 
 

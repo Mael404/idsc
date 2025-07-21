@@ -19,7 +19,9 @@ return new class extends Migration
     public function down()
     {
         Schema::table('payments', function (Blueprint $table) {
-            $table->dropColumn('is_void');
+            if (Schema::hasColumn('payments', 'is_void')) {
+                $table->dropColumn('is_void');
+            }
         });
     }
 };

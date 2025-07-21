@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c8b0528b8b100d6f44e7fbf50b84129",
+    "content-hash": "49918e70cef7e387595234f49d388a7a",
     "packages": [
         {
             "name": "brick/math",
@@ -1424,6 +1424,88 @@
             "time": "2025-04-03T18:00:49+00:00"
         },
         {
+            "name": "laravel/nightwatch",
+            "version": "v1.10.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/nightwatch.git",
+                "reference": "90ec0f78fe09b5328a36b03d8d42d0ef5ecc61d1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/nightwatch/zipball/90ec0f78fe09b5328a36b03d8d42d0ef5ecc61d1",
+                "reference": "90ec0f78fe09b5328a36b03d8d42d0ef5ecc61d1",
+                "shasum": ""
+            },
+            "require": {
+                "ext-zlib": "*",
+                "guzzlehttp/promises": "^2.0",
+                "laravel/framework": "^10.0|^11.0|^12.0",
+                "monolog/monolog": "^3.0",
+                "nesbot/carbon": "^2.0|^3.0",
+                "php": "^8.2",
+                "psr/http-message": "^1.0|^2.0",
+                "psr/log": "^1.0|^2.0|^3.0",
+                "symfony/console": "^6.0|^7.0",
+                "symfony/http-foundation": "^6.0|^7.0"
+            },
+            "require-dev": {
+                "ext-pdo": "*",
+                "guzzlehttp/guzzle": "^7.0",
+                "guzzlehttp/psr7": "^2.0",
+                "laravel/horizon": "^5.4",
+                "laravel/pint": "1.21.0",
+                "mockery/mockery": "^1.0",
+                "mongodb/laravel-mongodb": "^4.0|^5.0",
+                "orchestra/testbench": "^8.0|^9.0|^10.0",
+                "orchestra/testbench-core": "^8.0|^9.0|^10.0",
+                "orchestra/workbench": "^8.0|^9.0|^10.0",
+                "phpstan/phpstan": "^1.0",
+                "phpunit/phpunit": "^10.0|^11.0",
+                "ramsey/uuid": "^4.0",
+                "spatie/laravel-ignition": "^2.0",
+                "symfony/mailer": "^6.0|^7.0",
+                "symfony/mime": "^6.0|^7.0",
+                "symfony/var-dumper": "^6.0|^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Nightwatch\\NightwatchServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Nightwatch\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "The official Laravel Nightwatch package.",
+            "homepage": "https://nightwatch.laravel.com",
+            "keywords": [
+                "Insights",
+                "laravel",
+                "monitoring"
+            ],
+            "support": {
+                "docs": "https://nightwatch.laravel.com/docs",
+                "issues": "https://github.com/laravel/nightwatch/issues",
+                "source": "https://github.com/laravel/nightwatch"
+            },
+            "time": "2025-07-02T00:39:56+00:00"
+        },
+        {
             "name": "laravel/prompts",
             "version": "v0.3.5",
             "source": {
@@ -1481,6 +1563,70 @@
                 "source": "https://github.com/laravel/prompts/tree/v0.3.5"
             },
             "time": "2025-02-11T13:34:40+00:00"
+        },
+        {
+            "name": "laravel/sanctum",
+            "version": "v4.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/sanctum.git",
+                "reference": "e4c09e69aecd5a383e0c1b85a6bb501c997d7491"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/sanctum/zipball/e4c09e69aecd5a383e0c1b85a6bb501c997d7491",
+                "reference": "e4c09e69aecd5a383e0c1b85a6bb501c997d7491",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/console": "^11.0|^12.0",
+                "illuminate/contracts": "^11.0|^12.0",
+                "illuminate/database": "^11.0|^12.0",
+                "illuminate/support": "^11.0|^12.0",
+                "php": "^8.2",
+                "symfony/console": "^7.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^9.0|^10.0",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^11.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Sanctum\\SanctumServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Sanctum\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Laravel Sanctum provides a featherweight authentication system for SPAs and simple APIs.",
+            "keywords": [
+                "auth",
+                "laravel",
+                "sanctum"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/sanctum/issues",
+                "source": "https://github.com/laravel/sanctum"
+            },
+            "time": "2025-07-01T15:49:32+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -2159,6 +2305,65 @@
                 }
             ],
             "time": "2024-12-08T08:18:47+00:00"
+        },
+        {
+            "name": "mike42/escpos-php",
+            "version": "v2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mike42/escpos-php.git",
+                "reference": "e5496cf819b048b11877117bd14a9cea4fb17c03"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mike42/escpos-php/zipball/e5496cf819b048b11877117bd14a9cea4fb17c03",
+                "reference": "e5496cf819b048b11877117bd14a9cea4fb17c03",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^5.3",
+                "phpunit/phpunit": "^4.8",
+                "squizlabs/php_codesniffer": "^3.2"
+            },
+            "suggest": {
+                "ext-gd": "Used for image printing if present.",
+                "ext-imagick": "Will be used for image printing if present. Required for PDF printing or use of custom fonts.",
+                "guzzlehttp/guzzle": "Allows the use of the ApiConnector to send print jobs over HTTP."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mike42\\": "src/Mike42"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Billington",
+                    "email": "michael.billington@gmail.com"
+                }
+            ],
+            "description": "PHP receipt printer library for use with ESC/POS-compatible thermal and impact printers",
+            "homepage": "https://github.com/mike42/escpos-php",
+            "keywords": [
+                "ESC-POS",
+                "driver",
+                "escpos",
+                "print",
+                "receipt"
+            ],
+            "support": {
+                "issues": "https://github.com/mike42/escpos-php/issues",
+                "source": "https://github.com/mike42/escpos-php/tree/v2.2"
+            },
+            "time": "2019-10-05T05:59:00+00:00"
         },
         {
             "name": "monolog/monolog",

@@ -287,27 +287,27 @@
     <!-- Fee Sections -->
     <div class="row">
         <!-- MISCELLANEOUS -->
-        <div class="col-3">
-            <div class="section-title" style="text-align: center; font-size: larger;">MISCELLANEOUS</div>
-            <table>
-                @php $totalMisc = 0; @endphp
-                @foreach ($miscFees as $fee)
-                    <tr>
-                        <td>{{ $fee->name }}</td>
-                        <td class="text-end">
-                            {{ is_numeric($fee->amount) ? number_format($fee->amount, 2) : $fee->amount }}
-                            @php
-                                $totalMisc += is_numeric($fee->amount) ? $fee->amount : 0;
-                            @endphp
-                        </td>
-                    </tr>
-                @endforeach
-                <tr class="fw-bold-border">
-                    <td>Total</td>
-                    <td class="text-end">{{ number_format($totalMisc, 2) }}</td>
-                </tr>
-            </table>
-        </div>
+       <div class="col-3">
+    <div class="section-title" style="text-align: center; font-size: larger;">MISCELLANEOUS</div>
+    <table>
+        @php $totalMisc = 0; @endphp
+        @foreach ($miscFees as $fee)
+            <tr>
+                <td>{{ $isIrregular ? $fee->fee_name : $fee->name }}</td>
+                <td class="text-end">
+                    {{ is_numeric($fee->amount) ? number_format($fee->amount, 2) : $fee->amount }}
+                    @php
+                        $totalMisc += is_numeric($fee->amount) ? $fee->amount : 0;
+                    @endphp
+                </td>
+            </tr>
+        @endforeach
+        <tr class="fw-bold-border">
+            <td>Total</td>
+            <td class="text-end">{{ number_format($totalMisc, 2) }}</td>
+        </tr>
+    </table>
+</div>
 
         <!-- ASSESSMENT + SCHEDULE -->
         <div class="col-5">

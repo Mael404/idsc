@@ -6,6 +6,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProgramCourseMappingController;
 use App\Http\Controllers\ReEnrollRegularController;
 use App\Http\Controllers\RegistrarSideBarController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentSearchController;
 use App\Models\RefBrgy;
 use App\Models\RefCityMun;
@@ -18,6 +19,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('registrar')->middleware('auth')->group(function () {
     // Dashboard
     Route::get('dashboard', [RegistrarSideBarController::class, 'dashboard'])->name('registrar.dashboard');
+    Route::get('queueing', function () {
+        return view('registrar.queueing');
+    })->name('registrar.queueing');
 
     // Enrollment
     Route::get('enrollment/manage', [RegistrarSideBarController::class, 'quickSearch'])->name('registrar.enrollment.manage');
@@ -28,6 +32,11 @@ Route::prefix('registrar')->middleware('auth')->group(function () {
     Route::get('enrollment/transferee', [RegistrarSideBarController::class, 'transfereeEnrollment'])->name('registrar.enrollment.transferee');
     Route::get('enrollment/re-enroll/regular', [RegistrarSideBarController::class, 'reEnrollRegular'])->name('registrar.enrollment.reenroll.regular');
     Route::get('enrollment/re-enroll/irregular', [RegistrarSideBarController::class, 'reEnrollIrregular'])->name('registrar.enrollment.reenroll.irregular');
+
+
+    // SHS Routes
+    Route::get('enrollment/new/shs', [RegistrarSideBarController::class, 'newShsEnrollment'])->name('registrar.enrollment.new.shs');
+
 
     Route::get('enrollment/records', [RegistrarSideBarController::class, 'enrollmentRecords'])->name('registrar.enrollment.records');
 
@@ -49,6 +58,13 @@ Route::get('admissions', [AdmissionController::class, 'index'])->name('admission
 Route::get('admissions/create', [AdmissionController::class, 'create'])->name('admissions.create');
 Route::post('admissions', [AdmissionController::class, 'store'])->name('admissions.store');
 
+// Shs routes
+Route::post('shs', [StudentController::class, 'store'])->name('shs.store');
+Route::post('shs/promote/{id}', [StudentController::class, 'promoteStudent'])->name('shs.promote');
+Route::put('/billing/shs/{studentId}/initial-payment', [StudentController::class, 'updateInitialPayment'])
+    ->name('billing.shs.updateInitialPayment');
+
+
 Route::get('/admissions/{student_id}', [AdmissionController::class, 'show'])->name('admissions.show');
 
 Route::get('/admissions/{student_id}/print-cor', [AdmissionController::class, 'printCOR'])->name('admissions.printCOR');
@@ -68,7 +84,7 @@ Route::get('/cities/{provinceCode}', [LocationController::class, 'getCities']);
 Route::get('/barangays/{citymunCode}', [LocationController::class, 'getBarangays']);
 
 
-// form uses 're_enroll_regular.store'
+
 Route::post('/re-enroll-regular', [ReEnrollRegularController::class, 'submitForm'])
     ->name('re_enroll_regular.store');
 
@@ -87,4 +103,4 @@ Route::get('/courses/search', [AdmissionController::class, 'search'])->name('cou
 
 
 
-    Route::post('/calculate-irregular-tuition', [AdmissionIrregularController::class, 'calculateIrregularTuition'])->name('calculate.irregular.tuition');
+Route::post('/calculate-irregular-tuition', [AdmissionIrregularController::class, 'calculateIrregularTuition'])->name('calculate.irregular.tuition');

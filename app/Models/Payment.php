@@ -20,6 +20,9 @@ class Payment extends Model
         'grading_period',
         'remaining_balance',
         'processed_by',
+        'payment_method',
+        'ref_number',
+        'status',
     ];
 
 

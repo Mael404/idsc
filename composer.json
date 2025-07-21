@@ -9,7 +9,10 @@
         "php": "^8.2",
         "doctrine/dbal": "^4.2",
         "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1"
+        "laravel/nightwatch": "^1.10",
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^2.10.1",
+        "mike42/escpos-php": "^2.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
