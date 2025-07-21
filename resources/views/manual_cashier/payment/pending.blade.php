@@ -127,11 +127,16 @@
                                                                             <div class="border rounded p-3 mb-4">
                                                                                 <h6 class="text-success fw-semibold mb-3">
                                                                                     Confirmation Details</h6>
-                                                                              <div class="mb-3">
-    <label for="or_number{{ $enrollment->id }}" class="form-label">OR Number</label>
-    <input type="text" name="or_number" class="form-control" id="or_number{{ $enrollment->id }}"
-        placeholder="Enter OR Number" required>
-</div>
+                                                                                <div class="mb-3">
+                                                                                    <label
+                                                                                        for="or_number{{ $enrollment->id }}"
+                                                                                        class="form-label">OR Number</label>
+                                                                                    <input type="text" name="or_number"
+                                                                                        class="form-control"
+                                                                                        id="or_number{{ $enrollment->id }}"
+                                                                                        placeholder="Enter OR Number"
+                                                                                        required>
+                                                                                </div>
                                                                                 <div class="mb-3">
                                                                                     <label
                                                                                         for="receipt_date{{ $enrollment->id }}"
@@ -168,89 +173,34 @@
                                                         </div>
 
 
-                                                      <script>
-    function handleSubmitAndPrint(event, enrollmentId) {
-        event.preventDefault(); // Stop normal submission
+                                                        <script>
+                                                            function handleSubmitAndPrint(event, enrollmentId) {
+                                                                event.preventDefault(); // Stop normal submission
 
-        const form = event.target;
+                                                                const form = event.target;
 
-        // Get OR number
-        const orInput = document.getElementById(`or_number${enrollmentId}`);
-        const orNumber = orInput.value.trim();
+                                                                // SAFELY get data using ID-based spans
+                                                                const studentName = document.getElementById(`studentName${enrollmentId}`).textContent.trim();
+                                                                const amountText = document.getElementById(`initialPayment${enrollmentId}`).textContent.trim();
+                                                                const amount = parseFloat(amountText.replace(/[^\d.-]/g, ''));
+                                                                const remarks = form.querySelector(`#remarks${enrollmentId}`).value;
 
-        // Clear any previous error popup
-        const existingError = document.getElementById('js-error-alert');
-        if (existingError) existingError.remove();
+                                                                // Fill in hidden fields
+                                                                document.getElementById('studentName').value = studentName;
+                                                                document.getElementById('amount').value = amount;
+                                                                document.getElementById('remarks').value = remarks;
 
-        // Validate OR number presence
-        if (orNumber === "") {
-            showErrorMessage("OR Number cannot be blank.");
-            return false;
-        }
+                                                                // Print the receipt
+                                                               printReceipt(enrollmentId);
 
-        // Check for duplicate OR number via AJAX
-        fetch(`/check-or-number?or_number=${encodeURIComponent(orNumber)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.exists) {
-                    // If duplicate, show popup and prevent submission/print
-                    showErrorMessage("This OR Number is already in use. Please enter a different number.");
-                    return false;
-                } else {
-                    // SAFELY get data using ID-based spans
-                    const studentName = document.getElementById(`studentName${enrollmentId}`).textContent.trim();
-                    const amountText = document.getElementById(`initialPayment${enrollmentId}`).textContent.trim();
-                    const amount = parseFloat(amountText.replace(/[^\d.-]/g, ''));
-                    const remarks = form.querySelector(`#remarks${enrollmentId}`).value;
+                                                                // Delay form submission slightly
+                                                                setTimeout(() => {
+                                                                    form.submit();
+                                                                }, 1000);
 
-                    // Fill in hidden fields for receipt
-                    document.getElementById('studentName').value = studentName;
-                    document.getElementById('amount').value = amount;
-                    document.getElementById('remarks').value = remarks;
-
-                    // Print the receipt
-                    printReceipt();
-
-                    // Delay form submission slightly
-                    setTimeout(() => {
-                        form.submit();
-                    }, 1000);
-                }
-            })
-            .catch(error => {
-                console.error('Error verifying OR number:', error);
-                showErrorMessage("Error verifying OR number. Please try again.");
-            });
-
-        return false;
-    }
-
-    function showErrorMessage(message) {
-        const existing = document.getElementById('js-error-alert');
-        if (existing) existing.remove();
-
-        const alert = document.createElement('div');
-        alert.className = 'popup-alert fadeDownIn shadow rounded-lg p-4';
-        alert.id = 'js-error-alert';
-        alert.style.backgroundColor = '#dc3545';
-        alert.style.color = '#fff';
-        alert.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-semibold fs-6">
-                    ${message}
-                    <i class="fas fa-exclamation-circle ms-1"></i>
-                </span>
-            </div>
-        `;
-        document.body.appendChild(alert);
-
-        setTimeout(() => {
-            alert.classList.remove('fadeDownIn');
-            alert.classList.add('fadeOut');
-            setTimeout(() => alert.remove(), 400);
-        }, 3000);
-    }
-</script>
+                                                                return false;
+                                                            }
+                                                        </script>
 
                                                     </td>
                                                 </tr>
